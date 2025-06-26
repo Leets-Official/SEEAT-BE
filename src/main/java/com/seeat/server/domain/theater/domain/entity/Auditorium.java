@@ -36,6 +36,4 @@ public class Auditorium extends BaseEntity {
 
     private String soundType;
 
-    private Integer seatCount;
-
 }
