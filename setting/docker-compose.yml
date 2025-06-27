@@ -1,0 +1,70 @@
+services:
+
+  spring:
+    image: seeat/server:latest
+    container_name: seeat-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - backend-bridge
+
+  mysql:
+    image: mysql:8.0
+    container_name: seeat-mysql
+    volumes:
+      - ./mysql/my.cnf:/etc/mysql/conf.d/mytv.cnf
+      - ./mysql/data:/var/lib/mysql
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    networks:
+      - backend-bridge
+
+  redis:
+    image: redis:7.2.5
+    container_name: seeat-redis
+    ports:
+      - '6379:6379'
+    networks:
+      - backend-bridge
+
+  # Nginx Proxy
+  nginx: # nginx 서비스 정의
+    image: nginx:latest  # 사용할 Docker 이미지
+    container_name: seeat-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - spring
+    networks:
+      - backend-bridge
+    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
+
+  certbot:
+    image: certbot/certbot
+    container_name: seeat-certbot
+    restart: unless-stopped
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    depends_on:
+      - nginx
+    networks:
+      - backend-bridge
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+networks:
+  backend-bridge:
+    driver: bridge
