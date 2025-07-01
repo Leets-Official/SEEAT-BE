@@ -1,6 +1,11 @@
 package com.seeat.server.domain.review.application.usecase;
 
+import com.seeat.server.domain.review.presentation.dto.request.ReviewRequest;
+import com.seeat.server.domain.review.presentation.dto.request.ReviewUpdateRequest;
+import com.seeat.server.domain.review.presentation.dto.response.ReviewDetailResponse;
+import com.seeat.server.domain.review.presentation.dto.response.ReviewListResponse;
 
+import java.util.*;
 /**
  * [리뷰 인터페이스]
  * - 로그인한 유저만 좌석 후기를 작성 및 열람할 수 있습니다.
@@ -9,4 +14,20 @@ package com.seeat.server.domain.review.application.usecase;
  */
 public interface ReviewUseCase {
 
+    /// 리뷰 작성
+    void createReview(ReviewRequest request, Long userId);
+
+    /// 리뷰 조회
+    // 리뷰 상세 조회
+    ReviewDetailResponse loadReview(Long reviewId);
+
+    // 리뷰 목록 조회
+    List<ReviewListResponse> loadReviewsBySeatId(Long seatId);
+
+    /// 리뷰 수정
+    void updateReview(ReviewUpdateRequest request, Long userId);
+
+    /// 리뷰 삭제
+    void deleteReview(Long reviewId, Long userId);
 }
+
