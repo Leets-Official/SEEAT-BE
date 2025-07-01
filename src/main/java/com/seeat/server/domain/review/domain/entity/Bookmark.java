@@ -5,9 +5,7 @@ import com.seeat.server.domain.BaseEntity;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.user.domain.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * 유저가 찜(북마크)한 좌석 정보를 나타내는 엔티티
@@ -19,6 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
 public class Bookmark extends BaseEntity {
 
     @Id
