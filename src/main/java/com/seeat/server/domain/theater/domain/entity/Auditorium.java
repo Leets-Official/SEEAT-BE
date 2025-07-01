@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Getter
+@Table(name = "auditorium")
 public class Auditorium extends BaseEntity {
 
     @Id
