@@ -1,5 +1,6 @@
-package com.seeat.server.domain.review.application;
+package com.seeat.server.domain.review.application.service;
 
+import com.seeat.server.domain.review.application.usecase.TicketOcrUseCase;
 import com.seeat.server.domain.review.external.NaverOcrApi;
 import com.seeat.server.domain.review.presentation.dto.response.OcrResponse;
 import lombok.RequiredArgsConstructor;

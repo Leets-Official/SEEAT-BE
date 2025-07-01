@@ -1,6 +1,6 @@
 package com.seeat.server.domain.review.presentation;
 
-import com.seeat.server.domain.review.application.TicketOcrUseCase;
+import com.seeat.server.domain.review.application.usecase.TicketOcrUseCase;
 import com.seeat.server.domain.review.presentation.dto.response.OcrResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

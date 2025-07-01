@@ -1,4 +1,4 @@
-package com.seeat.server.domain.review.application;
+package com.seeat.server.domain.review.application.usecase;
 
 import com.seeat.server.domain.review.presentation.dto.response.OcrResponse;
 import org.springframework.web.multipart.MultipartFile;
