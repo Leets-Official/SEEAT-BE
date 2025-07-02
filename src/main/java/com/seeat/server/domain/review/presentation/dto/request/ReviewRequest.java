@@ -7,9 +7,7 @@ import java.util.List;
 /**
  * [좌석 후기 작성]을 위한 요청 DTO
  *
- * @param theaterId     영화관 ID
- * @param auditoriumId  상영관 ID
- * @param seatNumbers    좌석 번호 (예: "F12")
+ * @param seatId        좌석 번호 (예: "특정 영화관의 F12 아이디")
  * @param movieTitle    영화 ID
  * @param rating        평점 (1~5)
  * @param content       텍스트 후기
@@ -18,9 +16,7 @@ import java.util.List;
  */
 
 public record ReviewRequest(
-        Long theaterId,
-        Long auditoriumId,
-        List<Long> seatNumbers,
+        Long seatId,
         String movieTitle,
         int rating,
         String content,
