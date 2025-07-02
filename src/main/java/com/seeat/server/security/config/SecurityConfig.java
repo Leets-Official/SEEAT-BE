@@ -1,5 +1,6 @@
 package com.seeat.server.security.config;
 
+import com.seeat.server.security.handler.CustomOAuth2SuccessHandler;
 import com.seeat.server.security.oauth2.application.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -19,19 +20,23 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login/**", "/oauth2/**").permitAll()
+                        .requestMatchers("/", "/login/**", "/oauth2/**", "/api/v1/users").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .defaultSuccessUrl("/", true)
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService) // 커스텀 OAuth2UserService 등록
+                                .userService(customOAuth2UserService)
                         )
+                        .successHandler(customOAuth2SuccessHandler)
+                        .failureHandler((request, response, exception) -> {
+                            response.sendRedirect("/login?error");
+                        })
                 );
 
         return http.build();
