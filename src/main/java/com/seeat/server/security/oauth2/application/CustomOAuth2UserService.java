@@ -1,5 +1,6 @@
 package com.seeat.server.security.oauth2.application;
 
+import com.seeat.server.domain.user.application.UserService;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserGrade;
 import com.seeat.server.domain.user.domain.entity.UserRole;
@@ -22,7 +23,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -30,25 +31,32 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
-        OAuth2UserInfo userInfo;
-        if ("kakao".equals(registrationId)) {
-            userInfo = new KakaoUserInfo(oAuth2User.getAttributes());
-        } else if ("naver".equals(registrationId)) {
-            userInfo = new NaverUserInfo(oAuth2User.getAttributes());
-        } else {
-            throw new OAuth2AuthenticationException("지원하지 않는 OAuth2");
+        OAuth2UserInfo userInfo = getUserInfo(registrationId, oAuth2User.getAttributes());
+
+        UserSocial social = UserSocial.valueOf(registrationId.toUpperCase());
+        String socialId = userInfo.getProviderId();
+        String email = userInfo.getEmail();
+
+        Optional<User> userOpt = userService.getUserBySocialAndSocialId(social, socialId);
+
+        if (userOpt.isPresent()) {
+            return CustomUserInfo.ofExistingUser(userOpt.get(), oAuth2User.getAttributes());
         }
 
-        Optional<User> userOpt = userRepository.findBySocialAndSocialId(
-                UserSocial.valueOf(registrationId.toUpperCase()), userInfo.getProviderId());
+        Optional<User> userByEmail = userService.getUserByEmail(email);
 
-        if (userOpt.isEmpty()) {
-            throw new OAuth2AuthenticationException("SIGNUP_REQUIRED:" + userInfo.getProviderId());
+        if (userByEmail.isPresent()) {
+            return CustomUserInfo.ofEmailDuplicate(userInfo, social, oAuth2User.getAttributes());
         }
 
-        User user = userOpt.get();
+        return CustomUserInfo.ofNewUser(userInfo, social, oAuth2User.getAttributes());
+    }
 
-        return new CustomUserInfo(user, oAuth2User.getAttributes());
-
+    private OAuth2UserInfo getUserInfo(String registrationId, Map<String, Object> attributes) {
+        return switch (registrationId) {
+            case "kakao" -> new KakaoUserInfo(attributes);
+            case "naver" -> new NaverUserInfo(attributes);
+            default -> throw new OAuth2AuthenticationException("지원하지 않는 소셜 로그인: " + registrationId);
+        };
     }
 }
