@@ -32,15 +32,15 @@ public class UserService implements UserUseCase {
     @Value("${server.ssl.enabled}")
     private boolean sslEnabled;
 
-    public Optional<User> getUserByEmail(String email){
+    public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    public Optional<User> getUserBySocialAndSocialId(UserSocial social, String socialId){
+    public Optional<User> getUserBySocialAndSocialId(UserSocial social, String socialId) {
         return userRepository.findBySocialAndSocialId(social, socialId);
     }
 
-    public void createUser(TempUserInfo tempUserInfo, UserSignUpRequest request){
+    public void createUser(TempUserInfo tempUserInfo, UserSignUpRequest request) {
         User user = User.builder()
                 .email(tempUserInfo.getEmail())
                 .socialId(tempUserInfo.getSocialId())
@@ -72,7 +72,7 @@ public class UserService implements UserUseCase {
         }
     }
 
-    public void logout(HttpServletRequest request, HttpServletResponse response){
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
@@ -81,8 +81,8 @@ public class UserService implements UserUseCase {
 
                     if (jwtProvider.validateToken(refreshToken)) {
                         Authentication authentication = jwtProvider.getAuthentication(refreshToken);
-                        Long userId = Long.parseLong(authentication.getName());
-
+                        User user = (User) authentication.getPrincipal();
+                        Long userId = user.getId();
                         redisService.deleteRefreshToken(userId);
                     }
 
