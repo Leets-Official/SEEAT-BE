@@ -1,5 +1,6 @@
 package com.seeat.server.security.jwt;
 
+import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.service.RedisService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -54,14 +55,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 Authentication refreshAuth = jwtProvider.getAuthentication(refreshToken);
                 String userIdStr = refreshAuth.getName();
 
-                Long userId;
-                try {
-                    userId = Long.parseLong(userIdStr);
-                } catch (NumberFormatException e) {
-                    // 공통에러처리예정 - userId가 숫자가 아닐 때
-                    filterChain.doFilter(request, response);
-                    return;
-                }
+                User user = (User) refreshAuth.getPrincipal();
+                Long userId = user.getId();
 
                 String redisRefreshToken = redisService.getRefreshToken(userId);
 
