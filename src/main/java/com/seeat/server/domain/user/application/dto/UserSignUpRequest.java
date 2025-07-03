@@ -9,6 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 public class UserSignUpRequest {
+    // 공통응답 머지 후 @NotBlank로 에러처리
     private String nickname;
     private String imageUrl;
     private List<MovieGenre> genres;
