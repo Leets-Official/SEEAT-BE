@@ -1,5 +1,6 @@
 package com.seeat.server.security.handler;
 
+import com.seeat.server.security.jwt.service.TokenService;
 import com.seeat.server.security.oauth2.application.dto.TempUserInfo;
 import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import jakarta.servlet.ServletException;
@@ -23,6 +24,8 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
     private final RedisTemplate<String, Object> redisTemplate;
 
+    private final TokenService tokenService;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException{
@@ -31,7 +34,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         switch (userInfo.getStatus()) {
             case EXISTING_USER -> {
-                // JWT, 세션, 쿠키 추가
+                tokenService.generateTokensAndSetHeaders(authentication, response, userInfo.getId());
                 redirectStrategy.sendRedirect(request, response, "/");
             }
             case NEW_USER -> {

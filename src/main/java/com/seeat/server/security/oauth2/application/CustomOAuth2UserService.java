@@ -19,7 +19,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.Optional;
-
+/**
+ * OAuth2 사용자 정보를 처리하는 서비스
+ *
+ * - 소셜 ID로 기존 사용자 조회
+ * - 이메일 중복 체크
+ * - 신규 사용자 정보 반환
+ */
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
