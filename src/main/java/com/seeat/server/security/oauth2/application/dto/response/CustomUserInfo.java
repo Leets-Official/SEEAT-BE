@@ -96,6 +96,13 @@ public class CustomUserInfo implements OAuth2User {
         return this.user.getSocialId();
     }
 
+    public Long getId() {
+        if (user != null) {
+            return user.getId();
+        }
+        return null;
+    }
+
     public User getUser() {
         return user;
     }
