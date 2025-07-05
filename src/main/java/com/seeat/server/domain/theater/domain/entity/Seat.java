@@ -28,8 +28,10 @@ public class Seat {
     @JoinColumn(name = "auditorium_id")
     private Auditorium auditorium;
 
+    @Column(name = "`row`")
     private String row;
 
+    @Column(name = "`column`")
     private String column;
 
 }
