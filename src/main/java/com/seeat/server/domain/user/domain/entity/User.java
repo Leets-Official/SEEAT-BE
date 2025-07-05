@@ -24,6 +24,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Getter
+@Table(name = "`user`")
 public class User extends BaseEntity {
 
     @Id
