@@ -1,7 +1,13 @@
 package com.seeat.server.domain.review.application.service;
 
+import com.seeat.server.domain.review.domain.HashTagFixtures;
 import com.seeat.server.domain.review.domain.ReviewFixtures;
+import com.seeat.server.domain.review.domain.entity.HashTag;
+import com.seeat.server.domain.review.domain.entity.HashTagType;
 import com.seeat.server.domain.review.domain.entity.Review;
+import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
+import com.seeat.server.domain.review.domain.repository.HashTagRepository;
+import com.seeat.server.domain.review.domain.repository.ReviewHashTagRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
@@ -47,7 +53,14 @@ class ReviewServiceTest {
     private ReviewRepository repository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private SeatRepository seatRepository;
+
+    /// 미리 저장되어있어야하는 의존성 추가
+    @Autowired
+    private HashTagRepository hashTagRepository;
 
     @Autowired
     private AuditoriumRepository auditoriumRepository;
@@ -56,12 +69,17 @@ class ReviewServiceTest {
     private TheaterRepository theaterRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private ReviewHashTagRepository reviewHashTagRepository;
+
+    private Seat seat;
+    private User user;
+
 
     private Theater theater;
     private Auditorium auditorium;
-    private Seat seat;
-    private User user;
+    private HashTag hashTag1;
+    private HashTag hashTag2;
+    private HashTag hashTag3;
 
     /**
      * 각 테스트 실행 전 공통으로 필요한 영화관, 상영관, 좌석, 유저 데이터를 준비합니다.
@@ -72,6 +90,9 @@ class ReviewServiceTest {
         auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
         seat = seatRepository.save(SeatFixtures.createSeat(auditorium));
         user = userRepository.save(UserFixtures.createUser());
+        hashTag1 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.SOUND, "음향이 좋아요"));
+        hashTag2 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.COMPANION, "혼자 관람했어요"));
+        hashTag3 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.ENVIRONMENT, "좌석이 넓어요"));
     }
 
     @Nested
@@ -91,20 +112,37 @@ class ReviewServiceTest {
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
                     .rating(5)
-                    .hashtags(List.of(1L, 2L))
+                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
 
             //when
             sut.createReview(request, user.getId());
 
             //then
+            /// 리뷰 체크
             List<Review> reviews = repository.findAll();
+
+            // 1. 개수 검증
             Assertions.assertThat(reviews).hasSize(1);
+
+            // 2. 리뷰와 정보들이 일치하는지 검증
             Review review = reviews.get(0);
             Assertions.assertThat(review.getContent()).isEqualTo(request.content());
             Assertions.assertThat(review.getRating()).isEqualTo(request.rating());
             Assertions.assertThat(review.getSeat().getId()).isEqualTo(seat.getId());
             Assertions.assertThat(review.getSeat().getAuditorium().getTheater().getName()).isEqualTo("Test Theater");
+
+            /// 해시태그 체크
+            List<ReviewHashTag> reviewHashTags = reviewHashTagRepository.findByReview(review);
+            // 1. 개수 검증
+            Assertions.assertThat(reviewHashTags).hasSize(3);
+
+            // 2. 실제 연결된 해시태그 ID와 요청한 해시태그 ID가 일치하는지 검증
+            List<Long> actualHashTagIds = reviewHashTags.stream()
+                    .map(rht -> rht.getHashTag().getId())
+                    .toList();
+            Assertions.assertThat(actualHashTagIds)
+                    .containsExactlyInAnyOrderElementsOf(request.hashtags());
         }
 
         /**
@@ -121,13 +159,35 @@ class ReviewServiceTest {
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
                     .rating(5)
-                    .hashtags(List.of(1L, 2L))
+                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
 
             // when & then
             Assertions.assertThatThrownBy(() -> sut.createReview(request, fakeUser.getId()))
                     .isInstanceOf(NoSuchElementException.class)
                     .hasMessageContaining(ErrorCode.NOT_USER.getMessage());
+        }
+
+        /**
+         * 유저가 리뷰를 생성할 때 해시태그를 1개 이상 선택하지 않으면 예외가 발생합니다.
+         */
+        @Test
+        @DisplayName("[unhappy] 해시태그를 1개이상 설정하지 않고 리뷰 생성시 예외 발생")
+        void createReviewByUser_unhappy_throw_IllegalArgumentException() {
+            //given
+            var request = ReviewRequest.builder()
+                    .seatId(seat.getId())
+                    .content("test")
+                    .movieTitle("ReviewTestTitle")
+                    .photos(null)
+                    .rating(5)
+                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId()))
+                    .build();
+
+            // when & then
+            Assertions.assertThatThrownBy(() -> sut.createReview(request, user.getId()))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining(ErrorCode.INVALID_HASHTAG.getMessage());
         }
     }
 
