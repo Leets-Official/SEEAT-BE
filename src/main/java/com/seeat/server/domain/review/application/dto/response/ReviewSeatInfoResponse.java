@@ -1,4 +1,4 @@
-package com.seeat.server.domain.review.presentation.dto.response;
+package com.seeat.server.domain.review.application.dto.response;
 
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.theater.domain.entity.Seat;

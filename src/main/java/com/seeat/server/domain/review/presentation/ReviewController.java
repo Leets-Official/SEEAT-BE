@@ -1,9 +1,9 @@
 package com.seeat.server.domain.review.presentation;
 
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
-import com.seeat.server.domain.review.presentation.dto.request.ReviewRequest;
-import com.seeat.server.domain.review.presentation.dto.response.ReviewDetailResponse;
-import com.seeat.server.domain.review.presentation.dto.response.ReviewListResponse;
+import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
+import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
+import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.review.presentation.swagger.ReviewControllerSpec;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;

@@ -1,7 +1,7 @@
 package com.seeat.server.domain.review.presentation;
 
 import com.seeat.server.domain.review.application.usecase.TicketOcrUseCase;
-import com.seeat.server.domain.review.presentation.dto.response.OcrResponse;
+import com.seeat.server.domain.review.application.dto.response.OcrResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

@@ -1,6 +1,6 @@
 package com.seeat.server.domain.review.application.usecase;
 
-import com.seeat.server.domain.review.presentation.dto.response.OcrResponse;
+import com.seeat.server.domain.review.application.dto.response.OcrResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 /**

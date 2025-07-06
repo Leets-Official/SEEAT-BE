@@ -1,4 +1,4 @@
-package com.seeat.server.domain.review.presentation.dto.request;
+package com.seeat.server.domain.review.application.dto.request;
 
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
