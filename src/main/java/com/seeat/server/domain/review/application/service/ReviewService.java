@@ -3,7 +3,6 @@ package com.seeat.server.domain.review.application.service;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
-import com.seeat.server.domain.review.domain.repository.ReviewHashTagRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
@@ -33,7 +32,7 @@ import java.util.stream.Collectors;
 public class ReviewService implements ReviewUseCase {
 
     private final ReviewRepository repository;
-    private final ReviewHashTagRepository hashTagRepository;
+    private final ReviewHashTagService hashTagService;
 
     /// 외부 의존성 처리
     private final SeatRepository seatRepository;
@@ -56,10 +55,14 @@ public class ReviewService implements ReviewUseCase {
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_USER.getMessage()));
 
         // 객체 생성
-        Review review = Review.of(user, seat, request.movieTitle(), request.rating(), request.content(), "thumbnail");
+        Review requestReview = Review.of(user, seat, request.movieTitle(), request.rating(), request.content(), "thumbnail");
 
         // DB 내 저장
-        repository.save(review);
+        Review review = repository.save(requestReview);
+
+        // 리뷰 내 해시태그 생성
+        hashTagService.createReviewHashTag(review, request.hashtags());
+
     }
 
     /**
@@ -75,7 +78,7 @@ public class ReviewService implements ReviewUseCase {
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_REVIEW.getMessage()));
 
         // ReviewId를 바탕으로 작성한 해시태그 조회
-        List<ReviewHashTag> hashTags = hashTagRepository.findByReview_Id(reviewId);
+        List<ReviewHashTag> hashTags = hashTagService.getReviewHashTagByReview(review);
 
         return ReviewDetailResponse.from(review, hashTags);
     }
@@ -170,7 +173,7 @@ public class ReviewService implements ReviewUseCase {
     private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, Page<Review> reviews) {
 
         // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
-        List<ReviewHashTag> allHashTags = hashTagRepository.findByReview_IdIn(reviewIds);
+        List<ReviewHashTag> allHashTags = hashTagService.getReviewHashTagByReviews(reviewIds);
 
         // 리뷰 ID를 바탕으로 해시태그 매핑
         Map<Long, List<ReviewHashTag>> mapping = allHashTags.stream()

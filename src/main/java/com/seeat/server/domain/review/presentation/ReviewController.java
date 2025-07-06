@@ -43,7 +43,8 @@ public class ReviewController implements ReviewControllerSpec {
      * @return ReviewDetailResponse DTO 작성 응답
      */
     @GetMapping("/{reviewId}")
-    public ApiResponse<ReviewDetailResponse> getReview(@PathVariable Long reviewId) {
+    public ApiResponse<ReviewDetailResponse> getReview(
+            @PathVariable Long reviewId) {
 
         // 서비스 호출
         var response = reviewService.loadReview(reviewId);
@@ -57,7 +58,7 @@ public class ReviewController implements ReviewControllerSpec {
      * @param theaterId 영화관에 따른 리뷰 목록 조회를 위한 Id
      * @return Page<ReviewListResponse> Page DTO
      */
-    @GetMapping("/{theaterId}")
+    @GetMapping("/theater/{theaterId}")
     public ApiResponse<PageResponse<ReviewListResponse>> getReviewsByTheater(
             @PathVariable Long theaterId,
             PageRequest pageRequest) {
@@ -75,7 +76,7 @@ public class ReviewController implements ReviewControllerSpec {
      * @param seatId 영화관 자리에 따른 리뷰 목록 조회를 위한 Id
      * @return Page<ReviewListResponse> Page DTO
      */
-    @GetMapping("/{seatId}")
+    @GetMapping("/seat/{seatId}")
     public ApiResponse<PageResponse<ReviewListResponse>> getReviewsBySeat(
             @PathVariable Long seatId,
             PageRequest pageRequest) {
