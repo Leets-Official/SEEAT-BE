@@ -14,3 +14,8 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
 
+  redis:
+    image: redis:7.2.5
+    container_name: seeat-redis
+    ports:
+      - '6379:6379'
