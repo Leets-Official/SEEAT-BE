@@ -1,7 +1,5 @@
 package com.seeat.server.global.config;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -12,15 +10,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 /**
- * Swagger / OpenAPI 설정 클래스
- * - HTTPS 설정으로 인해 @OpenAPIDefinition 추가
- * - 스웨거 내부 JWT 설정 추가
+ * Local용 Swagger / OpenAPI 설정 클래스
  */
 
+@Profile("local")
 @Configuration
-@Profile("dev")
-@OpenAPIDefinition(servers = {@Server(url = "https://api.seeat.site", description = "SEEAT 개발 서버")})
-public class SwaggerConfig {
+public class LocalSwaggerConfig {
 
     @Bean
     public OpenAPI openAPI() {
