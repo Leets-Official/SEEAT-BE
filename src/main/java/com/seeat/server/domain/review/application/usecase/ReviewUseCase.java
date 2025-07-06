@@ -4,8 +4,9 @@ import com.seeat.server.domain.review.presentation.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.presentation.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.presentation.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.presentation.dto.response.ReviewListResponse;
+import com.seeat.server.global.response.pageable.PageRequest;
+import com.seeat.server.global.response.pageable.PageResponse;
 
-import java.util.*;
 /**
  * [리뷰 인터페이스]
  * - 로그인한 유저만 좌석 후기를 작성 및 열람할 수 있습니다.
@@ -22,7 +23,9 @@ public interface ReviewUseCase {
     ReviewDetailResponse loadReview(Long reviewId);
 
     // 리뷰 목록 조회
-    List<ReviewListResponse> loadReviewsBySeatId(Long seatId);
+    PageResponse<ReviewListResponse> loadReviewsBySeatId(Long seatId, PageRequest pageRequest);
+
+    PageResponse<ReviewListResponse> loadReviewsByTheaterId(Long seatId, PageRequest pageRequest);
 
     /// 리뷰 수정
     void updateReview(ReviewUpdateRequest request, Long userId);

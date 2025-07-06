@@ -14,7 +14,11 @@ import com.seeat.server.domain.theater.domain.repository.SeatRepository;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
+import com.seeat.server.global.response.pageable.PageRequest;
+import com.seeat.server.global.response.pageable.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,28 +87,49 @@ public class ReviewService implements ReviewUseCase {
      * @return 리뷰에 대한 목록 조회 DTO
      */
     @Override
-    public List<ReviewListResponse> loadReviewsBySeatId(Long seatId) {
+    public PageResponse<ReviewListResponse> loadReviewsBySeatId(Long seatId, PageRequest pageRequest) {
+
+        // Pageable 처리
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize());
 
         // DB 조회
-        List<Review> reviews = repository.findBySeat_Id(seatId);
+        Page<Review> reviews = repository.findBySeat_Id(seatId, pageable);
 
         // 리뷰 ID 목록 추출
-        List<Long> reviewIds = reviews.stream()
-                .map(Review::getId)
-                .toList();
+        List<Long> reviewIds = getLongs(reviews);
 
         // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
-        List<ReviewHashTag> allHashTags = hashTagRepository.findByReview_IdIn(reviewIds);
+        List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
 
-        // 리뷰ID와 해시태그 매핑
-        Map<Long, List<ReviewHashTag>> mapping = allHashTags.stream()
-                .collect(Collectors.groupingBy(ht -> ht.getReview().getId()));
-
-        // DTO 변환
-        return reviews.stream()
-                .map(review -> ReviewListResponse.from(review, mapping.getOrDefault(review.getId(), List.of()), 0))
-                .toList();
+        // 결과
+        return new PageResponse<>(result, pageRequest, result.size());
     }
+
+    /**
+     * 영화관에 따른 리뷰 목록 조회를 위한 로직
+     * @param theaterId 좌석 Id
+     * @return 리뷰에 대한 목록 조회 DTO
+     */
+    @Override
+    public PageResponse<ReviewListResponse> loadReviewsByTheaterId(Long theaterId, PageRequest pageRequest) {
+
+        // Pageable 처리
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize());
+
+        // DB 조회
+        Page<Review> reviews = repository.findByTheater_Id(theaterId, pageable);
+
+        // 리뷰 ID 목록 추출
+        List<Long> reviewIds = getLongs(reviews);
+
+        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
+
+        // 결과
+        return new PageResponse<>(result, pageRequest, result.size());
+    }
+
+
 
     /**
      * 리뷰 수정을 위한 로직
@@ -124,6 +149,37 @@ public class ReviewService implements ReviewUseCase {
     @Override
     public void deleteReview(Long reviewId, Long userId) {
 
+    }
+
+    // 공통 로직
+    /**
+     * 리뷰의 Id를 얻기 위한 공통 로직
+     * @param reviews ID를 추출할 리뷰 목록
+     */
+    private List<Long> getLongs(Page<Review> reviews) {
+        return reviews.stream()
+                .map(Review::getId)
+                .toList();
+    }
+
+    /**
+     * 리뷰의 Id를 바탕으로 DTO 변경
+     * @param reviewIds ID 추출 목록
+     * @param reviews Page 처리를 한 리뷰 엔티티
+     */
+    private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, Page<Review> reviews) {
+
+        // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        List<ReviewHashTag> allHashTags = hashTagRepository.findByReview_IdIn(reviewIds);
+
+        // 리뷰 ID를 바탕으로 해시태그 매핑
+        Map<Long, List<ReviewHashTag>> mapping = allHashTags.stream()
+                .collect(Collectors.groupingBy(ht -> ht.getReview().getId()));
+
+        // DTO 변환
+        return reviews.stream()
+                .map(review -> ReviewListResponse.from(review, mapping.getOrDefault(review.getId(), List.of()), 0))
+                .toList();
     }
 
 }

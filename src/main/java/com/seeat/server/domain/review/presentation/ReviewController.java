@@ -3,8 +3,12 @@ package com.seeat.server.domain.review.presentation;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.presentation.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.presentation.dto.response.ReviewDetailResponse;
+import com.seeat.server.domain.review.presentation.dto.response.ReviewListResponse;
 import com.seeat.server.domain.review.presentation.swagger.ReviewControllerSpec;
 import com.seeat.server.domain.user.domain.entity.User;
+import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.global.response.pageable.PageRequest;
+import com.seeat.server.global.response.pageable.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -23,14 +27,14 @@ public class ReviewController implements ReviewControllerSpec {
      * @return 리뷰 작성 알림
      */
     @PostMapping
-    public String createReview(
-            @RequestBody ReviewRequest request,
+    public ApiResponse<Void> createReview(
+            @ModelAttribute ReviewRequest request,
             @AuthenticationPrincipal User user) {
 
         // 서비스 호출
         reviewService.createReview(request, user.getId());
 
-        return "리뷰가 생성되었습니다.";
+        return ApiResponse.created();
     }
 
     /**
@@ -39,10 +43,47 @@ public class ReviewController implements ReviewControllerSpec {
      * @return ReviewDetailResponse DTO 작성 응답
      */
     @GetMapping("/{reviewId}")
-    public ReviewDetailResponse getReview(@PathVariable Long reviewId) {
+    public ApiResponse<ReviewDetailResponse> getReview(@PathVariable Long reviewId) {
 
         // 서비스 호출
-        return reviewService.loadReview(reviewId);
+        var response = reviewService.loadReview(reviewId);
+
+        // 결과 리턴
+        return ApiResponse.ok(response);
+    }
+
+    /**
+     * 영화관에 따른 리뷰 목록 조회
+     * @param theaterId 영화관에 따른 리뷰 목록 조회를 위한 Id
+     * @return Page<ReviewListResponse> Page DTO
+     */
+    @GetMapping("/{theaterId}")
+    public ApiResponse<PageResponse<ReviewListResponse>> getReviewsByTheater(
+            @PathVariable Long theaterId,
+            PageRequest pageRequest) {
+
+        // 서비스 호출
+        PageResponse<ReviewListResponse> response = reviewService.loadReviewsBySeatId(theaterId, pageRequest);
+
+        // 응답
+        return ApiResponse.ok(response);
+    }
+
+
+    /**
+     * 자리에 따른 리뷰 목록 조회
+     * @param seatId 영화관 자리에 따른 리뷰 목록 조회를 위한 Id
+     * @return Page<ReviewListResponse> Page DTO
+     */
+    @GetMapping("/{seatId}")
+    public ApiResponse<PageResponse<ReviewListResponse>> getReviewsBySeat(
+            @PathVariable Long seatId,
+            PageRequest pageRequest) {
+
+        // 서비스 호출
+        PageResponse<ReviewListResponse> response = reviewService.loadReviewsBySeatId(seatId, pageRequest);
+
+        return ApiResponse.ok(response);
     }
 
 

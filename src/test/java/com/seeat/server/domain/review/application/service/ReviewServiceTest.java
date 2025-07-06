@@ -19,6 +19,8 @@ import com.seeat.server.domain.user.domain.UserFixtures;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
+import com.seeat.server.global.response.pageable.PageRequest;
+import com.seeat.server.global.response.pageable.PageResponse;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,25 +174,57 @@ class ReviewServiceTest {
          * 리뷰 목록 조회가 정상 동작하는지 검증합니다.
          */
         @Test
-        @DisplayName("[happy] 리뷰 목록 조회")
-        void loadReviews_happy() {
+        @DisplayName("[happy] 좌석 기반_리뷰 목록 조회")
+        void loadReviews_happy_seat() {
             //given
             String firstReview = "첫번째 리뷰입니다.";
             String secondReview = "두번째 리뷰입니다.";
 
             Review review1 = repository.save(ReviewFixtures.createReview(user, seat, 5, firstReview));
             Review review2 = repository.save(ReviewFixtures.createReview(user, seat, 3, secondReview));
+            var pageRequest = PageRequest.builder().page(0).size(10).build();
 
             //when
-            List<ReviewListResponse> responses = sut.loadReviewsBySeatId(seat.getId());
+            PageResponse<ReviewListResponse> response = sut.loadReviewsBySeatId(seat.getId(), pageRequest);
 
             //then
+            List<ReviewListResponse> responses = response.getDtoList();
             Assertions.assertThat(responses).hasSize(2);
             ReviewListResponse response1 = responses.get(0);
             ReviewListResponse response2 = responses.get(1);
 
             Assertions.assertThat(response1.content()).isEqualTo(review1.getContent());
             Assertions.assertThat(response2.content()).isEqualTo(review2.getContent());
+        }
+
+
+        @Test
+        @DisplayName("[happy] 영화관 기반_리뷰 목록 조회")
+        void loadReviews_happy_theater() {
+            // given
+            String firstReview = "첫번째 리뷰입니다.";
+            String secondReview = "두번째 리뷰입니다.";
+            String thirdReview = "세번째 리뷰입니다.";
+            String fourthReview = "네번째 리뷰입니다.";
+
+            Review review1 = repository.save(ReviewFixtures.createReview(user, seat, 1, firstReview));
+            Review review2 = repository.save(ReviewFixtures.createReview(user, seat, 2, secondReview));
+            Review review3 = repository.save(ReviewFixtures.createReview(user, seat, 3, thirdReview));
+            Review review4 = repository.save(ReviewFixtures.createReview(user, seat, 4, fourthReview));
+            var pageRequest = PageRequest.builder().page(0).size(10).build();
+
+            // when
+            PageResponse<ReviewListResponse> response = sut.loadReviewsByTheaterId(theater.getId(), pageRequest);
+
+            // then
+            List<ReviewListResponse> responses = response.getDtoList();
+            Assertions.assertThat(responses).hasSize(4);
+
+            // 각 리뷰의 내용이 저장한 순서대로 반환되는지 검증
+            Assertions.assertThat(responses.get(0).content()).isEqualTo(firstReview);
+            Assertions.assertThat(responses.get(1).content()).isEqualTo(secondReview);
+            Assertions.assertThat(responses.get(2).content()).isEqualTo(thirdReview);
+            Assertions.assertThat(responses.get(3).content()).isEqualTo(fourthReview);
         }
     }
 }
