@@ -9,4 +9,5 @@ public interface ReviewHashTagRepository extends JpaRepository<ReviewHashTag, Lo
 
     List<ReviewHashTag> findByReview_Id(Long reviewId);
 
+    List<ReviewHashTag> findByReview_IdIn(List<Long> reviewIds);
 }

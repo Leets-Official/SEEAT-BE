@@ -13,12 +13,15 @@ import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.theater.domain.repository.SeatRepository;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
+import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -46,10 +49,10 @@ public class ReviewService implements ReviewUseCase {
 
         // 유저 예외처리
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("해당 ID를 가진 유저가 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_USER.getMessage()));
 
         // 객체 생성
-        Review review = Review.of(user, seat, request.movieTitle(), request.rating(), request.content());
+        Review review = Review.of(user, seat, request.movieTitle(), request.rating(), request.content(), "thumbnail");
 
         // DB 내 저장
         repository.save(review);
@@ -65,7 +68,7 @@ public class ReviewService implements ReviewUseCase {
 
         // ReviewId를 바탕으로 조회
         Review review = repository.findById(reviewId)
-                .orElseThrow(() -> new NoSuchElementException("해당하는 리뷰가 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_REVIEW.getMessage()));
 
         // ReviewId를 바탕으로 작성한 해시태그 조회
         List<ReviewHashTag> hashTags = hashTagRepository.findByReview_Id(reviewId);
@@ -75,6 +78,7 @@ public class ReviewService implements ReviewUseCase {
 
     /**
      * 좌석에 따른 리뷰 목록 조회를 위한 로직
+     * N+1 해결을 위해 IN 사용
      * @param seatId 좌석 Id
      * @return 리뷰에 대한 목록 조회 DTO
      */
@@ -84,7 +88,22 @@ public class ReviewService implements ReviewUseCase {
         // DB 조회
         List<Review> reviews = repository.findBySeat_Id(seatId);
 
-        return List.of();
+        // 리뷰 ID 목록 추출
+        List<Long> reviewIds = reviews.stream()
+                .map(Review::getId)
+                .toList();
+
+        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        List<ReviewHashTag> allHashTags = hashTagRepository.findByReview_IdIn(reviewIds);
+
+        // 리뷰ID와 해시태그 매핑
+        Map<Long, List<ReviewHashTag>> mapping = allHashTags.stream()
+                .collect(Collectors.groupingBy(ht -> ht.getReview().getId()));
+
+        // DTO 변환
+        return reviews.stream()
+                .map(review -> ReviewListResponse.from(review, mapping.getOrDefault(review.getId(), List.of()), 0))
+                .toList();
     }
 
     /**

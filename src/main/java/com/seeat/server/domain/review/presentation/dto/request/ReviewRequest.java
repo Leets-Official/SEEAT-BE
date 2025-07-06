@@ -1,5 +1,6 @@
 package com.seeat.server.domain.review.presentation.dto.request;
 
+import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
  * @param photos        사진 목록 (선택)
  */
 
+@Builder
 public record ReviewRequest(
         Long seatId,
         String movieTitle,

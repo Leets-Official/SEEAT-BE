@@ -2,7 +2,7 @@ package com.seeat.server.domain.review.presentation.dto.response;
 
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
-import com.seeat.server.domain.user.presentation.dto.response.UserResponse;
+import com.seeat.server.domain.user.application.dto.response.UserResponse;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -28,9 +28,6 @@ public record ReviewDetailResponse(
         UserResponse user,
         LocalDateTime createdAt
 ) {
-    /**
-     * Review 및 연관 엔티티로부터 ReviewDetailResponse 생성
-     */
 
     public static ReviewDetailResponse from(
             Review review,
