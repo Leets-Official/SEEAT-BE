@@ -1,6 +1,7 @@
 package com.seeat.server.security.jwt.service;
 
 import com.seeat.server.global.service.RedisService;
+import com.seeat.server.global.util.JwtConstants;
 import com.seeat.server.security.jwt.JwtProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,9 +37,9 @@ public class TokenService {
 
         redisService.setRefreshToken(userId, refreshToken, Duration.ofMillis(refreshTokenExpiration));
 
-        response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        response.setHeader(HttpHeaders.AUTHORIZATION, JwtConstants.TOKEN_TYPE + " " + accessToken);
 
-        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+        Cookie refreshTokenCookie = new Cookie(JwtConstants.REFRESH_TOKEN_COOKIE, refreshToken);
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setSecure(sslEnabled);
         refreshTokenCookie.setPath("/");
