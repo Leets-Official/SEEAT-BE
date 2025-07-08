@@ -1,6 +1,7 @@
 package com.seeat.server;
 
 import com.seeat.server.domain.user.domain.entity.UserSocial;
+import com.seeat.server.global.util.RedisKeyUtil;
 import com.seeat.server.security.handler.CustomOAuth2SuccessHandler;
 import com.seeat.server.security.jwt.service.TokenService;
 import com.seeat.server.security.oauth2.application.dto.TempUserInfo;
@@ -9,14 +10,20 @@ import com.seeat.server.security.oauth2.application.dto.response.OAuth2UserInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.RedirectStrategy;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
 
@@ -43,6 +50,15 @@ public class CustomOAuth2SuccessHandlerTest {
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
 
+    @Mock
+    private RedirectStrategy redirectStrategy;
+
+    @BeforeEach
+    void setUp() {
+        successHandler = new CustomOAuth2SuccessHandler(redisTemplate, tokenService);
+        ReflectionTestUtils.setField(successHandler, "redirectStrategy", redirectStrategy);
+    }
+
     @Test
     void existingUser_cookieSet_redirect() throws Exception {
         // Given
@@ -51,17 +67,17 @@ public class CustomOAuth2SuccessHandlerTest {
         given(principal.getStatus()).willReturn(CustomUserInfo.UserStatus.EXISTING_USER);
         given(principal.getId()).willReturn(1L);
 
-        given(request.getContextPath()).willReturn("");
-        given(response.encodeRedirectURL(anyString())).willAnswer(invocation -> invocation.getArgument(0));
+        // 프로퍼티 설정
+        ReflectionTestUtils.setField(successHandler, "frontLocalUrl", "http://localhost:3000");
+        ReflectionTestUtils.setField(successHandler, "frontDevUrl", "http://localhost:3001");
+        ReflectionTestUtils.setField(successHandler, "activeProfile", "local");
 
         // When
         successHandler.onAuthenticationSuccess(request, response, authentication);
 
         // Then
         verify(tokenService).generateTokensAndSetHeaders(authentication, response, 1L);
-        verify(response).sendRedirect("/");
-        verify(response, never()).sendRedirect("/signup/extra-info");
-        verify(response, never()).sendRedirect("/login/duplicate-email");
+        verify(redirectStrategy).sendRedirect(request, response, "http://localhost:3000/");
     }
 
     @Test
@@ -71,6 +87,7 @@ public class CustomOAuth2SuccessHandlerTest {
         OAuth2UserInfo oauth2UserInfo = mock(OAuth2UserInfo.class);
         ValueOperations<String, Object> valueOperations = mock(ValueOperations.class);
         HttpSession session = mock(HttpSession.class);
+        String mockTempKey = "OAUTH2_TEMP_USER:test-key-123";
 
         given(authentication.getPrincipal()).willReturn(principal);
         given(principal.getStatus()).willReturn(CustomUserInfo.UserStatus.NEW_USER);
@@ -79,22 +96,25 @@ public class CustomOAuth2SuccessHandlerTest {
         given(oauth2UserInfo.getProviderId()).willReturn("test1234");
         given(principal.getSocial()).willReturn(UserSocial.KAKAO);
         given(oauth2UserInfo.getNickname()).willReturn("nickname");
-        given(request.getContextPath()).willReturn("");
-        given(response.encodeRedirectURL(anyString())).willAnswer(invocation -> invocation.getArgument(0));
 
         given(redisTemplate.opsForValue()).willReturn(valueOperations);
-        given(request.getSession()).willReturn(session);
 
 
-        // When
-        successHandler.onAuthenticationSuccess(request, response, authentication);
+        // 프로퍼티 설정
+        ReflectionTestUtils.setField(successHandler, "frontLocalUrl", "http://localhost:3000");
+        ReflectionTestUtils.setField(successHandler, "frontDevUrl", "http://localhost:3001");
+        ReflectionTestUtils.setField(successHandler, "activeProfile", "local");
 
-        // Then
-        verify(valueOperations).set(startsWith("OAUTH2_TEMP_USER:"), any(TempUserInfo.class), eq(Duration.ofMinutes(10)));
-        verify(session).setAttribute(eq("OAUTH2_TEMP_USER_KEY"), startsWith("OAUTH2_TEMP_USER:"));
-        verify(response).sendRedirect("/signup/extra-info");
-        verify(response, never()).sendRedirect("/");
-        verify(response, never()).sendRedirect("/login/duplicate-email");
+        try (MockedStatic<RedisKeyUtil> redisKeyUtilMock = mockStatic(RedisKeyUtil.class)) {
+            redisKeyUtilMock.when(RedisKeyUtil::generateOAuth2TempUserKey).thenReturn(mockTempKey);
+
+            // When
+            successHandler.onAuthenticationSuccess(request, response, authentication);
+
+            // Then
+            verify(valueOperations).set(eq(mockTempKey), any(TempUserInfo.class), eq(Duration.ofMinutes(10)));
+            verify(redirectStrategy).sendRedirect(request, response, "http://localhost:3000/extra-info?tempKey=" + mockTempKey);
+        }
     }
 
     @Test
@@ -103,16 +123,37 @@ public class CustomOAuth2SuccessHandlerTest {
         CustomUserInfo principal = mock(CustomUserInfo.class);
         given(authentication.getPrincipal()).willReturn(principal);
         given(principal.getStatus()).willReturn(CustomUserInfo.UserStatus.EMAIL_DUPLICATE);
-        given(request.getContextPath()).willReturn("");
-        given(response.encodeRedirectURL(anyString())).willAnswer(invocation -> invocation.getArgument(0));
+
+        // 프로퍼티 설정
+        ReflectionTestUtils.setField(successHandler, "frontLocalUrl", "http://localhost:3000");
+        ReflectionTestUtils.setField(successHandler, "frontDevUrl", "http://localhost:3001");
+        ReflectionTestUtils.setField(successHandler, "activeProfile", "local");
 
         // When
         successHandler.onAuthenticationSuccess(request, response, authentication);
 
         // Then
-        verify(response).sendRedirect("/login/duplicate-email");
-        verify(response, never()).sendRedirect("/");
-        verify(response, never()).sendRedirect("/signup/extra-info");
+        verify(redirectStrategy).sendRedirect(request, response, "http://localhost:3000/login/duplicate-email");
+    }
 
+    @Test
+    void dev_profile_uses_dev_url() throws Exception {
+        // Given
+        CustomUserInfo principal = mock(CustomUserInfo.class);
+        given(authentication.getPrincipal()).willReturn(principal);
+        given(principal.getStatus()).willReturn(CustomUserInfo.UserStatus.EXISTING_USER);
+        given(principal.getId()).willReturn(1L);
+
+        // 프로퍼티 설정 (dev 환경)
+        ReflectionTestUtils.setField(successHandler, "frontLocalUrl", "http://localhost:3000");
+        ReflectionTestUtils.setField(successHandler, "frontDevUrl", "http://dev.example.com");
+        ReflectionTestUtils.setField(successHandler, "activeProfile", "dev");
+
+        // When
+        successHandler.onAuthenticationSuccess(request, response, authentication);
+
+        // Then
+        verify(tokenService).generateTokensAndSetHeaders(authentication, response, 1L);
+        verify(redirectStrategy).sendRedirect(request, response, "http://dev.example.com/");
     }
 }

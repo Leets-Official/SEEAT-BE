@@ -42,7 +42,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         switch (userInfo.getStatus()) {
             case EXISTING_USER -> {
                 tokenService.generateTokensAndSetHeaders(authentication, response, userInfo.getId());
-                redirectStrategy.sendRedirect(request, response, "/");
+                redirectStrategy.sendRedirect(request, response, frontUrl + "/");
             }
             case NEW_USER -> {
                 String tempUserKey = RedisKeyUtil.generateOAuth2TempUserKey();

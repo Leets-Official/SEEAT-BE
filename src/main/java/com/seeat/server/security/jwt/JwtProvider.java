@@ -45,6 +45,9 @@ public class JwtProvider {
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenValidTime;
 
+    @Value("${jwt.dev-token-expiration}")
+    private long devTokenExpiration;
+
     private final UserRepository userRepository;
 
     @PostConstruct
@@ -116,4 +119,10 @@ public class JwtProvider {
 
         return new UsernamePasswordAuthenticationToken(user, token, authorities);
     }
+
+
+    public String generateDevToken(Authentication authentication) {
+        return generateToken(authentication, devTokenExpiration);
+    }
+
 }
