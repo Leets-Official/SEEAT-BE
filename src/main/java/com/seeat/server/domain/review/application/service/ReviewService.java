@@ -47,21 +47,21 @@ public class ReviewService implements ReviewUseCase {
     public void createReview(ReviewRequest request, Long userId) {
 
         // 좌석 예외 처리
-        Seat seat = seatRepository.findById(request.seatId())
-                .orElseThrow(() -> new NoSuchElementException("해당 ID를 가진 좌석이 존재하지 않습니다."));
+        Seat seat = seatRepository.findById(request.getSeatId())
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_SEAT.getMessage()));
 
         // 유저 예외처리
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_USER.getMessage()));
 
         // 객체 생성
-        Review requestReview = Review.of(user, seat, request.movieTitle(), request.rating(), request.content(), "thumbnail");
+        Review requestReview = Review.of(user, seat, request.getMovieTitle(), request.getRating(), request.getContent(), "thumbnail");
 
         // DB 내 저장
         Review review = repository.save(requestReview);
 
         // 리뷰 내 해시태그 생성
-        hashTagService.createReviewHashTag(review, request.hashtags());
+        hashTagService.createReviewHashTag(review, request.getHashtags());
 
     }
 

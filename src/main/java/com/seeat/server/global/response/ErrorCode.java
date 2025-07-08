@@ -73,7 +73,9 @@ public enum ErrorCode {
     // ========================
     // 2000~2999 : 영화관 관련 에러
     // ========================
-
+    NOT_THEATER(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 영화관이 존재하지 않습니다."),
+    NOT_AUDITORIUM(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 상영관이 존재하지 않습니다."),
+    NOT_SEAT(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 좌석이 존재하지 않습니다."),
 
     // ========================
     // 3000~3999 : 리뷰 관련 에러

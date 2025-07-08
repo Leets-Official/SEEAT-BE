@@ -127,8 +127,8 @@ class ReviewServiceTest {
 
             // 2. 리뷰와 정보들이 일치하는지 검증
             Review review = reviews.get(0);
-            Assertions.assertThat(review.getContent()).isEqualTo(request.content());
-            Assertions.assertThat(review.getRating()).isEqualTo(request.rating());
+            Assertions.assertThat(review.getContent()).isEqualTo(request.getContent());
+            Assertions.assertThat(review.getRating()).isEqualTo(request.getRating());
             Assertions.assertThat(review.getSeat().getId()).isEqualTo(seat.getId());
             Assertions.assertThat(review.getSeat().getAuditorium().getTheater().getName()).isEqualTo("Test Theater");
 
@@ -142,7 +142,7 @@ class ReviewServiceTest {
                     .map(rht -> rht.getHashTag().getId())
                     .toList();
             Assertions.assertThat(actualHashTagIds)
-                    .containsExactlyInAnyOrderElementsOf(request.hashtags());
+                    .containsExactlyInAnyOrderElementsOf(request.getHashtags());
         }
 
         /**
