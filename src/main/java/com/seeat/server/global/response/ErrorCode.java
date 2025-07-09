@@ -68,18 +68,20 @@ public enum ErrorCode {
     NOT_USER(1000, HttpStatus.NOT_FOUND, "해당하는 유저가 존재하지 않습니다."),
 
     /** 최초 로그인 추가 정보 필요 */
-    FIRST_LOGIN(1200, HttpStatus.NOT_FOUND, "최초 로그인유저이기에 추가정보기입이 필요합니다.");
+    FIRST_LOGIN(1200, HttpStatus.NOT_FOUND, "최초 로그인유저이기에 추가정보기입이 필요합니다."),
 
     // ========================
     // 2000~2999 : 영화관 관련 에러
     // ========================
-
-
+    NOT_THEATER(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 영화관이 존재하지 않습니다."),
+    NOT_AUDITORIUM(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 상영관이 존재하지 않습니다."),
+    NOT_SEAT(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 좌석이 존재하지 않습니다."),
 
     // ========================
     // 3000~3999 : 리뷰 관련 에러
     // ========================
-
+    NOT_REVIEW(3000, HttpStatus.NOT_FOUND, "해당하는 리뷰가 존재하지 않습니다."),
+    INVALID_HASHTAG(3001, HttpStatus.BAD_REQUEST, "모든 해시태그 항목(음향, 동반인, 관람환경)을 최소 1개 이상 작성해야 합니다.");
 
 
 
