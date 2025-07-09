@@ -4,14 +4,24 @@ import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.CustomException;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.FieldErrorResponse;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import java.util.List;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.util.List;
+import java.util.NoSuchElementException;
+
+/**
+ * 전역 예외 처리 핸들러
+ * - @Hidden 은 스웨거에서 인식 되지 않도록 에러 수정용
+ */
+
+@Hidden
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -44,6 +54,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             IllegalStateException.class, IllegalArgumentException.class})
     public ApiResponse<CustomException> handleIllegalStateException(Exception e) {
+
+        /// 메세지 바탕으로 예외 코드 검색
+        ErrorCode errorCode = ErrorCode.fromMessage(e.getMessage());
+
+        /// 해당 예외 코드로 예외 처리
+        CustomException exception = new CustomException(errorCode, null);
+
+        return handleCustomException(exception);
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler({NoSuchElementException.class, NoResourceFoundException.class})
+    public ApiResponse<CustomException> handleNoSuchException(Exception e) {
 
         /// 메세지 바탕으로 예외 코드 검색
         ErrorCode errorCode = ErrorCode.fromMessage(e.getMessage());
