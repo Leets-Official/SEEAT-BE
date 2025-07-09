@@ -9,7 +9,9 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.PageResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,9 +28,11 @@ public class ReviewController implements ReviewControllerSpec {
      * @param user Jwt 기반 SecurityContext 저장되어있는 유저
      * @return 리뷰 작성 알림
      */
-    @PostMapping
+    @PostMapping(
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ApiResponse<Void> createReview(
-            @ModelAttribute ReviewRequest request,
+            @ModelAttribute @Valid ReviewRequest request,
             @AuthenticationPrincipal User user) {
 
         // 서비스 호출
