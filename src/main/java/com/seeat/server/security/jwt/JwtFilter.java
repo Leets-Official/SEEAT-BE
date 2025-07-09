@@ -2,6 +2,7 @@ package com.seeat.server.security.jwt;
 
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.service.RedisService;
+import com.seeat.server.global.util.JwtConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,9 +35,6 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
     private final RedisService redisService;
 
-    @Value("${server.ssl.enabled}")
-    private boolean sslEnabled;
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response, // 공통에러처리예정
@@ -66,7 +64,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + newAccessToken);
+                    response.setHeader(HttpHeaders.AUTHORIZATION, JwtConstants.TOKEN_TYPE + " " + newAccessToken);
 
                 } else {
                     // 공통에러처리예정 - 재로그인 처리
@@ -79,8 +77,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private String resolveToken(HttpServletRequest request, String headerName) {
         String bearerToken = request.getHeader(headerName);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(JwtConstants.TOKEN_TYPE + " ")) {
+            return bearerToken.substring(JwtConstants.TOKEN_TYPE.length() + 1);
         }
         return null;
     }
@@ -90,7 +88,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return null;
         }
         for (Cookie cookie : request.getCookies()) {
-            if ("refreshToken".equals(cookie.getName())) {
+            if (JwtConstants.REFRESH_TOKEN_COOKIE.equals(cookie.getName())) {
                 return cookie.getValue();
             }
         }

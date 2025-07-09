@@ -2,6 +2,7 @@ package com.seeat.server.security.jwt;
 
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
+import com.seeat.server.global.util.JwtConstants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -38,14 +39,14 @@ public class JwtProvider {
 
     private Key key;
 
-    private final String AUTHORITIES_KEY = "auth";
-    private final String USER_ID_KEY = "userId";
-
     @Value("${jwt.access-token-expiration}")
     private long accessTokenValidTime;
 
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenValidTime;
+
+    @Value("${jwt.dev-token-expiration}")
+    private long devTokenExpiration;
 
     private final UserRepository userRepository;
 
@@ -71,8 +72,8 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY, authoritiesStr)
-                .claim(USER_ID_KEY, userId)
+                .claim(JwtConstants.AUTHORITIES_KEY, authoritiesStr)
+                .claim(JwtConstants.USER_ID_KEY, userId)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(key, SignatureAlgorithm.HS512)
@@ -107,15 +108,21 @@ public class JwtProvider {
                 .getBody();
 
         Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                Arrays.stream(claims.get(JwtConstants.AUTHORITIES_KEY).toString().split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-        Long userId = claims.get(USER_ID_KEY, Long.class);
+        Long userId = claims.get(JwtConstants.USER_ID_KEY, Long.class);
         User user = userRepository.findById(userId)
                 // 공통에러처리
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
 
         return new UsernamePasswordAuthenticationToken(user, token, authorities);
     }
+
+
+    public String generateDevToken(Authentication authentication) {
+        return generateToken(authentication, devTokenExpiration);
+    }
+
 }
