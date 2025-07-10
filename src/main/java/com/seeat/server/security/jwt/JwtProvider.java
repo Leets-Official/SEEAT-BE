@@ -1,6 +1,8 @@
 package com.seeat.server.security.jwt;
 
 import com.seeat.server.domain.user.domain.entity.User;
+import com.seeat.server.domain.user.domain.entity.UserRole;
+import com.seeat.server.domain.user.domain.entity.UserSocial;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.util.JwtConstants;
@@ -15,14 +17,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
 import java.util.stream.Collectors;
 /**
  * JWT 토큰 생성 및 검증
@@ -81,6 +82,35 @@ public class JwtProvider {
                 .compact();
     }
 
+    public String generateDevTokenWithMockUser(Long userId, String username, UserRole role) {
+
+        User mockUser = createMockUser(userId, username);
+
+        Collection<GrantedAuthority> authorities = Collections.singletonList(
+                new SimpleGrantedAuthority(role.name())
+        );
+
+        Authentication mockAuthentication = new UsernamePasswordAuthenticationToken(
+                mockUser, null, authorities);
+
+        SecurityContextHolder.getContext().setAuthentication(mockAuthentication);
+
+        return generateToken(mockAuthentication, devTokenExpiration);
+    }
+
+    private User createMockUser(Long userId, String username) {
+        return User.of(
+                "dev@test.com",
+                "dev-" + userId,
+                UserSocial.KAKAO,
+                username,
+                "Dev User",
+                "https://example.com/profile.jpg",
+                new ArrayList<>()
+        );
+    }
+
+
     public String generateAccessToken(Authentication authentication) {
         return generateToken(authentication, accessTokenValidTime);
     }
@@ -119,11 +149,6 @@ public class JwtProvider {
                 .orElseThrow(() -> new UsernameNotFoundException(ErrorCode.NOT_USER.getMessage()));
 
         return new UsernamePasswordAuthenticationToken(user, token, authorities);
-    }
-
-
-    public String generateDevToken(Authentication authentication) {
-        return generateToken(authentication, devTokenExpiration);
     }
 
 }

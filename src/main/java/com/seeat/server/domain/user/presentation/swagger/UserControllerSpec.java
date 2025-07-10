@@ -39,5 +39,5 @@ public interface UserControllerSpec {
     @Operation(summary = "개발용 토큰 생성",
             description = "30일 동안 유효한 개발용 토큰을 생성합니다"
     )
-    ApiResponse<Void> generateDevToken(Authentication authentication, HttpServletResponse response);
+    ApiResponse<Void> generateDevToken(HttpServletResponse response);
 }

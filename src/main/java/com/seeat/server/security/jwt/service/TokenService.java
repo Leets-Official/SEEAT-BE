@@ -1,5 +1,6 @@
 package com.seeat.server.security.jwt.service;
 
+import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.service.RedisService;
 import com.seeat.server.global.util.JwtConstants;
@@ -58,13 +59,13 @@ public class TokenService {
         response.addCookie(refreshTokenCookie);
     }
 
-    public void generateDevTokensAndSetHeaders(Authentication authentication, HttpServletResponse response, Long userId) {
+    public void generateDevTokensAndSetHeaders(Long userId, String username, UserRole role, HttpServletResponse response) {
         if (!Arrays.asList("local", "dev").contains(activeProfile)) {
 
             throw new IllegalStateException(ErrorCode.INVALID_ENVIRONMENT.getMessage());
         }
 
-        String devToken = jwtProvider.generateDevToken(authentication);
+        String devToken = jwtProvider.generateDevTokenWithMockUser(userId, username, role);
 
         redisService.setRefreshToken(userId, devToken, Duration.ofMillis(devTokenExpiration));
 
