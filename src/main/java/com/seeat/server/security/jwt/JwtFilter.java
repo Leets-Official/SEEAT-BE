@@ -1,6 +1,9 @@
 package com.seeat.server.security.jwt;
 
 import com.seeat.server.domain.user.domain.entity.User;
+import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.global.response.CustomException;
+import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.service.RedisService;
 import com.seeat.server.global.util.JwtConstants;
 import jakarta.servlet.FilterChain;
@@ -37,8 +40,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response, // 공통에러처리예정
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) {
 
         String accessToken = resolveToken(request, HttpHeaders.AUTHORIZATION);
 
@@ -51,7 +54,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
             if (StringUtils.hasText(refreshToken) && jwtProvider.validateToken(refreshToken)) {
                 Authentication refreshAuth = jwtProvider.getAuthentication(refreshToken);
-                String userIdStr = refreshAuth.getName();
 
                 User user = (User) refreshAuth.getPrincipal();
                 Long userId = user.getId();
@@ -67,12 +69,19 @@ public class JwtFilter extends OncePerRequestFilter {
                     response.setHeader(HttpHeaders.AUTHORIZATION, JwtConstants.TOKEN_TYPE + " " + newAccessToken);
 
                 } else {
-                    // 공통에러처리예정 - 재로그인 처리
+
+                    throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN, null);
                 }
             }
         }
+        try {
 
-        filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response);
+
+        } catch (ServletException | IOException e) {
+
+            throw new RuntimeException(e);
+        }
     }
 
     private String resolveToken(HttpServletRequest request, String headerName) {

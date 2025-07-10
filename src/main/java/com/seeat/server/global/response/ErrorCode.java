@@ -45,11 +45,13 @@ public enum ErrorCode {
     REFRESH_TOKEN_NOT_FOUND(401_011, HttpStatus.UNAUTHORIZED, "저장된 리프레시 토큰이 존재하지 않습니다."),
     REFRESH_TOKEN_MISMATCH(401_009, HttpStatus.UNAUTHORIZED, "저장된 리프레시 토큰과 일치하지 않습니다."),
     EXPIRED_REFRESH_TOKEN(401_010, HttpStatus.UNAUTHORIZED, "리프레시 토큰이 만료되었습니다."),
+    UNSUPPORTED_SOCIAL_LOGIN(401_012, HttpStatus.UNAUTHORIZED, "지원하지 않는 소셜 로그인 방식입니다."),
 
 
     // 403 Forbidden
     FORBIDDEN(403_000, HttpStatus.FORBIDDEN, "접속 권한이 없습니다."),
     ACCESS_DENY(403_001, HttpStatus.FORBIDDEN, "접근이 거부되었습니다."),
+    INVALID_ENVIRONMENT(403_002, HttpStatus.FORBIDDEN, "개발 환경에서만 사용할 수 있는 기능입니다."),
 
     /** 엔드포인트 없음  */
     NOT_FOUND_END_POINT(404, HttpStatus.NOT_FOUND, "요청한 엔드포인트가 존재하지 않습니다."),
@@ -66,6 +68,7 @@ public enum ErrorCode {
 
     /** 유저 없음 */
     NOT_USER(1000, HttpStatus.NOT_FOUND, "해당하는 유저가 존재하지 않습니다."),
+    NOT_TEMP_USER(1001, HttpStatus.NOT_FOUND, "임시 유저가 존재하지 않습니다."),
 
     /** 최초 로그인 추가 정보 필요 */
     FIRST_LOGIN(1200, HttpStatus.NOT_FOUND, "최초 로그인유저이기에 추가정보기입이 필요합니다."),

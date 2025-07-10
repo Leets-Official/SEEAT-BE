@@ -6,7 +6,9 @@ import com.seeat.server.domain.user.application.dto.UserSignUpRequest;
 import com.seeat.server.domain.user.domain.entity.*;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.domain.user.domain.repository.UserTheaterRepository;
+import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.service.RedisService;
+import com.seeat.server.global.util.JwtConstants;
 import com.seeat.server.security.jwt.JwtProvider;
 import com.seeat.server.security.oauth2.application.dto.TempUserInfo;
 import jakarta.servlet.http.Cookie;
@@ -17,66 +19,59 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserUseCase {
 
-    private final UserRepository userRepository;
-    private final TheaterRepository theaterRepository;
-    private final UserTheaterRepository userTheaterRepository;
+    private final UserRepository repository;
     private final JwtProvider jwtProvider;
     private final RedisService redisService;
+
+    private final TheaterRepository theaterRepository;
+    private final UserTheaterRepository userTheaterRepository;
+
 
     @Value("${server.ssl.enabled}")
     private boolean sslEnabled;
 
+    @Override
     public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return repository.findByEmail(email);
     }
 
     public Optional<User> getUserBySocialAndSocialId(UserSocial social, String socialId) {
-        return userRepository.findBySocialAndSocialId(social, socialId);
+        return repository.findBySocialAndSocialId(social, socialId);
     }
 
+    @Override
     public void createUser(TempUserInfo tempUserInfo, UserSignUpRequest request) {
-        User user = User.builder()
-                .email(tempUserInfo.getEmail())
-                .socialId(tempUserInfo.getSocialId())
-                .social(tempUserInfo.getSocial())
-                .username(tempUserInfo.getUsername())
-                .nickname(request.getNickname())
-                .imageUrl(request.getImageUrl())
-                .genres(request.getGenres())
-                .role(UserRole.USER)
-                .grade(UserGrade.BRONZE)
-                .build();
+        User user = User.of(tempUserInfo.getEmail(), tempUserInfo.getSocialId(), tempUserInfo.getSocial(), tempUserInfo.getUsername(),
+                            request.getNickname(), request.getImageUrl(), request.getGenres());
 
-        userRepository.save(user);
+        repository.save(user);
 
         if (request.getTheaterIds() != null) {
             for (Long theaterId : request.getTheaterIds()) {
                 Theater theater = theaterRepository.findById(theaterId)
-                        // 공통에러처리
-                        .orElseThrow(() -> new RuntimeException("극장을 찾을 수 없습니다. id: " + theaterId));
 
-                UserTheater userTheater = UserTheater.builder()
-                        .user(user)
-                        .theater(theater)
-                        .isMainTheater(false)
-                        .build();
+                        .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_THEATER.getMessage()));
+
+                UserTheater userTheater = UserTheater.of(user, theater);
 
                 userTheaterRepository.save(userTheater);
             }
         }
     }
 
+    @Override
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("refreshToken".equals(cookie.getName())) {
+                if (JwtConstants.REFRESH_TOKEN_COOKIE.equals(cookie.getName())) {
                     String refreshToken = cookie.getValue();
 
                     if (jwtProvider.validateToken(refreshToken)) {
@@ -86,7 +81,7 @@ public class UserService implements UserUseCase {
                         redisService.deleteRefreshToken(userId);
                     }
 
-                    Cookie deleteCookie = new Cookie("refreshToken", null);
+                    Cookie deleteCookie = new Cookie(JwtConstants.REFRESH_TOKEN_COOKIE, null);
                     deleteCookie.setHttpOnly(true);
                     deleteCookie.setSecure(sslEnabled);
                     deleteCookie.setPath("/");

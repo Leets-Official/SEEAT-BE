@@ -1,7 +1,9 @@
 package com.seeat.server.domain.user.domain.entity;
 
 import com.seeat.server.domain.BaseEntity;
+import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
+import com.seeat.server.domain.theater.domain.entity.Seat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,4 +58,19 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private UserGrade grade;
+
+    // 사용자 생성 정적 팩토리 메서드
+    public static User of(String email, String socialId, UserSocial social, String username, String nickname, String imageUrl, List<MovieGenre> genres) {
+        return User.builder()
+                .email(email)
+                .socialId(socialId)
+                .social(social)
+                .username(username)
+                .nickname(nickname)
+                .imageUrl(imageUrl)
+                .genres(genres)
+                .role(UserRole.USER)
+                .grade(UserGrade.BRONZE)
+                .build();
+    }
 }

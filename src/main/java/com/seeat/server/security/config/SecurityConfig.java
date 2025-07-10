@@ -35,7 +35,8 @@ public class SecurityConfig {
                                 "/",
                                 "/login/**",
                                 "/oauth2/**",
-                                "/api/v1/users"
+                                "/api/v1/users",
+                                "/api/v1/users/dev/long-token"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
