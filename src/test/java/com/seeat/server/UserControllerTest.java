@@ -23,9 +23,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -36,11 +37,8 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -137,25 +135,42 @@ public class UserControllerTest {
         String refreshToken = "validRefreshToken";
         Long userId = 123L;
 
-        given(jwtProvider.validateToken(refreshToken)).willReturn(true);
-
-        Authentication authentication = mock(Authentication.class);
         User mockUser = mock(User.class);
         given(mockUser.getId()).willReturn(userId);
-        given(authentication.getPrincipal()).willReturn(mockUser);
-        given(jwtProvider.getAuthentication(refreshToken)).willReturn(authentication);
 
+        Authentication authentication = mock(Authentication.class);
+        given(authentication.getPrincipal()).willReturn(mockUser);
+        given(authentication.isAuthenticated()).willReturn(true);
+
+        given(jwtProvider.validateToken(refreshToken)).willReturn(true);
+        given(jwtProvider.getAuthentication(refreshToken)).willReturn(authentication);
+        given(redisService.getRefreshToken(userId)).willReturn(refreshToken);
         doNothing().when(redisService).deleteRefreshToken(userId);
 
-        // When
-        ResultActions result = mockMvc.perform(post("/api/v1/users/logout")
-                        .cookie(new Cookie("refreshToken", refreshToken))
-                        .with(user("user").password("pass").roles("USER"))) // 인증 정보 주입
-                .andExpect(status().isOk())
-                .andExpect(cookie().maxAge("refreshToken", 0))
-                .andExpect(content().string("로그아웃 완료"));
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(authentication);
+        SecurityContextHolder.setContext(securityContext);
 
-        // Then
-        verify(redisService, times(1)).deleteRefreshToken(userId);
+        try {
+            // When
+            mockMvc.perform(post("/api/v1/users/logout")
+                            .cookie(new Cookie("refreshToken", refreshToken)))
+                    .andExpect(status().isOk())
+                    .andExpect(cookie().maxAge("refreshToken", 0))
+                    .andExpect(content().json("""
+                    {
+                        "success": true,
+                        "code": 200,
+                        "message": "호출이 성공적으로 완료되었습니다.",
+                        "data": null,
+                        "error": null
+                    }
+                    """));
+
+            // Then
+            verify(redisService, times(1)).deleteRefreshToken(userId);
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
     }
 }
