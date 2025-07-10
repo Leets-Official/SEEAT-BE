@@ -1,5 +1,6 @@
 package com.seeat.server.security.jwt.service;
 
+import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.service.RedisService;
 import com.seeat.server.global.util.JwtConstants;
 import com.seeat.server.security.jwt.JwtProvider;
@@ -59,8 +60,8 @@ public class TokenService {
 
     public void generateDevTokensAndSetHeaders(Authentication authentication, HttpServletResponse response, Long userId) {
         if (!Arrays.asList("local", "dev").contains(activeProfile)) {
-            // 에러처리
-            throw new IllegalStateException("개발용 토큰은 개발 환경에서만 사용할 수 있습니다.");
+
+            throw new IllegalStateException(ErrorCode.INVALID_ENVIRONMENT.getMessage());
         }
 
         String devToken = jwtProvider.generateDevToken(authentication);

@@ -21,6 +21,7 @@ import java.time.Duration;
 @Component
 @RequiredArgsConstructor
 public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler {
+
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
     private final RedisTemplate<String, Object> redisTemplate;
     @Value("${cors.front.local}")
@@ -34,39 +35,44 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws IOException{
+                                        Authentication authentication) {
 
         CustomUserInfo userInfo = (CustomUserInfo) authentication.getPrincipal();
         String frontUrl = getFrontUrl();
+        try {
+            switch (userInfo.getStatus()) {
+                case EXISTING_USER -> {
+                    tokenService.generateTokensAndSetHeaders(authentication, response, userInfo.getId());
+                    redirectStrategy.sendRedirect(request, response, frontUrl + "/");
+                }
+                case NEW_USER -> {
+                    String tempUserKey = RedisKeyUtil.generateOAuth2TempUserKey();
 
-        switch (userInfo.getStatus()) {
-            case EXISTING_USER -> {
-                tokenService.generateTokensAndSetHeaders(authentication, response, userInfo.getId());
-                redirectStrategy.sendRedirect(request, response, frontUrl + "/");
-            }
-            case NEW_USER -> {
-                String tempUserKey = RedisKeyUtil.generateOAuth2TempUserKey();
+                    TempUserInfo tempUserInfo = new TempUserInfo(
+                            userInfo.getTempUserInfo().getEmail(),
+                            userInfo.getTempUserInfo().getProviderId(),
+                            userInfo.getSocial(),
+                            userInfo.getTempUserInfo().getNickname()
+                    );
 
-                TempUserInfo tempUserInfo = new TempUserInfo(
-                        userInfo.getTempUserInfo().getEmail(),
-                        userInfo.getTempUserInfo().getProviderId(),
-                        userInfo.getSocial(),
-                        userInfo.getTempUserInfo().getNickname()
-                );
+                    redisTemplate.opsForValue().set(tempUserKey, tempUserInfo, Duration.ofMinutes(10));
 
-                redisTemplate.opsForValue().set(tempUserKey, tempUserInfo, Duration.ofMinutes(10));
+                    String extraInfoUrl = frontUrl + "/extra-info?tempKey=" + tempUserKey;
 
-                String extraInfoUrl = frontUrl + "/extra-info?tempKey=" + tempUserKey;
-                redirectStrategy.sendRedirect(request, response, extraInfoUrl);
+                    redirectStrategy.sendRedirect(request, response, extraInfoUrl);
+                }
+                case EMAIL_DUPLICATE -> {
+
+                    redirectStrategy.sendRedirect(request, response, frontUrl + "/login/duplicate-email");
+                }
+                default -> {
+
+                    redirectStrategy.sendRedirect(request, response, frontUrl + "/login");
+                }
             }
-            case EMAIL_DUPLICATE -> {
-                // 공통 에러처리로
-                redirectStrategy.sendRedirect(request, response, frontUrl + "/login/duplicate-email");
-            }
-            default -> {
-                // 공통 에러처리로
-                redirectStrategy.sendRedirect(request, response, frontUrl + "/login");
-            }
+        } catch (IOException e){
+
+            throw new RuntimeException(e);
         }
     }
 

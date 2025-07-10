@@ -2,6 +2,7 @@ package com.seeat.server.security.jwt;
 
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
+import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.util.JwtConstants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -114,8 +115,8 @@ public class JwtProvider {
 
         Long userId = claims.get(JwtConstants.USER_ID_KEY, Long.class);
         User user = userRepository.findById(userId)
-                // 공통에러처리
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+
+                .orElseThrow(() -> new UsernameNotFoundException(ErrorCode.NOT_USER.getMessage()));
 
         return new UsernamePasswordAuthenticationToken(user, token, authorities);
     }
