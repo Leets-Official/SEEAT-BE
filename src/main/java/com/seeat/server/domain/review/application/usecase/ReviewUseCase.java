@@ -4,8 +4,10 @@ import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
+import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.PageResponse;
+import org.springframework.data.domain.Slice;
 
 /**
  * [리뷰 인터페이스]
@@ -32,5 +34,11 @@ public interface ReviewUseCase {
 
     /// 리뷰 삭제
     void deleteReview(Long reviewId, Long userId);
+
+
+    /// 외부 의존성을 위한 유즈 케이스
+    Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Review> reviews);
+
+    Review getReview(Long reviewId);
 }
 
