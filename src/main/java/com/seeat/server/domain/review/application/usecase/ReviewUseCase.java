@@ -18,7 +18,7 @@ import org.springframework.data.domain.Slice;
 public interface ReviewUseCase {
 
     /// 리뷰 작성
-    void createReview(ReviewRequest request, Long userId);
+    Review createReview(ReviewRequest request, Long userId);
 
     /// 리뷰 조회
     // 리뷰 상세 조회

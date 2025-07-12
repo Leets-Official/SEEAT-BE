@@ -48,7 +48,7 @@ public class ReviewService implements ReviewUseCase {
      * @param userId  리뷰를 작성할 유저 id (@AuthenticationPrincipal)
      */
     @Override
-    public void createReview(ReviewRequest request, Long userId) {
+    public Review createReview(ReviewRequest request, Long userId) {
 
         // 좌석 예외 처리
         Seat seat = seatRepository.findById(request.getSeatId())
@@ -66,6 +66,7 @@ public class ReviewService implements ReviewUseCase {
         // 리뷰 내 해시태그 생성
         hashTagService.createReviewHashTag(review, request.getHashtags());
 
+        return review;
     }
 
     /**

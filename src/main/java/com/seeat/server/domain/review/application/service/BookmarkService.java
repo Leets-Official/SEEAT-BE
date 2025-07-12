@@ -41,7 +41,7 @@ public class BookmarkService implements BookmarkUseCase {
      * @param request   생성 DTO
      */
     @Override
-    public void createBookmark(BookmarkRequest request) {
+    public Bookmark createBookmark(BookmarkRequest request) {
 
         /// 유저 예외 처리
         User user = userService.getUser(request.getUserId());
@@ -60,7 +60,7 @@ public class BookmarkService implements BookmarkUseCase {
         Bookmark bookmark = Bookmark.of(user, review);
 
         /// DB에 저장
-        repository.save(bookmark);
+        return repository.save(bookmark);
     }
 
 
