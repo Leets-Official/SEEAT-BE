@@ -1,8 +1,8 @@
 package com.seeat.server.security.jwt;
 
 import com.seeat.server.domain.user.domain.entity.User;
+import com.seeat.server.domain.user.domain.entity.UserGrade;
 import com.seeat.server.domain.user.domain.entity.UserRole;
-import com.seeat.server.domain.user.domain.entity.UserSocial;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.util.JwtConstants;
@@ -18,13 +18,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.seeat.server.domain.user.domain.entity.UserSocial.KAKAO;
+
 /**
  * JWT 토큰 생성 및 검증
  *
@@ -84,30 +86,37 @@ public class JwtProvider {
 
     public String generateDevTokenWithMockUser(Long userId, String username, UserRole role) {
 
-        User mockUser = createMockUser(userId, username);
+        /// 개발용 유저 실제 DB에 저장
+        User user = userRepository.findBySocialAndSocialId(KAKAO, "dev-" + userId)
+                .orElse(userRepository.save(createMockUser(userId, username, role)));
 
         Collection<GrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority(role.name())
+                new SimpleGrantedAuthority(role.getRole())
         );
 
         Authentication mockAuthentication = new UsernamePasswordAuthenticationToken(
-                mockUser, null, authorities);
+                user, null, authorities);
 
         SecurityContextHolder.getContext().setAuthentication(mockAuthentication);
 
         return generateToken(mockAuthentication, devTokenExpiration);
     }
 
-    private User createMockUser(Long userId, String username) {
-        return User.of(
-                "dev@test.com",
-                "dev-" + userId,
-                UserSocial.KAKAO,
-                username,
-                "Dev User",
-                "https://example.com/profile.jpg",
-                new ArrayList<>()
-        );
+    /// 기존 구조의 of는 USER ROLE만 생성되는 구조라서, 충돌이 발생합니다
+    /// of 대신 바꾸는것이 좋아보입니다!
+    private User createMockUser(Long userId, String username, UserRole role) {
+
+        return User.builder()
+                .email("dev@test.com")
+                .socialId("dev-" + userId)
+                .social(KAKAO)
+                .username(username)
+                .nickname("Dev User")
+                .imageUrl("https://example.com/profile.jpg")
+                .role(role)
+                .grade(UserGrade.BRONZE)
+                .genres(List.of())
+                .build();
     }
 
 
@@ -145,8 +154,7 @@ public class JwtProvider {
 
         Long userId = claims.get(JwtConstants.USER_ID_KEY, Long.class);
         User user = userRepository.findById(userId)
-
-                .orElseThrow(() -> new UsernameNotFoundException(ErrorCode.NOT_USER.getMessage()));
+                .orElseThrow(() -> new JwtAuthenticationException(ErrorCode.NOT_USER.getMessage()));
 
         return new UsernamePasswordAuthenticationToken(user, token, authorities);
     }
