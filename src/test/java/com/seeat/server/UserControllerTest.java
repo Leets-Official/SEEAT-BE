@@ -7,6 +7,7 @@ import com.seeat.server.domain.theater.domain.repository.TheaterRepository;
 import com.seeat.server.domain.user.application.UserService;
 import com.seeat.server.domain.user.application.dto.UserSignUpRequest;
 import com.seeat.server.domain.user.domain.entity.User;
+import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
 import com.seeat.server.domain.user.domain.entity.UserTheater;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
@@ -22,9 +23,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -133,44 +134,43 @@ public class UserControllerTest {
     void givenValidRequest_whenPostLogout_thenReturnsOkAndCallsLogoutService() throws Exception {
         // Given
         String refreshToken = "validRefreshToken";
-        Long userId = 123L;
+        Long userId = 999L;
 
-        User mockUser = mock(User.class);
-        given(mockUser.getId()).willReturn(userId);
+        // 실제 유저 엔티티 생성 (필요시 빌더 사용)
+        User user = User.builder()
+                .id(userId)
+                .email("test@example.com")
+                .nickname("testUser")
+                .build();
 
-        Authentication authentication = mock(Authentication.class);
-        given(authentication.getPrincipal()).willReturn(mockUser);
-        given(authentication.isAuthenticated()).willReturn(true);
+        // 권한 포함한 Authentication 생성
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(UserRole.USER.getRole()));
 
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(user, null, authorities);
+
+        // JwtProvider, RedisService 모킹
         given(jwtProvider.validateToken(refreshToken)).willReturn(true);
         given(jwtProvider.getAuthentication(refreshToken)).willReturn(authentication);
         given(redisService.getRefreshToken(userId)).willReturn(refreshToken);
         doNothing().when(redisService).deleteRefreshToken(userId);
 
-        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-        securityContext.setAuthentication(authentication);
-        SecurityContextHolder.setContext(securityContext);
+        // When & Then
+        mockMvc.perform(post("/api/v1/users/logout")
+                        .cookie(new Cookie("refreshToken", refreshToken)))
+                .andExpect(status().isOk())
+                .andExpect(cookie().maxAge("refreshToken", 0))
+                .andExpect(content().json("""
+            {
+                "success": true,
+                "code": 200,
+                "message": "호출이 성공적으로 완료되었습니다.",
+                "data": null,
+                "error": null
+            }
+            """));
 
-        try {
-            // When
-            mockMvc.perform(post("/api/v1/users/logout")
-                            .cookie(new Cookie("refreshToken", refreshToken)))
-                    .andExpect(status().isOk())
-                    .andExpect(cookie().maxAge("refreshToken", 0))
-                    .andExpect(content().json("""
-                    {
-                        "success": true,
-                        "code": 200,
-                        "message": "호출이 성공적으로 완료되었습니다.",
-                        "data": null,
-                        "error": null
-                    }
-                    """));
-
-            // Then
-            verify(redisService, times(1)).deleteRefreshToken(userId);
-        } finally {
-            SecurityContextHolder.clearContext();
-        }
+        verify(redisService, times(1)).deleteRefreshToken(userId);
     }
+
 }

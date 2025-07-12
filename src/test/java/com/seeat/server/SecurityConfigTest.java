@@ -53,6 +53,9 @@ public class SecurityConfigTest {
 //                .andExpect(status().isOk());
 //    }
 
+    /**
+     * 로그인이 필요하다면 401 에러가 뜬다.
+     */
     @Test
     void should_redirect_when_accessing_protected_url_without_authentication() throws Exception {
         // Given
@@ -60,7 +63,7 @@ public class SecurityConfigTest {
 
         // When // Then
         mockMvc.perform(get(url))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().is4xxClientError());
     }
 
 //    열려있는 get controller없어서 주석처리
