@@ -41,6 +41,7 @@ public class RequestMatcherHolder {
             new RequestInfo(GET, "/docs/**", null),
             new RequestInfo(GET, "/*.ico", null),
             new RequestInfo(GET, "/resources/**", null),
+            new RequestInfo(GET, "/style.css", null),
             new RequestInfo(GET, "/index.html", null),
             new RequestInfo(GET, "/error", null),
 
