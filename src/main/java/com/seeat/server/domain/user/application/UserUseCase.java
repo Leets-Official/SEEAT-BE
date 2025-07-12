@@ -22,4 +22,8 @@ public interface UserUseCase {
 
     // redis, cookie - refreshToken 삭제 (로그아웃)
     void logout(HttpServletRequest request, HttpServletResponse response);
+
+
+    /// 외부 의존성을 위한 함수
+    User getUser(Long userId);
 }

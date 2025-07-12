@@ -242,7 +242,7 @@ class ReviewServiceTest {
 
             Review review1 = repository.save(ReviewFixtures.createReview(user, seat, 5, firstReview));
             Review review2 = repository.save(ReviewFixtures.createReview(user, seat, 3, secondReview));
-            var pageRequest = PageRequest.builder().page(0).size(10).build();
+            var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             //when
             PageResponse<ReviewListResponse> response = sut.loadReviewsBySeatId(seat.getId(), pageRequest);
@@ -271,7 +271,7 @@ class ReviewServiceTest {
             Review review2 = repository.save(ReviewFixtures.createReview(user, seat, 2, secondReview));
             Review review3 = repository.save(ReviewFixtures.createReview(user, seat, 3, thirdReview));
             Review review4 = repository.save(ReviewFixtures.createReview(user, seat, 4, fourthReview));
-            var pageRequest = PageRequest.builder().page(0).size(10).build();
+            var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             // when
             PageResponse<ReviewListResponse> response = sut.loadReviewsByTheaterId(theater.getId(), pageRequest);

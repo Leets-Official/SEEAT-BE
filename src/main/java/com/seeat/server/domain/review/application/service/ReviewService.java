@@ -10,14 +10,16 @@ import com.seeat.server.domain.review.application.dto.response.ReviewDetailRespo
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.theater.domain.repository.SeatRepository;
+import com.seeat.server.domain.user.application.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
-import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+
+import static com.seeat.server.global.response.pageable.PageUtil.getPageable;
 
 @Service
 @Transactional
@@ -36,7 +40,7 @@ public class ReviewService implements ReviewUseCase {
 
     /// 외부 의존성 처리
     private final SeatRepository seatRepository;
-    private final UserRepository userRepository;
+    private final UserUseCase userService;
 
     /**
      * 리뷰 저장을 위한 로직
@@ -44,15 +48,14 @@ public class ReviewService implements ReviewUseCase {
      * @param userId  리뷰를 작성할 유저 id (@AuthenticationPrincipal)
      */
     @Override
-    public void createReview(ReviewRequest request, Long userId) {
+    public Review createReview(ReviewRequest request, Long userId) {
 
         // 좌석 예외 처리
         Seat seat = seatRepository.findById(request.getSeatId())
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_SEAT.getMessage()));
 
         // 유저 예외처리
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_USER.getMessage()));
+        User user = userService.getUser(userId);
 
         // 객체 생성
         Review requestReview = Review.of(user, seat, request.getMovieTitle(), request.getRating(), request.getContent(), "thumbnail");
@@ -63,6 +66,7 @@ public class ReviewService implements ReviewUseCase {
         // 리뷰 내 해시태그 생성
         hashTagService.createReviewHashTag(review, request.getHashtags());
 
+        return review;
     }
 
     /**
@@ -93,7 +97,7 @@ public class ReviewService implements ReviewUseCase {
     public PageResponse<ReviewListResponse> loadReviewsBySeatId(Long seatId, PageRequest pageRequest) {
 
         // Pageable 처리
-        Pageable pageable = org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize());
+        Pageable pageable = getPageable(pageRequest);
 
         // DB 조회
         Page<Review> reviews = repository.findBySeat_Id(seatId, pageable);
@@ -117,7 +121,7 @@ public class ReviewService implements ReviewUseCase {
     public PageResponse<ReviewListResponse> loadReviewsByTheaterId(Long theaterId, PageRequest pageRequest) {
 
         // Pageable 처리
-        Pageable pageable = org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getSize());
+        Pageable pageable = getPageable(pageRequest);
 
         // DB 조회
         Page<Review> reviews = repository.findByTheater_Id(theaterId, pageable);
@@ -154,6 +158,36 @@ public class ReviewService implements ReviewUseCase {
 
     }
 
+    /**
+     * 북마크에서 무한스크롤 조회를 위한 공통 로직
+     * @param reviews   리뷰들
+     */
+    @Override
+    public Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Review> reviews) {
+
+        // List 추출
+        List<Review> reviewsContent = reviews.getContent();
+
+        // 리뷰 ID 목록 추출
+        List<Long> reviewIds = getLongs(reviewsContent);
+
+        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviewsContent);
+
+        // 결과
+        return new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
+    }
+
+    /**
+     * 북마크에서 리뷰 조회를 위해 사용되는 공통 함수
+     * @param reviewId  리뷰 ID
+     */
+    @Override
+    public Review getReview(Long reviewId) {
+        return repository.findById(reviewId)
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_REVIEW.getMessage()));
+    }
+
     // 공통 로직
     /**
      * 리뷰의 Id를 얻기 위한 공통 로직
@@ -166,11 +200,41 @@ public class ReviewService implements ReviewUseCase {
     }
 
     /**
+     * 리뷰의 Id를 얻기 위한 공통 로직
+     * @param reviews ID를 추출할 리뷰 목록
+     */
+    private List<Long> getLongs(List<Review> reviews) {
+        return reviews.stream()
+                .map(Review::getId)
+                .toList();
+    }
+
+    /**
      * 리뷰의 Id를 바탕으로 DTO 변경
      * @param reviewIds ID 추출 목록
      * @param reviews Page 처리를 한 리뷰 엔티티
      */
     private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, Page<Review> reviews) {
+
+        // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        List<ReviewHashTag> allHashTags = hashTagService.getReviewHashTagByReviews(reviewIds);
+
+        // 리뷰 ID를 바탕으로 해시태그 매핑
+        Map<Long, List<ReviewHashTag>> mapping = allHashTags.stream()
+                .collect(Collectors.groupingBy(ht -> ht.getReview().getId()));
+
+        // DTO 변환
+        return reviews.stream()
+                .map(review -> ReviewListResponse.from(review, mapping.getOrDefault(review.getId(), List.of()), 0))
+                .toList();
+    }
+
+    /**
+     * 리뷰의 Id를 바탕으로 DTO 변경
+     * @param reviewIds ID 추출 목록
+     * @param reviews Page 처리를 한 리뷰 엔티티
+     */
+    private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, List<Review> reviews) {
 
         // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
         List<ReviewHashTag> allHashTags = hashTagService.getReviewHashTagByReviews(reviewIds);

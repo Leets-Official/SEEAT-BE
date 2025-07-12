@@ -92,4 +92,23 @@ public class UserService implements UserUseCase {
             }
         }
     }
+
+
+
+
+
+
+
+
+
+    //// 공통 함수
+    /**
+     * @param userId    조회할 유저 Id
+     */
+    @Override
+    public User getUser(Long userId) {
+        return repository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_USER.getMessage()));
+    }
+
 }
