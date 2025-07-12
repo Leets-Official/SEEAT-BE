@@ -44,7 +44,7 @@ public class BookmarkController {
         return ApiResponse.ok(response);
     }
 
-    @DeleteMapping("{/bookmarkId}")
+    @DeleteMapping("/{bookmarkId}")
     public ApiResponse<Void> deleteBookmark(
             @AuthenticationPrincipal User user,
             @PathVariable Long bookmarkId
