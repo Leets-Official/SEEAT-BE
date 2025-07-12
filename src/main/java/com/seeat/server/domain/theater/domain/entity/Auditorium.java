@@ -1,6 +1,5 @@
 package com.seeat.server.domain.theater.domain.entity;
 
-import com.seeat.server.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,11 +19,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @Getter
 @Table(name = "auditorium")
-public class Auditorium extends BaseEntity {
+public class Auditorium {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theater_id")
