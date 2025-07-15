@@ -25,9 +25,9 @@ public interface ReviewUseCase {
     ReviewDetailResponse loadReview(Long reviewId);
 
     // 리뷰 목록 조회
-    PageResponse<ReviewListResponse> loadReviewsBySeatId(Long seatId, PageRequest pageRequest);
+    PageResponse<ReviewListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest);
 
-    PageResponse<ReviewListResponse> loadReviewsByTheaterId(Long seatId, PageRequest pageRequest);
+    PageResponse<ReviewListResponse> loadReviewsByTheaterId(String seatId, PageRequest pageRequest);
 
     /// 리뷰 수정
     void updateReview(ReviewUpdateRequest request, Long userId);

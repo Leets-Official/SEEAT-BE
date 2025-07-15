@@ -62,7 +62,7 @@ public interface ReviewControllerSpec {
     @GetMapping("/theater/{theaterId}")
     ApiResponse<PageResponse<ReviewListResponse>> getReviewsByTheater(
             @Parameter(example = "1")
-            @PathVariable Long theaterId,
+            @PathVariable String theaterId,
             PageRequest pageRequest
     );
 
@@ -81,7 +81,7 @@ public interface ReviewControllerSpec {
     @GetMapping("/seat/{seatId}")
     ApiResponse<PageResponse<ReviewListResponse>> getReviewsBySeat(
             @Parameter(example = "1")
-            @PathVariable Long seatId,
+            @PathVariable String seatId,
             PageRequest pageRequest
     );
 }
