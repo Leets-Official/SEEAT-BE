@@ -58,6 +58,7 @@ public enum ErrorCode {
 
     /** 서버 내부 오류  */
     INTERNAL_SERVER_ERROR(500, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
+    INTERNAL_S3_ERROR(500_001, HttpStatus.INTERNAL_SERVER_ERROR, "AWS S3 설정이 잘못되었습니다. 속성을 확인하세요."),
 
     /** 요청 파라미터 오류 */
     BAD_PARAMETER(999, HttpStatus.BAD_REQUEST, "요청 파라미터에 문제가 존재합니다."),
