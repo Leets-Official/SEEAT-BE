@@ -20,6 +20,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${cors.front.dev}")
     private String front_dev;
 
+    @Value("${cors.back.dev}")
+    private String back_dev;
+
     /**
      * CORS 설정을 진행합니다.
      * @param registry Cors 등록을 위한 파라미터 입니다.
@@ -28,7 +31,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(front_local, front_dev)
+                .allowedOrigins(front_local, front_dev, back_dev)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowCredentials(true)
                 .maxAge(3600);
