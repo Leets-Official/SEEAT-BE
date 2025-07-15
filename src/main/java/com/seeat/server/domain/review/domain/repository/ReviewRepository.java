@@ -9,9 +9,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    Page<Review> findBySeat_Id(Long seatId, Pageable pageable);
+    Page<Review> findBySeat_Id(String seatId, Pageable pageable);
 
     @Query("select r from Review r where r.seat.auditorium.theater.id = :theaterId")
-    Page<Review> findByTheater_Id(@Param("theaterId") Long theaterId, Pageable pageable);
+    Page<Review> findByTheater_Id(@Param("theaterId") String theaterId, Pageable pageable);
     
 }

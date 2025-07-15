@@ -94,7 +94,7 @@ public class ReviewService implements ReviewUseCase {
      * @return 리뷰에 대한 목록 조회 DTO
      */
     @Override
-    public PageResponse<ReviewListResponse> loadReviewsBySeatId(Long seatId, PageRequest pageRequest) {
+    public PageResponse<ReviewListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest) {
 
         // Pageable 처리
         Pageable pageable = getPageable(pageRequest);
@@ -118,7 +118,7 @@ public class ReviewService implements ReviewUseCase {
      * @return 리뷰에 대한 목록 조회 DTO
      */
     @Override
-    public PageResponse<ReviewListResponse> loadReviewsByTheaterId(Long theaterId, PageRequest pageRequest) {
+    public PageResponse<ReviewListResponse> loadReviewsByTheaterId(String theaterId, PageRequest pageRequest) {
 
         // Pageable 처리
         Pageable pageable = getPageable(pageRequest);

@@ -64,7 +64,7 @@ public class ReviewController implements ReviewControllerSpec {
      */
     @GetMapping("/theater/{theaterId}")
     public ApiResponse<PageResponse<ReviewListResponse>> getReviewsByTheater(
-            @PathVariable Long theaterId,
+            @PathVariable String theaterId,
             PageRequest pageRequest) {
 
         // 서비스 호출
@@ -82,7 +82,7 @@ public class ReviewController implements ReviewControllerSpec {
      */
     @GetMapping("/seat/{seatId}")
     public ApiResponse<PageResponse<ReviewListResponse>> getReviewsBySeat(
-            @PathVariable Long seatId,
+            @PathVariable String seatId,
             PageRequest pageRequest) {
 
         // 서비스 호출
