@@ -1,5 +1,6 @@
 package com.seeat.server.domain.review.application.service;
 
+import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.review.domain.HashTagFixtures;
 import com.seeat.server.domain.review.domain.ReviewFixtures;
 import com.seeat.server.domain.review.domain.entity.HashTag;
@@ -27,6 +28,7 @@ import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.PageResponse;
+import com.seeat.server.global.response.pageable.SliceResponse;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static org.junit.Assert.assertFalse;
+
 /**
  * [리뷰 서비스의 통합 테스트 클래스]입니다.
  * 리뷰 생성, 조회에 대한 happy/unhappy 테스트를 수행합니다.
@@ -44,7 +48,7 @@ import java.util.NoSuchElementException;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-class ReviewServiceTest {
+class ReviewServiceIntTest {
 
     @Autowired
     private ReviewService sut;
@@ -71,7 +75,12 @@ class ReviewServiceTest {
     @Autowired
     private ReviewHashTagRepository reviewHashTagRepository;
 
-    private Seat seat;
+    /// 좋아요 의존성 추가
+    @Autowired
+    private ReviewLikeUseCase likeService;
+
+    private Seat seat1;
+    private Seat seat2;
     private User user;
 
 
@@ -88,7 +97,8 @@ class ReviewServiceTest {
     void setUp() {
         theater = theaterRepository.save(TheaterFixtures.createTheater());
         auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
-        seat = seatRepository.save(SeatFixtures.createSeat(auditorium));
+        seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
+        seat2 = seatRepository.save(SeatFixtures.createSeat2(auditorium));
         user = userRepository.save(UserFixtures.createUser());
         hashTag1 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.SOUND, "음향이 좋아요"));
         hashTag2 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.COMPANION, "혼자 관람했어요"));
@@ -107,7 +117,7 @@ class ReviewServiceTest {
         void createReviewByUser_happy() {
             //given
             var request = ReviewRequest.builder()
-                    .seatId(seat.getId())
+                    .seatId(seat1.getId())
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
@@ -129,7 +139,7 @@ class ReviewServiceTest {
             Review review = reviews.get(0);
             Assertions.assertThat(review.getContent()).isEqualTo(request.getContent());
             Assertions.assertThat(review.getRating()).isEqualTo(request.getRating());
-            Assertions.assertThat(review.getSeat().getId()).isEqualTo(seat.getId());
+            Assertions.assertThat(review.getSeat().getId()).isEqualTo(seat1.getId());
             Assertions.assertThat(review.getSeat().getAuditorium().getTheater().getName()).isEqualTo("Test Theater");
 
             /// 해시태그 체크
@@ -154,7 +164,7 @@ class ReviewServiceTest {
             //given
             User fakeUser = UserFixtures.fakeUser();
             var request = ReviewRequest.builder()
-                    .seatId(seat.getId())
+                    .seatId(seat1.getId())
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
@@ -176,7 +186,7 @@ class ReviewServiceTest {
         void createReviewByUser_unhappy_throw_IllegalArgumentException() {
             //given
             var request = ReviewRequest.builder()
-                    .seatId(seat.getId())
+                    .seatId(seat1.getId())
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
@@ -202,7 +212,7 @@ class ReviewServiceTest {
         @DisplayName("[happy] 리뷰 상세 조회")
         void loadReview_happy() {
             //given
-            Review review = repository.save(ReviewFixtures.createReview(user, seat));
+            Review review = repository.save(ReviewFixtures.createReview(user, seat1));
 
             //when
             ReviewDetailResponse response = sut.loadReview(review.getId());
@@ -222,7 +232,7 @@ class ReviewServiceTest {
         @DisplayName("[unhappy] 존재하지 않는 리뷰 조회")
         void loadReview_unhappy_not_id() {
             //given
-            Review fakeReview = ReviewFixtures.fakeReview(user, seat);
+            Review fakeReview = ReviewFixtures.fakeReview(user, seat1);
 
             // when & then
             Assertions.assertThatThrownBy(() -> sut.loadReview(fakeReview.getId()))
@@ -240,12 +250,12 @@ class ReviewServiceTest {
             String firstReview = "첫번째 리뷰입니다.";
             String secondReview = "두번째 리뷰입니다.";
 
-            Review review1 = repository.save(ReviewFixtures.createReview(user, seat, 5, firstReview));
-            Review review2 = repository.save(ReviewFixtures.createReview(user, seat, 3, secondReview));
+            Review review1 = repository.save(ReviewFixtures.createReview(user, seat1, 5, firstReview));
+            Review review2 = repository.save(ReviewFixtures.createReview(user, seat1, 3, secondReview));
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             //when
-            PageResponse<ReviewListResponse> response = sut.loadReviewsBySeatId(seat.getId(), pageRequest);
+            PageResponse<ReviewListResponse> response = sut.loadReviewsBySeatId(seat1.getId(), pageRequest);
 
             //then
             List<ReviewListResponse> responses = response.getDtoList();
@@ -267,10 +277,10 @@ class ReviewServiceTest {
             String thirdReview = "세번째 리뷰입니다.";
             String fourthReview = "네번째 리뷰입니다.";
 
-            Review review1 = repository.save(ReviewFixtures.createReview(user, seat, 1, firstReview));
-            Review review2 = repository.save(ReviewFixtures.createReview(user, seat, 2, secondReview));
-            Review review3 = repository.save(ReviewFixtures.createReview(user, seat, 3, thirdReview));
-            Review review4 = repository.save(ReviewFixtures.createReview(user, seat, 4, fourthReview));
+            Review review1 = repository.save(ReviewFixtures.createReview(user, seat1, 1, firstReview));
+            Review review2 = repository.save(ReviewFixtures.createReview(user, seat1, 2, secondReview));
+            Review review3 = repository.save(ReviewFixtures.createReview(user, seat1, 3, thirdReview));
+            Review review4 = repository.save(ReviewFixtures.createReview(user, seat1, 4, fourthReview));
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             // when
@@ -287,4 +297,105 @@ class ReviewServiceTest {
             Assertions.assertThat(responses.get(3).content()).isEqualTo(fourthReview);
         }
     }
+
+    @Nested
+    @DisplayName("인기 목록 조회 테스트")
+    class LoadReviewsPopular {
+
+        @Test
+        @DisplayName("[happy] 인기순정렬_기본케이스")
+        public void loadPopular() {
+
+            //given
+            PageRequest pageRequest = PageRequest.builder().page(1).size(8).build();
+            Review review1 = repository.save(ReviewFixtures.createReview(user, seat1));
+            Review review2 = repository.save(ReviewFixtures.createReview(user, seat2));
+
+            // 좋아요 추가
+            likeService.reviewLike(user.getId(), review1.getId());
+
+            //when
+            SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
+
+            // then
+            List<ReviewListResponse> contents = response.content();
+
+            // 응답 리스트가 Null 이 아니고 사이즈가 2개인지 확인
+            Assertions.assertThat(contents).isNotNull();
+            Assertions.assertThat(contents.size()).isEqualTo(2);
+
+            // 순서 검증: 좋아요 2개 받은 review2가 먼저, 그 다음 review1
+            Assertions.assertThat(contents.get(0).reviewId()).isEqualTo(review1.getId());
+            Assertions.assertThat(contents.get(1).reviewId()).isEqualTo(review2.getId());
+            org.junit.jupiter.api.Assertions.assertFalse(response.hasNext());
+        }
+
+        @Test
+        @DisplayName("[happy] 좋아요 수가 같은 경우 최신순 정렬")
+        void loadPopular_same_new() {
+            // given
+            PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();
+            Review older = repository.save(ReviewFixtures.createReview(user, seat1)); // 먼저 저장, 좋아요 1개
+            Review newer = repository.save(ReviewFixtures.createReview(user, seat2)); // 나중 저장, 좋아요 1개
+            likeService.reviewLike(user.getId(), older.getId());
+            likeService.reviewLike(user.getId(), newer.getId());
+
+            // when
+            SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
+            List<ReviewListResponse> contents = response.content();
+
+            // then
+            Assertions.assertThat(contents.size()).isEqualTo(2);
+            // (정책에 따라 최신 우선/생성순/ID 내림차순 등 원하는 로직 고정)
+            Assertions.assertThat(contents.get(0).reviewId()).isEqualTo(newer.getId());
+            Assertions.assertThat(contents.get(1).reviewId()).isEqualTo(older.getId());
+        }
+
+        @Test
+        @DisplayName("[happy] 여러 유저가 복수 개 리뷰에 좋아요를 누른 경우 합산 집계 및 순위정렬의 정확성")
+        void multiple_user_like() {
+            // given
+            PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();
+            Review revA = repository.save(ReviewFixtures.createReview(user, seat1));
+            Review revB = repository.save(ReviewFixtures.createReview(user, seat2));
+            User user2 = userRepository.save(UserFixtures.createUser());
+            User user3 = userRepository.save(UserFixtures.createUser());
+
+            // A: 3명, B: 2명(중복 허용X)
+            likeService.reviewLike(user.getId(), revA.getId());
+            likeService.reviewLike(user2.getId(), revA.getId());
+            likeService.reviewLike(user3.getId(), revA.getId());
+            likeService.reviewLike(user.getId(), revB.getId());
+            likeService.reviewLike(user2.getId(), revB.getId());
+
+            // when
+            SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
+            List<ReviewListResponse> contents = response.content();
+
+            // then
+            Assertions.assertThat(contents.size()).isEqualTo(2);
+            Assertions.assertThat(contents.get(0).reviewId()).isEqualTo(revA.getId());
+            Assertions.assertThat(contents.get(1).reviewId()).isEqualTo(revB.getId());
+        }
+
+        /**
+         * 리뷰가 아예 없는 경우 빈 리스트임을 검증한다.
+         */
+        @Test
+        @DisplayName("[happy] 등록된 리뷰가 없을 때 빈 리스트 반환")
+        void loadPopular_empty() {
+            // given
+            PageRequest pageRequest = PageRequest.builder().page(1).size(5).build();
+
+            // when
+            SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
+            List<ReviewListResponse> contents = response.content();
+
+            // then
+            Assertions.assertThat(contents).isEmpty();
+        }
+
+
+    }
+
 }

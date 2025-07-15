@@ -15,6 +15,7 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.PageResponse;
+import com.seeat.server.global.response.pageable.SliceResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -179,6 +180,31 @@ public class ReviewService implements ReviewUseCase {
     }
 
     /**
+     * 홈 화면에서 사용할 인기 리뷰 목록 조회를 위한 로직 (무한 스크롤)
+     * @param pageRequest   페이지 네이션
+     */
+    @Override
+    public SliceResponse<ReviewListResponse> loadFavoriteReviews(PageRequest pageRequest) {
+
+        /// Pageable 처리
+        Pageable pageable = getPageable(pageRequest);
+
+        /// 인기 있는 리뷰 검색
+        Slice<Review> reviews = repository.findAllOrderByPopularity(pageable);
+
+        /// DTO 변환
+        // 리뷰 ID 목록 추출
+        List<Long> reviewIds = getLongs(reviews);
+
+        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
+
+        /// Slice 객체 처리
+        SliceImpl<ReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
+        return SliceResponse.from(slice);
+    }
+
+    /**
      * 북마크에서 리뷰 조회를 위해 사용되는 공통 함수
      * @param reviewId  리뷰 ID
      */
@@ -210,6 +236,16 @@ public class ReviewService implements ReviewUseCase {
     }
 
     /**
+     * 리뷰의 Id를 얻기 위한 공통 로직
+     * @param reviews ID를 추출할 리뷰 목록
+     */
+    private List<Long> getLongs(Slice<Review> reviews) {
+        return reviews.stream()
+                .map(Review::getId)
+                .toList();
+    }
+
+    /**
      * 리뷰의 Id를 바탕으로 DTO 변경
      * @param reviewIds ID 추출 목록
      * @param reviews Page 처리를 한 리뷰 엔티티
@@ -235,6 +271,26 @@ public class ReviewService implements ReviewUseCase {
      * @param reviews Page 처리를 한 리뷰 엔티티
      */
     private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, List<Review> reviews) {
+
+        // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        List<ReviewHashTag> allHashTags = hashTagService.getReviewHashTagByReviews(reviewIds);
+
+        // 리뷰 ID를 바탕으로 해시태그 매핑
+        Map<Long, List<ReviewHashTag>> mapping = allHashTags.stream()
+                .collect(Collectors.groupingBy(ht -> ht.getReview().getId()));
+
+        // DTO 변환
+        return reviews.stream()
+                .map(review -> ReviewListResponse.from(review, mapping.getOrDefault(review.getId(), List.of()), 0))
+                .toList();
+    }
+
+    /**
+     * 리뷰의 Id를 바탕으로 DTO 변경
+     * @param reviewIds ID 추출 목록
+     * @param reviews Page 처리를 한 리뷰 엔티티
+     */
+    private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, Slice<Review> reviews) {
 
         // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
         List<ReviewHashTag> allHashTags = hashTagService.getReviewHashTagByReviews(reviewIds);

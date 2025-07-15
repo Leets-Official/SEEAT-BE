@@ -21,4 +21,13 @@ public class SeatFixtures {
                 .build();
     }
 
+    public static Seat createSeat2(Auditorium auditorium) {
+        return Seat.builder()
+                .id("seat-id"+ UUID.randomUUID())
+                .auditorium(auditorium)
+                .row("testRow")
+                .column(2)
+                .build();
+    }
+
 }
