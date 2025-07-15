@@ -2,7 +2,6 @@ package com.seeat.server.domain.review.domain.repository;
 
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,7 +21,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
             "WHERE r.seat.id = :seatId " +
             "GROUP BY r")
-    Page<ReviewWithLikeCount> findBySeat_Id(@Param("seatId") String seatId, Pageable pageable);
+    Slice<ReviewWithLikeCount> findBySeat_Id(@Param("seatId") String seatId, Pageable pageable);
 
 
     /**
@@ -35,7 +34,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
             "WHERE r.seat.auditorium.id = :auditoriumId " +
             "GROUP BY r")
-    Page<ReviewWithLikeCount> findByAuditorium_Id(@Param("auditoriumId") String auditoriumId, Pageable pageable);
+    Slice<ReviewWithLikeCount> findByAuditorium_Id(@Param("auditoriumId") String auditoriumId, Pageable pageable);
 
     /**
      * 인기순 검색

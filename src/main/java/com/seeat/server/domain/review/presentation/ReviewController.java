@@ -8,7 +8,7 @@ import com.seeat.server.domain.review.presentation.swagger.ReviewControllerSpec;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
-import com.seeat.server.global.response.pageable.PageResponse;
+import com.seeat.server.global.response.pageable.SliceResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -63,12 +63,12 @@ public class ReviewController implements ReviewControllerSpec {
      * @return Page<ReviewListResponse> Page DTO
      */
     @GetMapping("/auditorium/{auditoriumId}")
-    public ApiResponse<PageResponse<ReviewListResponse>> getReviewsByAuditorium(
+    public ApiResponse<SliceResponse<ReviewListResponse>> getReviewsByAuditorium(
             @PathVariable String auditoriumId,
             PageRequest pageRequest) {
 
         // 서비스 호출
-        PageResponse<ReviewListResponse> response = reviewService.loadReviewsByAuditoriumId(auditoriumId, pageRequest);
+        SliceResponse<ReviewListResponse> response = reviewService.loadReviewsByAuditoriumId(auditoriumId, pageRequest);
 
         // 응답
         return ApiResponse.ok(response);
@@ -81,12 +81,12 @@ public class ReviewController implements ReviewControllerSpec {
      * @return Page<ReviewListResponse> Page DTO
      */
     @GetMapping("/seat/{seatId}")
-    public ApiResponse<PageResponse<ReviewListResponse>> getReviewsBySeat(
+    public ApiResponse<SliceResponse<ReviewListResponse>> getReviewsBySeat(
             @PathVariable String seatId,
             PageRequest pageRequest) {
 
         // 서비스 호출
-        PageResponse<ReviewListResponse> response = reviewService.loadReviewsBySeatId(seatId, pageRequest);
+        SliceResponse<ReviewListResponse> response = reviewService.loadReviewsBySeatId(seatId, pageRequest);
 
         return ApiResponse.ok(response);
     }

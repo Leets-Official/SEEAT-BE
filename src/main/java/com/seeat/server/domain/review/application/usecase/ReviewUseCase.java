@@ -6,7 +6,6 @@ import com.seeat.server.domain.review.application.dto.response.ReviewDetailRespo
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.global.response.pageable.PageRequest;
-import com.seeat.server.global.response.pageable.PageResponse;
 import com.seeat.server.global.response.pageable.SliceResponse;
 import org.springframework.data.domain.Slice;
 
@@ -26,9 +25,9 @@ public interface ReviewUseCase {
     ReviewDetailResponse loadReview(Long reviewId);
 
     // 리뷰 목록 조회
-    PageResponse<ReviewListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest);
+    SliceResponse<ReviewListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest);
 
-    PageResponse<ReviewListResponse> loadReviewsByAuditoriumId(String seatId, PageRequest pageRequest);
+    SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(String seatId, PageRequest pageRequest);
 
     SliceResponse<ReviewListResponse> loadFavoriteReviews(PageRequest pageRequest);
 

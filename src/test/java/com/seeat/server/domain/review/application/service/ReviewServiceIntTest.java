@@ -27,7 +27,6 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.pageable.PageRequest;
-import com.seeat.server.global.response.pageable.PageResponse;
 import com.seeat.server.global.response.pageable.SliceResponse;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
@@ -255,10 +254,10 @@ class ReviewServiceIntTest {
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             //when
-            PageResponse<ReviewListResponse> response = sut.loadReviewsBySeatId(seat1.getId(), pageRequest);
+            SliceResponse<ReviewListResponse> response = sut.loadReviewsBySeatId(seat1.getId(), pageRequest);
 
             //then
-            List<ReviewListResponse> responses = response.getDtoList();
+            List<ReviewListResponse> responses = response.content();
             Assertions.assertThat(responses).hasSize(2);
             ReviewListResponse response1 = responses.get(0);
             ReviewListResponse response2 = responses.get(1);
@@ -284,10 +283,10 @@ class ReviewServiceIntTest {
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             // when
-            PageResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest);
+            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest);
 
             // then
-            List<ReviewListResponse> responses = response.getDtoList();
+            List<ReviewListResponse> responses = response.content();
             Assertions.assertThat(responses).hasSize(4);
 
             // 각 리뷰의 내용이 저장한 순서대로 반환되는지 검증

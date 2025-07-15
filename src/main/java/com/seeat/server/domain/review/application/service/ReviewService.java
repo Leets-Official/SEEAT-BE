@@ -15,10 +15,8 @@ import com.seeat.server.domain.user.application.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.pageable.PageRequest;
-import com.seeat.server.global.response.pageable.PageResponse;
 import com.seeat.server.global.response.pageable.SliceResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -103,13 +101,13 @@ public class ReviewService implements ReviewUseCase {
      * @return 리뷰에 대한 목록 조회 DTO
      */
     @Override
-    public PageResponse<ReviewListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest) {
+    public SliceResponse<ReviewListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest) {
 
         // Pageable 처리
         Pageable pageable = getPageable(pageRequest);
 
         // DB 조회
-        Page<ReviewWithLikeCount> reviews = repository.findBySeat_Id(seatId, pageable);
+        Slice<ReviewWithLikeCount> reviews = repository.findBySeat_Id(seatId, pageable);
 
         // 리뷰 ID 목록 추출
         List<Long> reviewIds = getLongs(reviews);
@@ -118,7 +116,9 @@ public class ReviewService implements ReviewUseCase {
         List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
 
         // 결과
-        return new PageResponse<>(result, pageRequest, result.size());
+        SliceImpl<ReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
+
+        return SliceResponse.from(slice);
     }
 
     /**
@@ -127,13 +127,13 @@ public class ReviewService implements ReviewUseCase {
      * @return 리뷰에 대한 목록 조회 DTO
      */
     @Override
-    public PageResponse<ReviewListResponse> loadReviewsByAuditoriumId(String auditoriumId, PageRequest pageRequest) {
+    public SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(String auditoriumId, PageRequest pageRequest) {
 
         // Pageable 처리
         Pageable pageable = getPageable(pageRequest);
 
         // DB 조회
-        Page<ReviewWithLikeCount> reviews = repository.findByAuditorium_Id(auditoriumId, pageable);
+        Slice<ReviewWithLikeCount> reviews = repository.findByAuditorium_Id(auditoriumId, pageable);
 
         // 리뷰 ID 목록 추출
         List<Long> reviewIds = getLongs(reviews);
@@ -142,7 +142,9 @@ public class ReviewService implements ReviewUseCase {
         List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
 
         // 결과
-        return new PageResponse<>(result, pageRequest, result.size());
+        SliceImpl<ReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
+
+        return SliceResponse.from(slice);
     }
 
     /**
@@ -238,16 +240,6 @@ public class ReviewService implements ReviewUseCase {
      * 리뷰의 Id를 얻기 위한 공통 로직
      * @param reviews ID를 추출할 리뷰 목록
      */
-    private List<Long> getLongs(Page<ReviewWithLikeCount> reviews) {
-        return reviews.getContent().stream()
-                .map(r -> r.getReview().getId())
-                .toList();
-    }
-
-    /**
-     * 리뷰의 Id를 얻기 위한 공통 로직
-     * @param reviews ID를 추출할 리뷰 목록
-     */
     private List<Long> getLongs(List<Review> reviews) {
         return reviews.stream()
                 .map(Review::getId)
@@ -261,30 +253,6 @@ public class ReviewService implements ReviewUseCase {
     private List<Long> getLongs(Slice<ReviewWithLikeCount> reviews) {
         return reviews.getContent().stream()
                 .map(r -> r.getReview().getId())
-                .toList();
-    }
-
-    /**
-     * 리뷰의 Id를 바탕으로 DTO 변경하는 공통 로직
-     * @param reviewIds ID 추출 목록
-     * @param reviews Page 처리를 한 리뷰 엔티티
-     */
-    private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, Page<ReviewWithLikeCount> reviews) {
-
-        // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
-        List<ReviewHashTag> allHashTags = hashTagService.getReviewHashTagByReviews(reviewIds);
-
-        // 리뷰 ID를 바탕으로 해시태그 매핑
-        Map<Long, List<ReviewHashTag>> mapping = allHashTags.stream()
-                .collect(Collectors.groupingBy(ht -> ht.getReview().getId()));
-
-        // DTO 변환
-        return reviews.stream()
-                .map(review -> ReviewListResponse.from(
-                        review.getReview(),
-                        mapping.getOrDefault(review.getReview().getId(), List.of()),
-                        review.getLikeCount())
-                )
                 .toList();
     }
 
