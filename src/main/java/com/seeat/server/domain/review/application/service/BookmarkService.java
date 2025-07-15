@@ -80,13 +80,14 @@ public class BookmarkService implements BookmarkUseCase {
         /// DB 에서 조회
         Slice<Bookmark> bookmarks = repository.findByUser(user, pageable);
 
-        /// 리뷰 목록 조회 후, DTO 변환
-        List<Review> reviews = bookmarks.stream()
+        /// 리뷰 목록 조회 후, ID로 변환
+        List<Long> reviews = bookmarks.stream()
                 .map(Bookmark::getReview)
+                .map(Review::getId)
                 .toList();
 
-        /// Slice 객체로 생성
-        SliceImpl<Review> reviewSlice = new SliceImpl<>(reviews, bookmarks.getPageable(), bookmarks.hasNext());
+        /// Slice ID 객체 생성
+        SliceImpl<Long> reviewSlice = new SliceImpl<>(reviews, bookmarks.getPageable(), bookmarks.hasNext());
 
         return reviewService.loadReviewsForBookmark(reviewSlice);
     }

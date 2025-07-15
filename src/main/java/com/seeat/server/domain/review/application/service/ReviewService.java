@@ -8,6 +8,7 @@ import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
+import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.theater.domain.repository.SeatRepository;
 import com.seeat.server.domain.user.application.UserUseCase;
@@ -43,6 +44,9 @@ public class ReviewService implements ReviewUseCase {
     private final SeatRepository seatRepository;
     private final UserUseCase userService;
 
+    // ========================
+    //  저장 함수
+    // ========================
     /**
      * 리뷰 저장을 위한 로직
      * @param request 리뷰를 위한 DTO
@@ -70,6 +74,10 @@ public class ReviewService implements ReviewUseCase {
         return review;
     }
 
+    // ========================
+    //  조회 함수
+    // ========================
+
     /**
      * 리뷰 상세 조회를 위한 로직
      * @param reviewId 상세조회할 Id
@@ -78,14 +86,14 @@ public class ReviewService implements ReviewUseCase {
     @Override
     public ReviewDetailResponse loadReview(Long reviewId) {
 
-        // ReviewId를 바탕으로 조회
-        Review review = repository.findById(reviewId)
+        /// ReviewId를 바탕으로 조회
+        ReviewWithLikeCount result = repository.findReviewAndCountById(reviewId)
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_REVIEW.getMessage()));
 
-        // ReviewId를 바탕으로 작성한 해시태그 조회
-        List<ReviewHashTag> hashTags = hashTagService.getReviewHashTagByReview(review);
+        /// ReviewId를 바탕으로 작성한 해시태그 조회
+        List<ReviewHashTag> hashTags = hashTagService.getReviewHashTagByReview(result.getReview());
 
-        return ReviewDetailResponse.from(review, hashTags);
+        return ReviewDetailResponse.from(result.getReview(), hashTags, result.getLikeCount());
     }
 
     /**
@@ -101,7 +109,7 @@ public class ReviewService implements ReviewUseCase {
         Pageable pageable = getPageable(pageRequest);
 
         // DB 조회
-        Page<Review> reviews = repository.findBySeat_Id(seatId, pageable);
+        Page<ReviewWithLikeCount> reviews = repository.findBySeat_Id(seatId, pageable);
 
         // 리뷰 ID 목록 추출
         List<Long> reviewIds = getLongs(reviews);
@@ -125,7 +133,7 @@ public class ReviewService implements ReviewUseCase {
         Pageable pageable = getPageable(pageRequest);
 
         // DB 조회
-        Page<Review> reviews = repository.findByAuditorium_Id(auditoriumId, pageable);
+        Page<ReviewWithLikeCount> reviews = repository.findByAuditorium_Id(auditoriumId, pageable);
 
         // 리뷰 ID 목록 추출
         List<Long> reviewIds = getLongs(reviews);
@@ -135,48 +143,6 @@ public class ReviewService implements ReviewUseCase {
 
         // 결과
         return new PageResponse<>(result, pageRequest, result.size());
-    }
-
-
-
-    /**
-     * 리뷰 수정을 위한 로직
-     * @param request 수정을 위한 DTO
-     * @param userId 수정을 원하는 유저 Id (@AuthenticationPrincipal)
-     */
-    @Override
-    public void updateReview(ReviewUpdateRequest request, Long userId) {
-
-    }
-
-    /**
-     * 리뷰 삭제를 위한 로직
-     * @param reviewId 삭제를 위하는 리뷰 id
-     * @param userId 삭제를 원하는 유저 Id (@AuthenticationPrincipal)
-     */
-    @Override
-    public void deleteReview(Long reviewId, Long userId) {
-
-    }
-
-    /**
-     * 북마크에서 무한스크롤 조회를 위한 공통 로직
-     * @param reviews   리뷰들
-     */
-    @Override
-    public Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Review> reviews) {
-
-        // List 추출
-        List<Review> reviewsContent = reviews.getContent();
-
-        // 리뷰 ID 목록 추출
-        List<Long> reviewIds = getLongs(reviewsContent);
-
-        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
-        List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviewsContent);
-
-        // 결과
-        return new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
     }
 
     /**
@@ -190,7 +156,7 @@ public class ReviewService implements ReviewUseCase {
         Pageable pageable = getPageable(pageRequest);
 
         /// 인기 있는 리뷰 검색
-        Slice<Review> reviews = repository.findAllOrderByPopularity(pageable);
+        Slice<ReviewWithLikeCount> reviews = repository.findAllOrderByPopularity(pageable);
 
         /// DTO 변환
         // 리뷰 ID 목록 추출
@@ -204,6 +170,60 @@ public class ReviewService implements ReviewUseCase {
         return SliceResponse.from(slice);
     }
 
+
+    // ========================
+    //  수정 함수
+    // ========================
+
+    /**
+     * 리뷰 수정을 위한 로직
+     * @param request 수정을 위한 DTO
+     * @param userId 수정을 원하는 유저 Id (@AuthenticationPrincipal)
+     */
+    @Override
+    public void updateReview(ReviewUpdateRequest request, Long userId) {
+
+    }
+
+    // ========================
+    //  삭제 함수
+    // ========================
+
+    /**
+     * 리뷰 삭제를 위한 로직
+     * @param reviewId 삭제를 위하는 리뷰 id
+     * @param userId 삭제를 원하는 유저 Id (@AuthenticationPrincipal)
+     */
+    @Override
+    public void deleteReview(Long reviewId, Long userId) {
+
+    }
+
+
+    // ========================
+    //  공통 함수
+    // ========================
+
+    /**
+     * 북마크에서 무한스크롤 조회를 위한 공통 로직
+     * @param reviews   리뷰들
+     */
+    @Override
+    public Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Long> reviews) {
+
+        // List 추출
+        List<Long> reviewIds = reviews.getContent();
+
+        List<ReviewWithLikeCount> reviewsContent = repository.findByReviewIds(reviewIds);
+
+        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviewsContent);
+
+        // 결과
+        return new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
+    }
+
+
     /**
      * 북마크에서 리뷰 조회를 위해 사용되는 공통 함수
      * @param reviewId  리뷰 ID
@@ -214,14 +234,13 @@ public class ReviewService implements ReviewUseCase {
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_REVIEW.getMessage()));
     }
 
-    // 공통 로직
     /**
      * 리뷰의 Id를 얻기 위한 공통 로직
      * @param reviews ID를 추출할 리뷰 목록
      */
-    private List<Long> getLongs(Page<Review> reviews) {
-        return reviews.stream()
-                .map(Review::getId)
+    private List<Long> getLongs(Page<ReviewWithLikeCount> reviews) {
+        return reviews.getContent().stream()
+                .map(r -> r.getReview().getId())
                 .toList();
     }
 
@@ -239,18 +258,18 @@ public class ReviewService implements ReviewUseCase {
      * 리뷰의 Id를 얻기 위한 공통 로직
      * @param reviews ID를 추출할 리뷰 목록
      */
-    private List<Long> getLongs(Slice<Review> reviews) {
-        return reviews.stream()
-                .map(Review::getId)
+    private List<Long> getLongs(Slice<ReviewWithLikeCount> reviews) {
+        return reviews.getContent().stream()
+                .map(r -> r.getReview().getId())
                 .toList();
     }
 
     /**
-     * 리뷰의 Id를 바탕으로 DTO 변경
+     * 리뷰의 Id를 바탕으로 DTO 변경하는 공통 로직
      * @param reviewIds ID 추출 목록
      * @param reviews Page 처리를 한 리뷰 엔티티
      */
-    private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, Page<Review> reviews) {
+    private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, Page<ReviewWithLikeCount> reviews) {
 
         // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
         List<ReviewHashTag> allHashTags = hashTagService.getReviewHashTagByReviews(reviewIds);
@@ -261,16 +280,20 @@ public class ReviewService implements ReviewUseCase {
 
         // DTO 변환
         return reviews.stream()
-                .map(review -> ReviewListResponse.from(review, mapping.getOrDefault(review.getId(), List.of()), 0))
+                .map(review -> ReviewListResponse.from(
+                        review.getReview(),
+                        mapping.getOrDefault(review.getReview().getId(), List.of()),
+                        review.getLikeCount())
+                )
                 .toList();
     }
 
     /**
-     * 리뷰의 Id를 바탕으로 DTO 변경
+     * 리뷰의 Id를 바탕으로 DTO 변경 공통 로직
      * @param reviewIds ID 추출 목록
      * @param reviews Page 처리를 한 리뷰 엔티티
      */
-    private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, List<Review> reviews) {
+    private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, List<ReviewWithLikeCount> reviews) {
 
         // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
         List<ReviewHashTag> allHashTags = hashTagService.getReviewHashTagByReviews(reviewIds);
@@ -281,16 +304,20 @@ public class ReviewService implements ReviewUseCase {
 
         // DTO 변환
         return reviews.stream()
-                .map(review -> ReviewListResponse.from(review, mapping.getOrDefault(review.getId(), List.of()), 0))
+                .map(review -> ReviewListResponse.from(
+                        review.getReview(),
+                        mapping.getOrDefault(review.getReview().getId(), List.of()),
+                        review.getLikeCount())
+                )
                 .toList();
     }
 
     /**
-     * 리뷰의 Id를 바탕으로 DTO 변경
+     * 리뷰의 Id를 바탕으로 DTO 변경 공통 로직
      * @param reviewIds ID 추출 목록
      * @param reviews Page 처리를 한 리뷰 엔티티
      */
-    private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, Slice<Review> reviews) {
+    private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, Slice<ReviewWithLikeCount> reviews) {
 
         // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
         List<ReviewHashTag> allHashTags = hashTagService.getReviewHashTagByReviews(reviewIds);
@@ -301,7 +328,11 @@ public class ReviewService implements ReviewUseCase {
 
         // DTO 변환
         return reviews.stream()
-                .map(review -> ReviewListResponse.from(review, mapping.getOrDefault(review.getId(), List.of()), 0))
+                .map(review -> ReviewListResponse.from(
+                        review.getReview(),
+                        mapping.getOrDefault(review.getReview().getId(), List.of()),
+                        review.getLikeCount())
+                )
                 .toList();
     }
 

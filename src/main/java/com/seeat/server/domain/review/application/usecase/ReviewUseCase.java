@@ -40,7 +40,7 @@ public interface ReviewUseCase {
 
 
     /// 외부 의존성을 위한 유즈 케이스
-    Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Review> reviews);
+    Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Long> reviews);
 
     Review getReview(Long reviewId);
 }
