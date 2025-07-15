@@ -80,7 +80,8 @@ class ReviewServiceIntTest {
 
     private Seat seat1;
     private Seat seat2;
-    private User user;
+    private User user1;
+    private User user2;
 
 
     private Theater theater;
@@ -98,7 +99,8 @@ class ReviewServiceIntTest {
         auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
         seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
         seat2 = seatRepository.save(SeatFixtures.createSeat2(auditorium));
-        user = userRepository.save(UserFixtures.createUser());
+        user1 = userRepository.save(UserFixtures.createUser());
+        user2 = userRepository.save(UserFixtures.createUser());
         hashTag1 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.SOUND, "음향이 좋아요"));
         hashTag2 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.COMPANION, "혼자 관람했어요"));
         hashTag3 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.ENVIRONMENT, "좌석이 넓어요"));
@@ -125,7 +127,7 @@ class ReviewServiceIntTest {
                     .build();
 
             //when
-            sut.createReview(request, user.getId());
+            sut.createReview(request, user1.getId());
 
             //then
             /// 리뷰 체크
@@ -194,7 +196,7 @@ class ReviewServiceIntTest {
                     .build();
 
             // when & then
-            Assertions.assertThatThrownBy(() -> sut.createReview(request, user.getId()))
+            Assertions.assertThatThrownBy(() -> sut.createReview(request, user1.getId()))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining(ErrorCode.INVALID_HASHTAG.getMessage());
         }
@@ -211,7 +213,7 @@ class ReviewServiceIntTest {
         @DisplayName("[happy] 리뷰 상세 조회")
         void loadReview_happy() {
             //given
-            Review review = repository.save(ReviewFixtures.createReview(user, seat1));
+            Review review = repository.save(ReviewFixtures.createReview(user1, seat1));
 
             //when
             ReviewDetailResponse response = sut.loadReview(review.getId());
@@ -231,7 +233,7 @@ class ReviewServiceIntTest {
         @DisplayName("[unhappy] 존재하지 않는 리뷰 조회")
         void loadReview_unhappy_not_id() {
             //given
-            Review fakeReview = ReviewFixtures.fakeReview(user, seat1);
+            Review fakeReview = ReviewFixtures.fakeReview(user1, seat1);
 
             // when & then
             Assertions.assertThatThrownBy(() -> sut.loadReview(fakeReview.getId()))
@@ -249,8 +251,8 @@ class ReviewServiceIntTest {
             String firstReview = "첫번째 리뷰입니다.";
             String secondReview = "두번째 리뷰입니다.";
 
-            Review review1 = repository.save(ReviewFixtures.createReview(user, seat1, 5, firstReview));
-            Review review2 = repository.save(ReviewFixtures.createReview(user, seat1, 3, secondReview));
+            Review review1 = repository.save(ReviewFixtures.createReview(user1, seat1, 5, firstReview));
+            Review review2 = repository.save(ReviewFixtures.createReview(user1, seat1, 3, secondReview));
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             //when
@@ -262,8 +264,8 @@ class ReviewServiceIntTest {
             ReviewListResponse response1 = responses.get(0);
             ReviewListResponse response2 = responses.get(1);
 
-            Assertions.assertThat(response1.content()).isEqualTo(review1.getContent());
-            Assertions.assertThat(response2.content()).isEqualTo(review2.getContent());
+            Assertions.assertThat(response1.content()).isEqualTo(review2.getContent());
+            Assertions.assertThat(response2.content()).isEqualTo(review1.getContent());
         }
 
 
@@ -276,10 +278,10 @@ class ReviewServiceIntTest {
             String thirdReview = "세번째 리뷰입니다.";
             String fourthReview = "네번째 리뷰입니다.";
 
-            Review review1 = repository.save(ReviewFixtures.createReview(user, seat1, 1, firstReview));
-            Review review2 = repository.save(ReviewFixtures.createReview(user, seat1, 2, secondReview));
-            Review review3 = repository.save(ReviewFixtures.createReview(user, seat1, 3, thirdReview));
-            Review review4 = repository.save(ReviewFixtures.createReview(user, seat1, 4, fourthReview));
+            Review review1 = repository.save(ReviewFixtures.createReview(user1, seat1, 1, firstReview));
+            Review review2 = repository.save(ReviewFixtures.createReview(user1, seat1, 2, secondReview));
+            Review review3 = repository.save(ReviewFixtures.createReview(user1, seat1, 3, thirdReview));
+            Review review4 = repository.save(ReviewFixtures.createReview(user1, seat1, 4, fourthReview));
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             // when
@@ -290,10 +292,10 @@ class ReviewServiceIntTest {
             Assertions.assertThat(responses).hasSize(4);
 
             // 각 리뷰의 내용이 저장한 순서대로 반환되는지 검증
-            Assertions.assertThat(responses.get(0).content()).isEqualTo(firstReview);
-            Assertions.assertThat(responses.get(1).content()).isEqualTo(secondReview);
-            Assertions.assertThat(responses.get(2).content()).isEqualTo(thirdReview);
-            Assertions.assertThat(responses.get(3).content()).isEqualTo(fourthReview);
+            Assertions.assertThat(responses.get(0).content()).isEqualTo(fourthReview);
+            Assertions.assertThat(responses.get(1).content()).isEqualTo(thirdReview);
+            Assertions.assertThat(responses.get(2).content()).isEqualTo(secondReview);
+            Assertions.assertThat(responses.get(3).content()).isEqualTo(firstReview);
         }
     }
 
@@ -307,11 +309,11 @@ class ReviewServiceIntTest {
 
             //given
             PageRequest pageRequest = PageRequest.builder().page(1).size(8).build();
-            Review review1 = repository.save(ReviewFixtures.createReview(user, seat1));
-            Review review2 = repository.save(ReviewFixtures.createReview(user, seat2));
+            Review review1 = repository.save(ReviewFixtures.createReview(user1, seat1));
+            Review review2 = repository.save(ReviewFixtures.createReview(user1, seat2));
 
             // 좋아요 추가
-            likeService.reviewLike(user.getId(), review1.getId());
+            likeService.reviewLike(user1.getId(), review1.getId());
 
             //when
             SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
@@ -334,10 +336,10 @@ class ReviewServiceIntTest {
         void loadPopular_same_new() {
             // given
             PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();
-            Review older = repository.save(ReviewFixtures.createReview(user, seat1)); // 먼저 저장, 좋아요 1개
-            Review newer = repository.save(ReviewFixtures.createReview(user, seat2)); // 나중 저장, 좋아요 1개
-            likeService.reviewLike(user.getId(), older.getId());
-            likeService.reviewLike(user.getId(), newer.getId());
+            Review older = repository.save(ReviewFixtures.createReview(user1, seat1)); // 먼저 저장, 좋아요 1개
+            Review newer = repository.save(ReviewFixtures.createReview(user1, seat2)); // 나중 저장, 좋아요 1개
+            likeService.reviewLike(user1.getId(), older.getId());
+            likeService.reviewLike(user1.getId(), newer.getId());
 
             // when
             SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
@@ -355,16 +357,16 @@ class ReviewServiceIntTest {
         void multiple_user_like() {
             // given
             PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();
-            Review revA = repository.save(ReviewFixtures.createReview(user, seat1));
-            Review revB = repository.save(ReviewFixtures.createReview(user, seat2));
+            Review revA = repository.save(ReviewFixtures.createReview(user1, seat1));
+            Review revB = repository.save(ReviewFixtures.createReview(user1, seat2));
             User user2 = userRepository.save(UserFixtures.createUser());
             User user3 = userRepository.save(UserFixtures.createUser());
 
             // A: 3명, B: 2명(중복 허용X)
-            likeService.reviewLike(user.getId(), revA.getId());
+            likeService.reviewLike(user1.getId(), revA.getId());
             likeService.reviewLike(user2.getId(), revA.getId());
             likeService.reviewLike(user3.getId(), revA.getId());
-            likeService.reviewLike(user.getId(), revB.getId());
+            likeService.reviewLike(user1.getId(), revB.getId());
             likeService.reviewLike(user2.getId(), revB.getId());
 
             // when
@@ -394,7 +396,84 @@ class ReviewServiceIntTest {
             Assertions.assertThat(contents).isEmpty();
         }
 
+    }
 
+    @Nested
+    @DisplayName("좋아요 반영 조회 테스트")
+    class LoadReviewsByLike {
+
+        @Test
+        @DisplayName("[happy] 상세 조회에서 정상적으로 좋아요 개수가 출력")
+        public void happyLoad_Detail(){
+
+            //given
+            var request = ReviewRequest.builder()
+                    .seatId(seat1.getId())
+                    .content("test")
+                    .movieTitle("ReviewTestTitle")
+                    .photos(null)
+                    .rating(5)
+                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                    .build();
+
+            //when
+            Review sutReview = sut.createReview(request, user1.getId());
+
+            likeService.reviewLike(user1.getId(), sutReview.getId());
+            likeService.reviewLike(user2.getId(), sutReview.getId());
+
+            //when
+            ReviewDetailResponse response = sut.loadReview(sutReview.getId());
+
+            //then
+            Assertions.assertThat(response).isNotNull();
+            Assertions.assertThat(response.heartCount()).isEqualTo(2L);
+
+        }
+
+        @Test
+        @DisplayName("[happy] 목록 조회에서 정상적으로 좋아요 개수가 출력")
+        public void happyLoad_List(){
+
+            // given
+            PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();
+
+            var request1 = ReviewRequest.builder()
+                    .seatId(seat1.getId())
+                    .content("test1")
+                    .movieTitle("ReviewTestTitle1")
+                    .photos(null)
+                    .rating(5)
+                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                    .build();
+
+            var request2 = ReviewRequest.builder()
+                    .seatId(seat1.getId())
+                    .content("test2")
+                    .movieTitle("ReviewTestTitle2")
+                    .photos(null)
+                    .rating(3)
+                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                    .build();
+
+            Review sutReview1 = sut.createReview(request1, user1.getId());
+            Review sutReview2 = sut.createReview(request2, user1.getId());
+
+            // 1에게만 좋아요 누르기
+            likeService.reviewLike(user1.getId(), sutReview1.getId());
+            likeService.reviewLike(user2.getId(), sutReview1.getId());
+
+            // when
+            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest);
+
+            // then
+            List<ReviewListResponse> contents = response.content();
+            Assertions.assertThat(contents).isNotNull();
+            Assertions.assertThat(contents.size()).isEqualTo(2);
+            Assertions.assertThat(response.content().get(0).heartCount()).isEqualTo(2L);
+            Assertions.assertThat(response.content().get(1).heartCount()).isEqualTo(0);
+
+        }
     }
 
 }

@@ -42,6 +42,7 @@ public record ReviewDetailResponse(
                         .from(hashTags))
                 .content(review.getContent())
                 .rating(review.getRating())
+                .heartCount(heartCount)
                 .user(UserResponse
                         .from(review.getUser()))
                 .createdAt(review.getCreatedAt())
