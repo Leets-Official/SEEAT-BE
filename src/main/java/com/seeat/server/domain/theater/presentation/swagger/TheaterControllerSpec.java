@@ -6,6 +6,7 @@ import com.seeat.server.domain.theater.application.dto.response.TheaterListRespo
 import com.seeat.server.domain.theater.domain.entity.AuditoriumType;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
+import com.seeat.server.global.response.pageable.SliceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +22,7 @@ public interface TheaterControllerSpec {
             summary = "영화관 목록 조회 API",
             description = "해당하는 타입을 가진 영화관 조회"
     )
-    ApiResponse<List<TheaterListResponse>> getTheaters(
+    ApiResponse<SliceResponse<TheaterListResponse>> getTheaters(
             @Parameter(
                     description = "조회할 타입"
             )

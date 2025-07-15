@@ -8,6 +8,7 @@ import com.seeat.server.domain.theater.domain.entity.AuditoriumType;
 import com.seeat.server.domain.theater.presentation.swagger.TheaterControllerSpec;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
+import com.seeat.server.global.response.pageable.SliceResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,14 +27,14 @@ public class TheaterController implements TheaterControllerSpec {
      */
 
     @GetMapping()
-    public ApiResponse<List<TheaterListResponse>> getTheaters(
+    public ApiResponse<SliceResponse<TheaterListResponse>> getTheaters(
             @RequestParam AuditoriumType auditoriumType,
             PageRequest pageRequest) {
 
         /// 서비스 호출
-        List<TheaterListResponse> responses = theaterService.loadTheatersByType(auditoriumType, pageRequest);
+        SliceResponse<TheaterListResponse> response = theaterService.loadTheatersByType(auditoriumType, pageRequest);
 
-        return ApiResponse.ok(responses);
+        return ApiResponse.ok(response);
     }
 
     /**
