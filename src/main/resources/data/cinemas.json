@@ -1,0 +1,74 @@
+[
+  {
+    "name": "롯데시네마 월드타워 수퍼MX4D",
+    "cinemaId": "1016",
+    "screenId": "101619",
+    "screenDivisionCode": "2",
+    "playDate": "2025-07-15",
+    "playSequence": "2"
+  },
+  {
+    "name": "롯데시네마 수원역 수퍼MX4D",
+    "cinemaId": "3024",
+    "screenId": "302407",
+    "screenDivisionCode": "931",
+    "playDate": "2025-07-15",
+    "playSequence": "1"
+  },
+  {
+    "name": "롯데시네마 월드타워 수퍼플렉스",
+    "cinemaId": "1016",
+    "screenId": "101621",
+    "screenDivisionCode": "940",
+    "playDate": "2025-07-15",
+    "playSequence": "4"
+  },
+  {
+    "name": "롯데시네마 건대입구 수퍼LED",
+    "cinemaId": "1004",
+    "screenId": "100407",
+    "screenDivisionCode": "980",
+    "playDate": "2025-07-15",
+    "playSequence": "3"
+  },
+  {
+    "name": "롯데시네마 노원 광음시네마",
+    "cinemaId": "1003",
+    "screenId": "100302",
+    "screenDivisionCode": "901",
+    "playDate": "2025-07-15",
+    "playSequence": "4"
+  },
+  {
+    "name": "롯데시네마 용산 리클라이너",
+    "cinemaId": "1014",
+    "screenId": "101405",
+    "screenDivisionCode": "986",
+    "playDate": "2025-07-15",
+    "playSequence": "3"
+  },
+  {
+    "name": "롯데시네마 가산디지털 수퍼4D",
+    "cinemaId": "1013",
+    "screenId": "101303",
+    "screenDivisionCode": "100",
+    "playDate": "2025-07-15",
+    "playSequence": "5"
+  },
+  {
+    "name": "롯데시네마 월드타워 씨네패밀리",
+    "cinemaId": "1016",
+    "screenId": "101609",
+    "screenDivisionCode": "960",
+    "playDate": "2025-07-15",
+    "playSequence": "4"
+  },
+  {
+    "name": "롯데시네마 의정부민락 씨네커플",
+    "cinemaId": "3033",
+    "screenId": "303303",
+    "screenDivisionCode": "100",
+    "playDate": "2025-07-15",
+    "playSequence": "3"
+  }
+]
