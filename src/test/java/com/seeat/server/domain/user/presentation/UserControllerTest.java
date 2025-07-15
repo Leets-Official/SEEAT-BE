@@ -128,7 +128,7 @@ public class UserControllerTest {
                 .map(ut -> ut.getTheater().getId())
                 .collect(Collectors.toList());
 
-        List<Long> expectedTheaterIds = List.of(1L, 2L);
+        List<String> expectedTheaterIds = List.of("theater1", "theater2");
         assertIterableEquals(expectedTheaterIds, savedTheaterIds);
     }
 
