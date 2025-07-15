@@ -40,5 +40,5 @@ public class UserSignUpRequest {
      */
     @NotNull(message = "선호 영화관은 필수입니다.")
     @Size(min = 1, message = "최소 하나 이상의 영화관이 필요합니다.")
-    private List<Long> theaterIds;
+    private List<String> theaterIds;
 }
