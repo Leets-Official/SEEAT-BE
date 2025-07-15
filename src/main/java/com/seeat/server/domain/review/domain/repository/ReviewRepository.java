@@ -20,7 +20,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
             "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
             "WHERE r.seat.id = :seatId " +
-            "GROUP BY r")
+            "GROUP BY r "+
+            "ORDER BY COUNT(rl) DESC, r.createdAt DESC")
     Slice<ReviewWithLikeCount> findBySeat_Id(@Param("seatId") String seatId, Pageable pageable);
 
 
@@ -33,7 +34,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
             "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
             "WHERE r.seat.auditorium.id = :auditoriumId " +
-            "GROUP BY r")
+            "GROUP BY r "+
+            "ORDER BY COUNT(rl) DESC, r.createdAt DESC")
     Slice<ReviewWithLikeCount> findByAuditorium_Id(@Param("auditoriumId") String auditoriumId, Pageable pageable);
 
     /**
@@ -57,14 +59,15 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
             "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
             "WHERE r.id = :id " +
-            "GROUP BY r")
+            "GROUP BY r ")
     Optional<ReviewWithLikeCount> findReviewAndCountById(@Param("id") Long id);
 
 
     @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
             "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
             "WHERE r.id IN :reviewIds " +
-            "GROUP BY r")
+            "GROUP BY r " +
+            "ORDER BY COUNT(rl) DESC, r.createdAt DESC")
     List<ReviewWithLikeCount> findByReviewIds(@Param("reviewIds") List<Long> reviewIds);
 
 
