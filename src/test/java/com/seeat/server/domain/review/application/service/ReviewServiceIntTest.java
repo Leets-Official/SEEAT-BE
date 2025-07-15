@@ -269,7 +269,7 @@ class ReviewServiceIntTest {
 
 
         @Test
-        @DisplayName("[happy] 영화관 기반_리뷰 목록 조회")
+        @DisplayName("[happy] 상영관 기반_리뷰 목록 조회")
         void loadReviews_happy_theater() {
             // given
             String firstReview = "첫번째 리뷰입니다.";
@@ -284,7 +284,7 @@ class ReviewServiceIntTest {
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             // when
-            PageResponse<ReviewListResponse> response = sut.loadReviewsByTheaterId(theater.getId(), pageRequest);
+            PageResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest);
 
             // then
             List<ReviewListResponse> responses = response.getDtoList();

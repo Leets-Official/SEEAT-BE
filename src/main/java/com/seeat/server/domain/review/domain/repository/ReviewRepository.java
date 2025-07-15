@@ -12,8 +12,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     Page<Review> findBySeat_Id(String seatId, Pageable pageable);
 
-    @Query("select r from Review r where r.seat.auditorium.theater.id = :theaterId")
-    Page<Review> findByTheater_Id(@Param("theaterId") String theaterId, Pageable pageable);
+    @Query("select r from Review r where r.seat.auditorium.id = :auditoriumId")
+    Page<Review> findByAuditorium_Id(@Param("auditoriumId") String auditoriumId, Pageable pageable);
 
     @Query(
             "SELECT r FROM Review r " +

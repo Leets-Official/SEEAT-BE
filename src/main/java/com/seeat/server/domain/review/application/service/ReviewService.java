@@ -114,18 +114,18 @@ public class ReviewService implements ReviewUseCase {
     }
 
     /**
-     * 영화관에 따른 리뷰 목록 조회를 위한 로직
-     * @param theaterId 좌석 Id
+     * 상영관에 따른 리뷰 목록 조회를 위한 로직
+     * @param auditoriumId 상영관 Id
      * @return 리뷰에 대한 목록 조회 DTO
      */
     @Override
-    public PageResponse<ReviewListResponse> loadReviewsByTheaterId(String theaterId, PageRequest pageRequest) {
+    public PageResponse<ReviewListResponse> loadReviewsByAuditoriumId(String auditoriumId, PageRequest pageRequest) {
 
         // Pageable 처리
         Pageable pageable = getPageable(pageRequest);
 
         // DB 조회
-        Page<Review> reviews = repository.findByTheater_Id(theaterId, pageable);
+        Page<Review> reviews = repository.findByAuditorium_Id(auditoriumId, pageable);
 
         // 리뷰 ID 목록 추출
         List<Long> reviewIds = getLongs(reviews);

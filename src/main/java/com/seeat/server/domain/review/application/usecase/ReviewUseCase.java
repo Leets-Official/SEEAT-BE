@@ -28,7 +28,7 @@ public interface ReviewUseCase {
     // 리뷰 목록 조회
     PageResponse<ReviewListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest);
 
-    PageResponse<ReviewListResponse> loadReviewsByTheaterId(String seatId, PageRequest pageRequest);
+    PageResponse<ReviewListResponse> loadReviewsByAuditoriumId(String seatId, PageRequest pageRequest);
 
     SliceResponse<ReviewListResponse> loadFavoriteReviews(PageRequest pageRequest);
 

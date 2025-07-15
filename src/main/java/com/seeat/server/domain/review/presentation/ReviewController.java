@@ -58,17 +58,17 @@ public class ReviewController implements ReviewControllerSpec {
     }
 
     /**
-     * 영화관에 따른 리뷰 목록 조회
-     * @param theaterId 영화관에 따른 리뷰 목록 조회를 위한 Id
+     * 상영관에 따른 리뷰 목록 조회
+     * @param auditoriumId 상영관에 따른 리뷰 목록 조회를 위한 Id
      * @return Page<ReviewListResponse> Page DTO
      */
-    @GetMapping("/theater/{theaterId}")
-    public ApiResponse<PageResponse<ReviewListResponse>> getReviewsByTheater(
-            @PathVariable String theaterId,
+    @GetMapping("/auditorium/{auditoriumId}")
+    public ApiResponse<PageResponse<ReviewListResponse>> getReviewsByAuditorium(
+            @PathVariable String auditoriumId,
             PageRequest pageRequest) {
 
         // 서비스 호출
-        PageResponse<ReviewListResponse> response = reviewService.loadReviewsBySeatId(theaterId, pageRequest);
+        PageResponse<ReviewListResponse> response = reviewService.loadReviewsByAuditoriumId(auditoriumId, pageRequest);
 
         // 응답
         return ApiResponse.ok(response);
