@@ -3,6 +3,7 @@ package com.seeat.server.domain.review.presentation;
 import com.seeat.server.domain.review.application.dto.request.BookmarkRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.review.application.usecase.BookmarkUseCase;
+import com.seeat.server.domain.review.presentation.swagger.BookmarkControllerSpec;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/bookmarks")
 @RequiredArgsConstructor
-public class BookmarkController {
+public class BookmarkController implements BookmarkControllerSpec {
 
     private final BookmarkUseCase bookmarkService;
 
