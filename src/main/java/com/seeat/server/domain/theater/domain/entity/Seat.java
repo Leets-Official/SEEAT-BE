@@ -31,6 +31,6 @@ public class Seat {
     private String row;
 
     @Column(name = "`column`")
-    private String column;
+    private int column;
 
 }

@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class Theater {
 
     @Id
-    private String code;
+    private String id;
 
     private String name;
 
