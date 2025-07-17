@@ -11,7 +11,7 @@ name: SEEAT dev CI-CD 파이프라인
 
 on:
   push:
-    branches: [ "develop","fix/swagger"]
+    branches: [ "develop"]
 
 jobs:
   #1. 개발 서버 CI, Build 용
