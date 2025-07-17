@@ -1,8 +1,12 @@
 package com.seeat.server.domain.user.presentation;
 
 
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.seeat.server.domain.user.application.UserUseCase;
-import com.seeat.server.domain.user.application.dto.UserSignUpRequest;
+import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
+import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
+import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
+import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.domain.user.presentation.swagger.UserControllerSpec;
 import com.seeat.server.global.response.ApiResponse;
@@ -15,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -83,5 +88,23 @@ public class UserController implements UserControllerSpec {
 
         return ApiResponse.created();
     }
+
+    /**
+     * 마이페이지에서 사용자 정보를 조회 합니다.
+     *
+     * @param user Jwt 기반 SecurityContext 저장되어있는 유저
+     * @return UserInfoResponse DTO 응답
+     */
+    @GetMapping
+    public ApiResponse<UserInfoResponse> getUserInfo(
+            @AuthenticationPrincipal User user){
+
+        // 사용자 정보 조회
+        UserInfoResponse response = userService.getUserInfo(user.getId());
+
+        return ApiResponse.ok(response);
+    }
+
+
 
 }

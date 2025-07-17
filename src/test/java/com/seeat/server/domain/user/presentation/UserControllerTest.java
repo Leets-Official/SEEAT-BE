@@ -5,7 +5,7 @@ import com.seeat.server.domain.theater.domain.entity.MovieGenre;
 import com.seeat.server.domain.theater.domain.entity.Theater;
 import com.seeat.server.domain.theater.domain.repository.TheaterRepository;
 import com.seeat.server.domain.user.application.UserService;
-import com.seeat.server.domain.user.application.dto.UserSignUpRequest;
+import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
