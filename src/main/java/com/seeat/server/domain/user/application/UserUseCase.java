@@ -1,6 +1,7 @@
 package com.seeat.server.domain.user.application;
 
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
+import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
@@ -27,6 +28,9 @@ public interface UserUseCase {
 
     // 사용자 정보 조회
     UserInfoResponse getUserInfo(Long userId);
+
+    // 사용자 등급 조회
+    UserGradeResponse getUserGrade(Long userId);
 
     /// 외부 의존성을 위한 함수
     User getUser(Long userId);

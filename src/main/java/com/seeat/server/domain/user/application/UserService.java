@@ -7,6 +7,7 @@ import com.seeat.server.domain.theater.domain.entity.Theater;
 import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
 import com.seeat.server.domain.theater.domain.repository.TheaterRepository;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
+import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.domain.entity.*;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
@@ -126,6 +127,15 @@ public class UserService implements UserUseCase {
         return UserInfoResponse.from(user);
     }
 
+    @Override
+    public UserGradeResponse getUserGrade(Long userId){
+
+        // 사용자 예외처리 및 사용자 정보 조회
+        User user = getUser(userId);
+
+        // 사용자 등급 DTO로 변환
+        return new UserGradeResponse(user.getGrade());
+    }
 
 
 

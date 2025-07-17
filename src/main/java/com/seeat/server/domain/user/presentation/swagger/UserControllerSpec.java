@@ -3,6 +3,7 @@ package com.seeat.server.domain.user.presentation.swagger;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
 import com.seeat.server.domain.theater.domain.entity.Theater;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
+import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserGrade;
@@ -55,5 +56,11 @@ public interface UserControllerSpec {
     @Operation(summary = "사용자 정보 조회",
                 description = "마이페이지에서 사용자 정보를 조회합니다.")
     ApiResponse<UserInfoResponse> getUserInfo(
+            @AuthenticationPrincipal User user);
+
+    @GetMapping("/me/grade")
+    @Operation(summary = "사용자 등급 조회",
+            description = "마이페이지에서 사용자 등급을 조회합니다.")
+    ApiResponse<UserGradeResponse> getUserGrade(
             @AuthenticationPrincipal User user);
 }

@@ -5,6 +5,7 @@ import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.seeat.server.domain.user.application.UserUseCase;
 import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
+import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserRole;
@@ -101,6 +102,21 @@ public class UserController implements UserControllerSpec {
 
         // 사용자 정보 조회
         UserInfoResponse response = userService.getUserInfo(user.getId());
+
+        return ApiResponse.ok(response);
+    }
+
+    /**
+     * 마이페이지에서 사용자 등급을 조회합니다.
+     * @param user Jwt 기반 SecurityContext 저장되어있는 유저
+     * @return UserGradeResponse DTO 응답
+     */
+    @GetMapping("/me/grade")
+    public ApiResponse<UserGradeResponse> getUserGrade(
+            @AuthenticationPrincipal User user){
+
+        // 사용자 등급 조회
+        UserGradeResponse response = userService.getUserGrade(user.getId());
 
         return ApiResponse.ok(response);
     }
