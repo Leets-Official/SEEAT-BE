@@ -15,7 +15,7 @@ services:
     image: mysql:8.0
     container_name: seeat-mysql
     volumes:
-      - ./mysql/my.cnf:/etc/mysql/conf.d/mytv.cnf
+      - ./mysql/cond.f/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./mysql/data:/var/lib/mysql
     ports:
       - '3306:3306'
