@@ -1,12 +1,12 @@
 package com.seeat.server.domain.user.presentation;
 
 
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.seeat.server.domain.user.application.UserUseCase;
 import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
 import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
+import com.seeat.server.domain.user.application.dto.response.UserInfoUpdateResponse;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.domain.user.presentation.swagger.UserControllerSpec;
@@ -36,7 +36,7 @@ public class UserController implements UserControllerSpec {
     /**
      * 최초 로그인시 추가 회원가입을 진행합니다.
      *
-     * @param request     추가 정보 요청값 (닉네임, 유저프로필, 선호 장르, 선호 극장)
+     * @param request 추가 정보 요청값 (닉네임, 유저프로필, 선호 장르, 선호 상영관)
      * @param tempUserKey 임시유저정보 담긴 RedisKey
      * @return 회원가입 완료 응답
      */
@@ -119,6 +119,25 @@ public class UserController implements UserControllerSpec {
         UserGradeResponse response = userService.getUserGrade(user.getId());
 
         return ApiResponse.ok(response);
+    }
+
+    /**
+     * 마이페이지에서 사용자 정보를 수정합니다.
+     *
+     * @param user Jwt 기반 SecurityContext 저장되어있는 유저
+     * @param request 수정 정보 요청값 (닉네임, 유저프로필, 선호 장르, 선호 상영관)
+     * @return UserInfoUpdateResponse DTO 응답
+     */
+    @PatchMapping
+    public ApiResponse<UserInfoUpdateResponse> updateUserInfo(
+            @AuthenticationPrincipal User user,
+            @RequestBody UserInfoUpdateRequest request){
+
+        // 사용자 정보 수정
+        UserInfoUpdateResponse response = userService.updateUserInfo(user.getId(), request.getNickname(),
+                                     request.getImageUrl(), request.getGenres(), request.getAuditoriums());
+
+       return ApiResponse.ok(response);
     }
 
 
