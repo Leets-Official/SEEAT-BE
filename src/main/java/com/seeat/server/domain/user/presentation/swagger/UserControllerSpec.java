@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 public interface UserControllerSpec {
 
     /**
@@ -71,18 +73,6 @@ public interface UserControllerSpec {
             @AuthenticationPrincipal User user);
 
     /**
-     * 사용자 등급 조회 API
-     *
-     * @param user 유저
-     * @return UserGradeResponse 응답
-     */
-    @GetMapping("/me/grade")
-    @Operation(summary = "사용자 등급 조회",
-            description = "마이페이지에서 사용자 등급을 조회합니다.")
-    ApiResponse<UserGradeResponse> getUserGrade(
-            @AuthenticationPrincipal User user);
-
-    /**
      * 사용자 정보 수정 API
      *
      * @param user 유저
@@ -95,5 +85,15 @@ public interface UserControllerSpec {
     ApiResponse<UserInfoUpdateResponse> updateUserInfo(
             @AuthenticationPrincipal User user,
             @RequestBody UserInfoUpdateRequest request);
+
+    /**
+     * 사용자 등급 목록 조회 API
+     *
+     * @return List UserGradeResponse 응답
+     */
+    @GetMapping("/grades")
+    @Operation(summary = "사용자 등급 목록 조회",
+            description = "사용자 등급 목록을 조회합니다.")
+    ApiResponse<List<UserGradeResponse>> getUserGradeList();
 
 }

@@ -74,36 +74,6 @@ public class UserServiceTest {
     }
 
     @Nested
-    @DisplayName("사용자 등급 조회 테스트")
-    class getUserGrade {
-        @Test
-        @DisplayName("로그인한 유저 등급 정상 조회")
-        void getUserInfo_Success() {
-            // given
-            User user = UserFixtures.createUser();
-            repository.save(user);
-
-            // when
-            UserGradeResponse response = sut.getUserGrade(user.getId());
-
-            // then
-            assertEquals(user.getGrade(), response.grade());
-        }
-
-        @Test
-        @DisplayName("로그인한 유저 등급 조회 예외 발생")
-        void getUserInfo_Fail() {
-            // given
-            User user = UserFixtures.fakeUser();
-
-            // when & then
-            Assertions.assertThatThrownBy(() -> sut.getUserGrade(user.getId()))
-                    .isInstanceOf(NoSuchElementException.class)
-                    .hasMessageContaining(ErrorCode.NOT_USER.getMessage());
-        }
-    }
-
-    @Nested
     @DisplayName("사용자 정보 수정 테스트")
     class updateUserInfo {
         @Test

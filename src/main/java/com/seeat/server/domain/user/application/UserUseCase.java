@@ -33,12 +33,12 @@ public interface UserUseCase {
     // 사용자 정보 조회
     UserInfoResponse getUserInfo(Long userId);
 
-    // 사용자 등급 조회
-    UserGradeResponse getUserGrade(Long userId);
-
     // 사용자 정보 수정
     UserInfoUpdateResponse updateUserInfo(Long userId, String nickName, String imageUrl,
                                           List<MovieGenre> genres, List<Auditorium> auditoriums);
+
+    // 등급 목록 조회
+    List<UserGradeResponse> getUserGradeList();
 
     /// 외부 의존성을 위한 함수
     User getUser(Long userId);

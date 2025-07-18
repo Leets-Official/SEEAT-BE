@@ -24,6 +24,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
@@ -107,21 +109,6 @@ public class UserController implements UserControllerSpec {
     }
 
     /**
-     * 마이페이지에서 사용자 등급을 조회합니다.
-     * @param user Jwt 기반 SecurityContext 저장되어있는 유저
-     * @return UserGradeResponse DTO 응답
-     */
-    @GetMapping("/me/grade")
-    public ApiResponse<UserGradeResponse> getUserGrade(
-            @AuthenticationPrincipal User user){
-
-        // 사용자 등급 조회
-        UserGradeResponse response = userService.getUserGrade(user.getId());
-
-        return ApiResponse.ok(response);
-    }
-
-    /**
      * 마이페이지에서 사용자 정보를 수정합니다.
      *
      * @param user Jwt 기반 SecurityContext 저장되어있는 유저
@@ -140,6 +127,19 @@ public class UserController implements UserControllerSpec {
        return ApiResponse.ok(response);
     }
 
+    /**
+     * 등급 목록을 조회합니다.
+     *
+     * @return UserGradeResponse DTO List 응답
+     */
+    @GetMapping("/grades")
+    public ApiResponse<List<UserGradeResponse>> getUserGradeList(){
+
+        // 등급 목록 조회
+        List<UserGradeResponse> responses = userService.getUserGradeList();
+
+        return ApiResponse.ok(responses);
+    }
 
 
 }

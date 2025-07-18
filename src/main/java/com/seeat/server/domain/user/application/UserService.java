@@ -11,6 +11,7 @@ import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoUpdateResponse;
 import com.seeat.server.domain.user.domain.entity.User;
+import com.seeat.server.domain.user.domain.entity.UserGrade;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
 import com.seeat.server.domain.user.domain.entity.UserTheater;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
@@ -29,9 +30,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -161,23 +164,6 @@ public class UserService implements UserUseCase {
     }
 
     /**
-     * 마이페이지 사용자 등급 조회를 위한 로직
-     *
-     * @param userId 정보를 조회할 사용자 Id
-     * @return 사용자 등급에 대한 조회 DTO
-     */
-    @Override
-    public UserGradeResponse getUserGrade(Long userId){
-
-        // 사용자 예외처리 및 사용자 정보 조회
-        User user = getUser(userId);
-
-        // 사용자 등급 DTO로 변환
-        return new UserGradeResponse(user.getGrade());
-    }
-
-
-    /**
      * 마이페이지 사용자 정보 수정을 위한 로직
      *
      * @param userId 정보를 수정할 사용자 Id
@@ -205,7 +191,19 @@ public class UserService implements UserUseCase {
         return UserInfoUpdateResponse.from(user, auditoriums);
     }
 
+    /**
+     * 사용자 등급 목록 조회를 위한 로직
+     *
+     * @return UserGradeResponse DTO List 응답
+     */
+    @Override
+    public List<UserGradeResponse> getUserGradeList(){
 
+        // 유저 등급 목록 조회
+        return Arrays.stream(UserGrade.values())
+                .map(UserGradeResponse::new)
+                .collect(Collectors.toList());
+    }
 
 
 

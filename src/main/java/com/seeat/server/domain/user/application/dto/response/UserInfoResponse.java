@@ -17,6 +17,7 @@ public record UserInfoResponse(
         String username,
         String nickname,
         String imageUrl,
+        UserGrade grade,
         List<MovieGenre> genres,
         UserSocial social
 
@@ -32,6 +33,7 @@ public record UserInfoResponse(
                 .username(user.getUsername())
                 .nickname(user.getNickname())
                 .imageUrl(user.getImageUrl())
+                .grade(user.getGrade())
                 .genres(user.getGenres())
                 .social(user.getSocial())
                 // .auditoriums(auditoriums)
