@@ -8,6 +8,7 @@ import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoUpdateResponse;
 import com.seeat.server.domain.user.domain.UserFixtures;
 import com.seeat.server.domain.user.domain.entity.User;
+import com.seeat.server.domain.user.domain.entity.UserGrade;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
 import org.assertj.core.api.Assertions;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
@@ -116,4 +118,17 @@ public class UserServiceTest {
                     .hasMessageContaining(ErrorCode.NOT_USER.getMessage());
         }
     }
+
+    @Test
+    @DisplayName("사용자 등급 목록 조회 테스트")
+    void getUserGradeList() {
+        // when
+        List<UserGradeResponse> responses = sut.getUserGradeList();
+
+        // then
+        assertThat(responses)
+                .extracting(UserGradeResponse::grade)
+                .containsExactly(UserGrade.BRONZE, UserGrade.SILVER, UserGrade.GOLD, UserGrade.PLATINUM);
+    }
+
 }
