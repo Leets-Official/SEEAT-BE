@@ -6,6 +6,7 @@ import com.seeat.server.domain.theater.domain.entity.Theater;
 import com.seeat.server.domain.theater.domain.repository.TheaterRepository;
 import com.seeat.server.domain.user.application.UserService;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
+import com.seeat.server.domain.user.domain.UserFixtures;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
@@ -86,6 +87,7 @@ public class UserControllerTest {
                 .longitude(127.456)
                 .build());
     }
+
     @Test
     void givenTempUserKeyAndSignUpRequest_whenPostUserSignUp_thenReturnsOk() throws Exception {
         // Given
@@ -134,14 +136,9 @@ public class UserControllerTest {
     void givenValidRequest_whenPostLogout_thenReturnsOkAndCallsLogoutService() throws Exception {
         // Given
         String refreshToken = "validRefreshToken";
-        Long userId = 999L;
 
-        // 실제 유저 엔티티 생성 (필요시 빌더 사용)
-        User user = User.builder()
-                .id(userId)
-                .email("test@example.com")
-                .nickname("testUser")
-                .build();
+        // 실제 유저 엔티티 생성
+        User user = UserFixtures.fakeUser();
 
         // 권한 포함한 Authentication 생성
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(UserRole.USER.getRole()));
@@ -152,8 +149,8 @@ public class UserControllerTest {
         // JwtProvider, RedisService 모킹
         given(jwtProvider.validateToken(refreshToken)).willReturn(true);
         given(jwtProvider.getAuthentication(refreshToken)).willReturn(authentication);
-        given(redisService.getRefreshToken(userId)).willReturn(refreshToken);
-        doNothing().when(redisService).deleteRefreshToken(userId);
+        given(redisService.getRefreshToken(user.getId())).willReturn(refreshToken);
+        doNothing().when(redisService).deleteRefreshToken(user.getId());
 
         // When & Then
         mockMvc.perform(post("/api/v1/users/logout")
@@ -170,7 +167,9 @@ public class UserControllerTest {
             }
             """));
 
-        verify(redisService, times(1)).deleteRefreshToken(userId);
+        verify(redisService, times(1)).deleteRefreshToken(user.getId());
     }
+
+
 
 }
