@@ -74,6 +74,7 @@ public class UserControllerTest {
     @BeforeEach
     void setUp() {
         theaterRepository.save(Theater.builder()
+                .id("theater1")
                 .name("테스트 극장 10")
                 .address("서울시 강남구 10")
                 .latitude(37.123)
@@ -81,6 +82,7 @@ public class UserControllerTest {
                 .build());
 
         theaterRepository.save(Theater.builder()
+                .id("theater2")
                 .name("테스트 극장 30")
                 .address("서울시 강남구 30")
                 .latitude(37.456)
@@ -97,7 +99,7 @@ public class UserControllerTest {
                 "nickname",
                 "https://example.com/profile.jpg",
                 List.of(MovieGenre.ROMANCE, MovieGenre.ACTION),
-                List.of(1L, 2L)
+                List.of("theater1", "theater2")
         );
 
         given(redisService.getValues(tempUserKey, TempUserInfo.class)).willReturn(tempUserInfo);
@@ -124,11 +126,11 @@ public class UserControllerTest {
         assertIterableEquals(expectedGenres, savedUser.getGenres());
 
         List<UserTheater> userTheaters = userTheaterRepository.findByUserId(savedUser.getId());
-        List<Long> savedTheaterIds = userTheaters.stream()
+        List<String> savedTheaterIds = userTheaters.stream()
                 .map(ut -> ut.getTheater().getId())
                 .collect(Collectors.toList());
 
-        List<Long> expectedTheaterIds = List.of(1L, 2L);
+        List<String> expectedTheaterIds = List.of("theater1", "theater2");
         assertIterableEquals(expectedTheaterIds, savedTheaterIds);
     }
 

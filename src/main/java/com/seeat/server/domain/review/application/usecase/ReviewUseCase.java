@@ -6,7 +6,7 @@ import com.seeat.server.domain.review.application.dto.response.ReviewDetailRespo
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.global.response.pageable.PageRequest;
-import com.seeat.server.global.response.pageable.PageResponse;
+import com.seeat.server.global.response.pageable.SliceResponse;
 import org.springframework.data.domain.Slice;
 
 /**
@@ -25,9 +25,11 @@ public interface ReviewUseCase {
     ReviewDetailResponse loadReview(Long reviewId);
 
     // 리뷰 목록 조회
-    PageResponse<ReviewListResponse> loadReviewsBySeatId(Long seatId, PageRequest pageRequest);
+    SliceResponse<ReviewListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest);
 
-    PageResponse<ReviewListResponse> loadReviewsByTheaterId(Long seatId, PageRequest pageRequest);
+    SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(String seatId, PageRequest pageRequest);
+
+    SliceResponse<ReviewListResponse> loadFavoriteReviews(PageRequest pageRequest);
 
     /// 리뷰 수정
     void updateReview(ReviewUpdateRequest request, Long userId);
@@ -37,7 +39,7 @@ public interface ReviewUseCase {
 
 
     /// 외부 의존성을 위한 유즈 케이스
-    Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Review> reviews);
+    Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Long> reviews);
 
     Review getReview(Long reviewId);
 }

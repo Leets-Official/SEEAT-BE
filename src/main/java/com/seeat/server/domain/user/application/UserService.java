@@ -93,7 +93,7 @@ public class UserService implements UserUseCase {
 
         // 선호하는 상영관 유무 체크 후 저장
         if (request.getTheaterIds() != null) {
-            for (Long theaterId : request.getTheaterIds()) {
+            for (String theaterId : request.getTheaterIds()) {
                 Theater theater = theaterRepository.findById(theaterId)
 
                         .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_THEATER.getMessage()));

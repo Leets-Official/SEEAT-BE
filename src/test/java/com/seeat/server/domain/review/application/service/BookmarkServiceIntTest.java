@@ -1,8 +1,11 @@
 package com.seeat.server.domain.review.application.service;
 
 import com.seeat.server.domain.review.application.dto.request.BookmarkRequest;
+import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
+import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.review.domain.entity.Bookmark;
 import com.seeat.server.domain.review.domain.entity.Review;
+import com.seeat.server.domain.review.domain.entity.ReviewLike;
 import com.seeat.server.domain.review.domain.repository.BookmarkRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.seat.domain.AuditoriumFixtures;
@@ -22,6 +25,7 @@ import com.seeat.server.global.response.pageable.PageRequest;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Slice;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +44,8 @@ class BookmarkServiceIntTest {
     @Autowired
     private BookmarkRepository bookmarkRepository;
 
+
+    /// 준비해야되는 의존성
     @Autowired
     private ReviewRepository reviewRepository;
 
@@ -54,6 +60,10 @@ class BookmarkServiceIntTest {
 
     @Autowired
     private SeatRepository seatRepository;
+
+    /// 기타 의존성
+    @Autowired
+    private ReviewLikeUseCase likeService;
 
     private Seat seat;
     private User user;
@@ -178,6 +188,39 @@ class BookmarkServiceIntTest {
 
             //then
             Assertions.assertTrue(response.getContent().isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("좋아요 반영 조회 테스트")
+    class LoadReviewsByLike {
+
+        @Test
+        @DisplayName("[happy] 정상적으로 좋아요 개수가 출력")
+        public void happyLoad_Like(){
+
+            //given
+            Review review = saveReview(user, seat, "test", 5);
+
+            var bookmarkRequest = BookmarkRequest.builder()
+                    .userId(user.getId())
+                    .reviewId(review.getId())
+                    .build();
+
+            PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();
+
+            // 좋아요 추가
+            likeService.reviewLike(user.getId(), review.getId());
+            sut.createBookmark(bookmarkRequest);
+
+            //when
+            Slice<ReviewListResponse> responses = sut.loadMyBookmarks(user.getId(), pageRequest);
+
+            //then
+            Assertions.assertEquals(1, responses.getContent().size());
+            Assertions.assertTrue(responses.hasContent());
+            Assertions.assertEquals(responses.getContent().get(0).heartCount(), 1L);
+
         }
     }
 

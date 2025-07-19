@@ -17,7 +17,7 @@ public class UserFixtures {
     public static User createUser() {
         return User.builder()
                 .email("test@test.com")
-                .socialId("testSocialId")
+                .socialId("test" + UUID.randomUUID())
                 .nickname("testNickname")
                 .grade(UserGrade.PLATINUM)
                 .imageUrl("www.test.imageUrl")

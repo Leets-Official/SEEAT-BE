@@ -16,6 +16,7 @@ import java.util.List;
  * @param content       리뷰 내용
  * @param rating        평점 (1~5)
  * @param user          작성자 정보 DTO
+ * @param heartCount    좋아요 개수
  * @param createdAt     리뷰 작성 시간
  */
 
@@ -26,12 +27,13 @@ public record ReviewDetailResponse(
         String content,
         double rating,
         UserResponse user,
+        Long heartCount,
         LocalDateTime createdAt
 ) {
 
     public static ReviewDetailResponse from(
             Review review,
-            List<ReviewHashTag> hashTags
+            List<ReviewHashTag> hashTags, Long heartCount
     ) {
         return ReviewDetailResponse.builder()
                 .movieSeatInfo(ReviewSeatInfoResponse
@@ -40,6 +42,7 @@ public record ReviewDetailResponse(
                         .from(hashTags))
                 .content(review.getContent())
                 .rating(review.getRating())
+                .heartCount(heartCount)
                 .user(UserResponse
                         .from(review.getUser()))
                 .createdAt(review.getCreatedAt())

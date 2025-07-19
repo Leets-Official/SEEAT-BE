@@ -29,10 +29,10 @@ public record ReviewListResponse(
         String theaterName,
         String content,
         UserResponse user,
-        Integer heartCount
+        Long heartCount
 ) {
 
-    public static ReviewListResponse from(Review review, List<ReviewHashTag> hashTags, Integer heartCount) {
+    public static ReviewListResponse from(Review review, List<ReviewHashTag> hashTags, Long heartCount) {
 
         return ReviewListResponse.builder()
                 .reviewId(review.getId())
