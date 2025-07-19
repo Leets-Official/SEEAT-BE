@@ -73,4 +73,11 @@ public class User extends BaseEntity {
                 .grade(UserGrade.BRONZE)
                 .build();
     }
+
+    // 사용자 정보 수정 메소드
+    public void updateUser(String nickname, String imageUrl, List<MovieGenre> genres) {
+        this.nickname = nickname;
+        this.imageUrl = imageUrl;
+        this.genres = genres;
+    }
 }
