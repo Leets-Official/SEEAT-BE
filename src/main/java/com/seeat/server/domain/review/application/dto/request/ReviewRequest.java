@@ -19,7 +19,7 @@ public class ReviewRequest {
      * 좌석 ID (예: 특정 영화관의 F12 아이디)
      */
     @NotNull(message = "좌석 ID는 필수입니다.")
-    private Long seatId;
+    private String seatId;
 
     /**
      * 영화 제목 또는 영화 ID

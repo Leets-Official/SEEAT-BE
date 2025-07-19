@@ -54,7 +54,7 @@ public class UserService implements UserUseCase {
         repository.save(user);
 
         if (request.getTheaterIds() != null) {
-            for (Long theaterId : request.getTheaterIds()) {
+            for (String theaterId : request.getTheaterIds()) {
                 Theater theater = theaterRepository.findById(theaterId)
 
                         .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_THEATER.getMessage()));
