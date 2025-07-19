@@ -35,7 +35,6 @@ public class TheaterService implements TheaterUseCase{
      * 해당 상영관이 존재하는 영화관 목록 조회
      * @param type  영화관 타입
      */
-    // TODO! 추후 무한스크롤 구현
     @Override
     public SliceResponse<TheaterListResponse> loadTheatersByType(AuditoriumType type, PageRequest pageRequest) {
 
