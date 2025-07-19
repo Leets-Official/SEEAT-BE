@@ -6,7 +6,7 @@ import com.seeat.server.domain.review.application.dto.response.ReviewListRespons
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
-import com.seeat.server.global.response.pageable.PageResponse;
+import com.seeat.server.global.response.pageable.SliceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,19 +50,19 @@ public interface ReviewControllerSpec {
     );
 
     /**
-     * 영화관별 리뷰 목록 조회 API
+     * 상영관별 리뷰 목록 조회 API
      *
-     * @param theaterId 영화관 ID
+     * @param auditoriumId 영화관 ID
      * @param pageRequest 페이지 요청 정보
      */
     @Operation(
-            summary = "영화관별 리뷰 목록 조회",
-            description = "영화관 ID로 리뷰 목록을 조회합니다."
+            summary = "상영관별 리뷰 목록 조회",
+            description = "상영관 ID로 리뷰 목록을 조회합니다."
     )
-    @GetMapping("/theater/{theaterId}")
-    ApiResponse<PageResponse<ReviewListResponse>> getReviewsByTheater(
+    @GetMapping("/auditorium/{auditoriumId}")
+    ApiResponse<SliceResponse<ReviewListResponse>> getReviewsByAuditorium(
             @Parameter(example = "1")
-            @PathVariable String theaterId,
+            @PathVariable String auditoriumId,
             PageRequest pageRequest
     );
 
@@ -79,7 +79,7 @@ public interface ReviewControllerSpec {
             description = "좌석 ID로 리뷰 목록을 조회합니다."
     )
     @GetMapping("/seat/{seatId}")
-    ApiResponse<PageResponse<ReviewListResponse>> getReviewsBySeat(
+    ApiResponse<SliceResponse<ReviewListResponse>> getReviewsBySeat(
             @Parameter(example = "1")
             @PathVariable String seatId,
             PageRequest pageRequest

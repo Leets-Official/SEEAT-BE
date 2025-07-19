@@ -58,6 +58,7 @@ public enum ErrorCode {
 
     /** 서버 내부 오류  */
     INTERNAL_SERVER_ERROR(500, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
+    INTERNAL_S3_ERROR(500_001, HttpStatus.INTERNAL_SERVER_ERROR, "AWS S3 설정이 잘못되었습니다. 속성을 확인하세요."),
 
     /** 요청 파라미터 오류 */
     BAD_PARAMETER(999, HttpStatus.BAD_REQUEST, "요청 파라미터에 문제가 존재합니다."),
@@ -86,8 +87,9 @@ public enum ErrorCode {
     NOT_REVIEW(3000, HttpStatus.NOT_FOUND, "해당하는 리뷰가 존재하지 않습니다."),
     INVALID_HASHTAG(3001, HttpStatus.BAD_REQUEST, "모든 해시태그 항목(음향, 동반인, 관람환경)을 최소 1개 이상 작성해야 합니다."),
     DUPLICATE_BOOKMARK(3002, HttpStatus.CONFLICT, "해당하는 리뷰를 이미 북마크 했습니다"),
-    NOT_OWN_BOOKMARK(3002, HttpStatus.CONFLICT, "추가되어있지 않은 북마크를 삭제할 수 없습니다."),;
-
+    DUPLICATE_REVIEW(3003, HttpStatus.CONFLICT, "해당하는 리뷰를 이미 좋아요 했습니다"),
+    NOT_OWN_BOOKMARK(3004, HttpStatus.CONFLICT, "추가되어있지 않은 북마크를 삭제할 수 없습니다."),
+    NOT_OWN_REVIEW(3005, HttpStatus.CONFLICT, "추가되어있지 않은 리뷰를 삭제할 수 없습니다.");
 
 
     /** 에러 코드 (고유값) */
@@ -98,7 +100,6 @@ public enum ErrorCode {
 
     /** 에러 메시지 */
     private final String message;
-
 
 
     /**
