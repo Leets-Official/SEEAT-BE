@@ -10,7 +10,8 @@ import lombok.Builder;
  * @param auditoriumName    상영관 이름
  * @param screenSize        스크린 이름
  * @param soundType         사운드 타입
- * @param screenFormat      스크린 포맷
+ * @param reviewCount       후기 개수
+ * @param averageReview     평균 평점
  */
 @Builder
 public record AuditoriumDetailResponse(
@@ -19,7 +20,9 @@ public record AuditoriumDetailResponse(
         String auditoriumName,
         String screenSize,
         String soundType,
-        String screenFormat
+        Integer reviewCount,
+        Float averageReview
+
 ) {
 
     /// 정적 팩토리 메서드
@@ -28,9 +31,8 @@ public record AuditoriumDetailResponse(
                 .theaterName(auditorium.getTheater().getName())
                 .auditoriumId(auditorium.getId())
                 .auditoriumName(auditorium.getName())
-                .screenFormat(auditorium.getScreenSize())
+                .screenSize(auditorium.getScreenSize())
                 .soundType(auditorium.getSoundType())
-                .screenFormat("")
                 .build();
     }
 }
