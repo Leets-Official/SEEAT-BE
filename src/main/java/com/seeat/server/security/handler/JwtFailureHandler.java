@@ -7,6 +7,7 @@ import com.seeat.server.global.response.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtFailureHandler implements AuthenticationEntryPoint {
@@ -31,6 +33,10 @@ public class JwtFailureHandler implements AuthenticationEntryPoint {
         // 로그인 필요 에러 발생
         CustomException exception = new CustomException(errorCode, null);
         ApiResponse<Object> apiResponse = ApiResponse.fail(exception);
+
+        /// 로그 남기기
+        String username = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "anonymous";
+        log.info("[필터 EXCEPTION] 사용자: {}, 메서드: {}, URI: {}, 예외: {}", username, request.getMethod(), request.getRequestURI(), errorCode.getMessage());
 
         // 응답 설정
         response.setStatus(apiResponse.httpStatus().value());

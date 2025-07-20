@@ -134,13 +134,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         /// requestMatcherHolder 통해 필터와 시큐리티를 한번에 해결, true 이면 필터 자체를 타지 않는다.
         /// ex) 개발용 토큰 자체에 필터를 타지 않도록 설정하여, 401,403 에러가 발생하지 않도록 설정
-        boolean matches = requestMatcherHolder.getRequestMatchersByMinRole(null)
+        return requestMatcherHolder.getRequestMatchersByMinRole(null)
                 .matches(request);
-
-        String requestURI = request.getRequestURI();
-        String method = request.getMethod();
-        log.info("[로그] 주소 {}, 방식 {}, 결과 {}}", requestURI, method, matches);
-
-        return matches;
     }
 }
