@@ -1,4 +1,4 @@
-package com.seeat.server.domain.theater.application;
+package com.seeat.server.domain.theater.application.usecase;
 
 import com.seeat.server.domain.theater.application.dto.response.*;
 import com.seeat.server.domain.theater.domain.entity.AuditoriumType;

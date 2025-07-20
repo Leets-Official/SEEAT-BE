@@ -1,6 +1,6 @@
 package com.seeat.server.domain.theater.presentation;
 
-import com.seeat.server.domain.theater.application.TheaterUseCase;
+import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.application.dto.response.AuditoriumDetailResponse;
 import com.seeat.server.domain.theater.application.dto.response.SeatListResponse;
 import com.seeat.server.domain.theater.application.dto.response.TheaterListResponse;

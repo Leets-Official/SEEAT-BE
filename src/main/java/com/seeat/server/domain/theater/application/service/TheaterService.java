@@ -1,5 +1,6 @@
-package com.seeat.server.domain.theater.application;
+package com.seeat.server.domain.theater.application.service;
 
+import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.application.dto.response.*;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.AuditoriumType;
@@ -26,7 +27,7 @@ import java.util.NoSuchElementException;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class TheaterService implements TheaterUseCase{
+public class TheaterService implements TheaterUseCase {
 
     private final AuditoriumRepository auditoriumRepository;
     public final SeatRepository seatRepository;
