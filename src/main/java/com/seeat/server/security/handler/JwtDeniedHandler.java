@@ -24,8 +24,11 @@ public class JwtDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
 
-        // 권한 부족 403 Error
-        CustomException exception = new CustomException(ErrorCode.FORBIDDEN, null);
+        /// 예외 상황에 맞는 예외코드 발생
+        ErrorCode errorCode = ErrorCode.fromMessage(accessDeniedException.getMessage());
+
+        /// 예외 응답값 생성
+        CustomException exception = new CustomException(errorCode, null);
         ApiResponse<Object> apiResponse = ApiResponse.fail(exception);
 
         /// response 제작

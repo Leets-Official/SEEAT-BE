@@ -25,8 +25,11 @@ public class JwtFailureHandler implements AuthenticationEntryPoint {
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
 
+        /// 예외 상황에 맞는 예외코드 발생
+        ErrorCode errorCode = ErrorCode.fromMessage(authException.getMessage());
+
         // 로그인 필요 에러 발생
-        CustomException exception = new CustomException(ErrorCode.INVALID_LOGIN, null);
+        CustomException exception = new CustomException(errorCode, null);
         ApiResponse<Object> apiResponse = ApiResponse.fail(exception);
 
         // 응답 설정
