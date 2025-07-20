@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -27,8 +28,17 @@ public class JwtFailureHandler implements AuthenticationEntryPoint {
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
 
-        /// 예외 상황에 맞는 예외코드 발생
-        ErrorCode errorCode = ErrorCode.fromMessage(authException.getMessage());
+        /// 예외코드 작성
+        ErrorCode errorCode;
+
+        /// 인증되지 않은 사용자가 접속할 때,
+        if (authException instanceof InsufficientAuthenticationException){
+            errorCode = ErrorCode.INVALID_LOGIN;
+        } else {
+            /// 예외 상황에 맞는 예외코드 발생
+            errorCode= ErrorCode.fromMessage(authException.getMessage());
+        }
+
 
         // 로그인 필요 에러 발생
         CustomException exception = new CustomException(errorCode, null);

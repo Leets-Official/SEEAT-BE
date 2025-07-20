@@ -154,7 +154,7 @@ public class JwtProvider {
 
         Long userId = claims.get(JwtConstants.USER_ID_KEY, Long.class);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new JwtAuthenticationException(ErrorCode.NOT_USER.getMessage()));
+                .orElseThrow(() -> new JwtAuthenticationException(ErrorCode.INVALID_CREDENTIALS.getMessage()));
 
         return new UsernamePasswordAuthenticationToken(user, token, authorities);
     }
