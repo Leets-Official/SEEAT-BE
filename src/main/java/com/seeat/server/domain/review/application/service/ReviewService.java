@@ -9,8 +9,10 @@ import com.seeat.server.domain.review.application.dto.request.ReviewUpdateReques
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
+import com.seeat.server.domain.theater.application.usecase.SeatRatingUseCase;
+import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
+import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.Seat;
-import com.seeat.server.domain.theater.domain.repository.SeatRepository;
 import com.seeat.server.domain.user.application.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ErrorCode;
@@ -39,8 +41,9 @@ public class ReviewService implements ReviewUseCase {
     private final ReviewHashTagService hashTagService;
 
     /// 외부 의존성 처리
-    private final SeatRepository seatRepository;
+    private final TheaterUseCase theaterService;
     private final UserUseCase userService;
+    private final SeatRatingUseCase seatRatingService;
 
     // ========================
     //  저장 함수
@@ -54,8 +57,7 @@ public class ReviewService implements ReviewUseCase {
     public Review createReview(ReviewRequest request, Long userId) {
 
         // 좌석 예외 처리
-        Seat seat = seatRepository.findById(request.getSeatId())
-                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_SEAT.getMessage()));
+        Seat seat = theaterService.getSeat(request.getSeatId());
 
         // 유저 예외처리
         User user = userService.getUser(userId);
@@ -68,6 +70,9 @@ public class ReviewService implements ReviewUseCase {
 
         // 리뷰 내 해시태그 생성
         hashTagService.createReviewHashTag(review, request.getHashtags());
+
+        // 좌석 배치도 업데이트
+        seatRatingService.saveSeatRating(review, seat);
 
         return review;
     }
@@ -103,11 +108,14 @@ public class ReviewService implements ReviewUseCase {
     @Override
     public SliceResponse<ReviewListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest) {
 
+        /// 좌석 예외처리
+        Seat seat = theaterService.getSeat(seatId);
+
         // Pageable 처리
         Pageable pageable = getPageable(pageRequest);
 
         // DB 조회
-        Slice<ReviewWithLikeCount> reviews = repository.findBySeat_Id(seatId, pageable);
+        Slice<ReviewWithLikeCount> reviews = repository.findBySeat_Id(seat.getId(), pageable);
 
         // 리뷰 ID 목록 추출
         List<Long> reviewIds = getLongs(reviews);
@@ -129,11 +137,14 @@ public class ReviewService implements ReviewUseCase {
     @Override
     public SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(String auditoriumId, PageRequest pageRequest) {
 
+        /// 상영관 존재 예외처리
+        Auditorium auditorium = theaterService.getAuditorium(auditoriumId);
+
         // Pageable 처리
         Pageable pageable = getPageable(pageRequest);
 
         // DB 조회
-        Slice<ReviewWithLikeCount> reviews = repository.findByAuditorium_Id(auditoriumId, pageable);
+        Slice<ReviewWithLikeCount> reviews = repository.findByAuditorium_Id(auditorium.getId(), pageable);
 
         // 리뷰 ID 목록 추출
         List<Long> reviewIds = getLongs(reviews);
