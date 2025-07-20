@@ -33,4 +33,20 @@ public class SeatRatingSummary {
     private Float averageGrade;
 
     private LocalDateTime lastUpdated;
+
+    /// 정적 팩토리 메서드
+    public static SeatRatingSummary of(Seat seat) {
+        return SeatRatingSummary.builder()
+                .seat(seat)
+                .totalReviews(0)
+                .averageGrade(0.0f)
+                .lastUpdated(LocalDateTime.now())
+                .build();
+    }
+
+    /// 수정을 위한 로직, 시간은 더티체킹으로 진행
+    public void update(int totalReviews, Float averageGrade) {
+        this.totalReviews = totalReviews;
+        this.averageGrade = averageGrade;
+    }
 }

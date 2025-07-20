@@ -1,7 +1,9 @@
 package com.seeat.server.domain.theater.application.usecase;
 
 import com.seeat.server.domain.theater.application.dto.response.*;
+import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.AuditoriumType;
+import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.SliceResponse;
 
@@ -26,4 +28,9 @@ public interface TheaterUseCase {
     List<SeatListResponse> loadSeatsByAuditorium(String auditoriumId);
 
 
+    /// 외부 의존성
+    // 예외처리를 위한
+    Auditorium getAuditorium(String auditoriumId);
+
+    Seat getSeat(String seatId);
 }
