@@ -71,4 +71,18 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<ReviewWithLikeCount> findByReviewIds(@Param("reviewIds") List<Long> reviewIds);
 
 
+    /**
+     * 나의 리뷰 검색
+     *
+     * @param pageable 페이징
+     * @return Slice<ReviewWithLikeCount>
+     */
+    @Query(
+            "SELECT r AS review, COUNT(rl) AS likeCount " +
+                    "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
+                    "WHERE r.user.id =: userId " +
+                    "GROUP BY r " +
+                    "ORDER BY COUNT(rl) DESC, r.createdAt DESC ")
+    Slice<ReviewWithLikeCount> findMyReviews(@Param("userId") Long userId, Pageable pageable);
+
 }
