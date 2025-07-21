@@ -33,4 +33,14 @@ public class ReviewImage extends BaseEntity {
     private String imageUrl;
 
     private Integer displayOrder;
+
+    /// 정적 팩토리 메서드
+    public static ReviewImage of(Review review, String imageUrl, Integer displayOrder) {
+        return ReviewImage.builder()
+                .review(review)
+                .imageUrl(imageUrl)
+                .displayOrder(displayOrder)
+                .build();
+
+    }
 }
