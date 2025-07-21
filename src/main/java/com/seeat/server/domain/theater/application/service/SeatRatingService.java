@@ -9,7 +9,9 @@ import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.theater.domain.entity.SeatRatingSummary;
 import com.seeat.server.domain.theater.domain.repository.SeatRatingSummaryRepository;
 import com.seeat.server.domain.theater.domain.repository.dto.SeatWithRating;
+import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,8 +68,15 @@ public class SeatRatingService implements SeatRatingUseCase {
 
         /// 좌석에 따른 조회
         // 기존에 존재한다면, 불러오고 없다면 새로 생성
-        SeatRatingSummary summary = repository.findBySeat(seat)
-                .orElse(repository.save(SeatRatingSummary.of(seat)));
+        SeatRatingSummary summary;
+
+        try {
+            summary = repository.findBySeatForUpdate(seat)
+                    .orElseGet(() -> repository.save(SeatRatingSummary.of(seat)));
+        } catch (DataIntegrityViolationException e) {
+            summary = repository.findBySeatForUpdate(seat)
+                    .orElseThrow(() -> new IllegalStateException(ErrorCode.TRANSACTION_ERROR.getMessage()));
+        }
 
         // 기존 평균 바탕으로 기존 평균 구하기
         float average = summary.getAverageGrade() * summary.getTotalReviews();

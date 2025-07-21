@@ -4,7 +4,9 @@ package com.seeat.server.domain.theater.domain.repository;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.theater.domain.entity.SeatRatingSummary;
 import com.seeat.server.domain.theater.domain.repository.dto.SeatWithRating;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -12,7 +14,10 @@ import java.util.*;
 
 public interface SeatRatingSummaryRepository extends JpaRepository<SeatRatingSummary,Long> {
 
-    Optional<SeatRatingSummary> findBySeat(Seat seat);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM SeatRatingSummary s WHERE s.seat = :seat")
+    Optional<SeatRatingSummary> findBySeatForUpdate(@Param("seat") Seat seat);
+
 
     @Query("""
     select s as seat,
