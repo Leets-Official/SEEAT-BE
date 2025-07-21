@@ -1,6 +1,6 @@
 package com.seeat.server.domain.user.application;
 
-import com.seeat.server.domain.theater.application.TheaterService;
+import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
 import com.seeat.server.domain.theater.domain.entity.Theater;
@@ -46,7 +46,7 @@ public class UserService implements UserUseCase {
     // 외부 의존성
     private final JwtProvider jwtProvider;
     private final RedisService redisService;
-    private final TheaterService theaterService;
+    private final TheaterUseCase theaterService;
     private final TheaterRepository theaterRepository;
     private final UserTheaterRepository userTheaterRepository;
     private final AuditoriumRepository auditoriumRepository;
