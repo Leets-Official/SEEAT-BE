@@ -92,8 +92,8 @@ public class UserService implements UserUseCase {
         repository.save(user);
 
         // 선호하는 상영관 유무 체크 후 저장
-        if (request.getTheaterIds() != null) {
-            for (String theaterId : request.getTheaterIds()) {
+        if (request.getAuditoriumId() != null) {
+            for (String theaterId : request.getAuditoriumId()) {
                 Theater theater = theaterRepository.findById(theaterId)
 
                         .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_THEATER.getMessage()));

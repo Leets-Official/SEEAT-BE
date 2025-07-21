@@ -36,9 +36,9 @@ public class UserSignUpRequest {
     private List<MovieGenre> genres;
 
     /**
-     * 선호하는 영화관 번호 (ex, 1, 2)
+     * 선호하는 상영관 번호 (ex, 1, 2)
      */
     @NotNull(message = "선호 상영관은 필수입니다.")
     @Size(min = 1, message = "최소 하나 이상의 상영관이 필요합니다.")
-    private List<Long> theaterIds;
+    private List<String> auditoriumId;
 }
