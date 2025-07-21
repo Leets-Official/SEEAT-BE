@@ -91,7 +91,9 @@ public enum ErrorCode {
     DUPLICATE_BOOKMARK(3002, HttpStatus.CONFLICT, "해당하는 리뷰를 이미 북마크 했습니다"),
     DUPLICATE_REVIEW(3003, HttpStatus.CONFLICT, "해당하는 리뷰를 이미 좋아요 했습니다"),
     NOT_OWN_BOOKMARK(3004, HttpStatus.CONFLICT, "추가되어있지 않은 북마크를 삭제할 수 없습니다."),
-    NOT_OWN_REVIEW(3005, HttpStatus.CONFLICT, "추가되어있지 않은 리뷰를 삭제할 수 없습니다.");
+    NOT_OWN_REVIEW(3005, HttpStatus.CONFLICT, "추가되어있지 않은 리뷰를 삭제할 수 없습니다."),
+    NO_IMAGE_REVIEW(3006, HttpStatus.BAD_REQUEST, "등록할 이미지가 없음에도 추가하고자 합니다."),
+    TOO_MANY_IMAGES(3007, HttpStatus.BAD_REQUEST, "등록할 이미지가 5개 초과입니다.");
 
 
     /** 에러 코드 (고유값) */

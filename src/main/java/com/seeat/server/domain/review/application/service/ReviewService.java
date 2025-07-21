@@ -77,7 +77,7 @@ public class ReviewService implements ReviewUseCase {
         // 이미지가 존재하는 경우
         if (request.getPhotos()!=null) {
             // 이미지 저장
-            String thumbnail = imageService.saveReviewImage(review, request.getPhotos().get(0));
+            String thumbnail = imageService.saveReviewImage(review, request.getPhotos()).get(0);
 
             // 현재 이미지를 저장할 때 더티 체킹으로 진행
             review.changeThumbnailUrl(thumbnail);

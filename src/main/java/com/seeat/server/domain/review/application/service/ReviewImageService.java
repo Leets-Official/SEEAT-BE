@@ -5,6 +5,7 @@ import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewImage;
 import com.seeat.server.domain.review.domain.repository.ReviewImageRepository;
 import com.seeat.server.global.image.application.usecase.ImageUseCase;
+import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,16 @@ public class ReviewImageService implements ReviewImageUseCase {
 
     @Override
     public List<String> saveReviewImage(Review review, List<MultipartFile> photos) throws IOException {
+
+        /// 이미지가 없음
+        if (photos.isEmpty()) {
+            throw new IllegalArgumentException(ErrorCode.NO_IMAGE_REVIEW.getMessage());
+        }
+
+        /// 최대 등록 이미지 수량 정하기
+        if (photos.size() >= 6) {
+            throw new IllegalArgumentException(ErrorCode.TOO_MANY_IMAGES.getMessage());
+        }
 
         /// 이미지 클라우드에 저장
         List<String> uploadFiles = imageService.uploadFiles(photos);
