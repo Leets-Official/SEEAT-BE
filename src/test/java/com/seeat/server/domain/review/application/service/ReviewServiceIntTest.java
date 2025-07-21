@@ -164,6 +164,46 @@ class ReviewServiceIntTest {
                     .containsExactlyInAnyOrderElementsOf(request.getHashtags());
         }
 
+        @Test
+        @DisplayName("[happy] 이미지 없이 로그인한 유저 리뷰 좌석 2개에 동시 생성 정상 생성")
+        void createReviewByUser_happy_multiple_seat() throws IOException {
+            // given
+            var request = ReviewRequest.builder()
+                    .seatIds(List.of(seat1.getId(), seat2.getId()))
+                    .content("test")
+                    .movieTitle("ReviewTestTitle")
+                    .photos(null)
+                    .rating(5)
+                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                    .build();
+
+            // when
+            sut.createReview(request, user1.getId());
+
+            // then
+            List<Review> reviews = repository.findAll();
+            Assertions.assertThat(reviews).hasSize(2);
+
+            for (Review review : reviews) {
+                Assertions.assertThat(review.getContent()).isEqualTo(request.getContent());
+                Assertions.assertThat(review.getRating()).isEqualTo(request.getRating());
+                Assertions.assertThat(List.of(seat1.getId(), seat2.getId())).contains(review.getSeat().getId());
+                Assertions.assertThat(review.getSeat().getAuditorium().getTheater().getName())
+                        .isEqualTo("Test Theater");
+
+                List<ReviewHashTag> reviewHashTags = reviewHashTagRepository.findByReview(review);
+                Assertions.assertThat(reviewHashTags).hasSize(3);
+
+                List<Long> actualHashTagIds = reviewHashTags.stream()
+                        .map(rht -> rht.getHashTag().getId())
+                        .toList();
+
+                Assertions.assertThat(actualHashTagIds)
+                        .containsExactlyInAnyOrderElementsOf(request.getHashtags());
+            }
+        }
+
+
         /**
          * 정상적인 유저가 이미지 한 장을 통해 리뷰를 생성하는 경우를 검증합니다.
          */
