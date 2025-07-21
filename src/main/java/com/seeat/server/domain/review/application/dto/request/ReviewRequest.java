@@ -36,7 +36,7 @@ public class ReviewRequest {
     @Schema(example = "3.2")
     @Min(value = 1, message = "평점은 최소 1점 이상이어야 합니다.")
     @Max(value = 5, message = "평점은 최대 5점 이하여야 합니다.")
-    private float rating;
+    private double rating;
 
     /**
      * 텍스트 후기 내용
