@@ -41,15 +41,20 @@ public class Review extends BaseEntity {
     private String content;
 
     /// 정적 팩토리 메서드
-    public static Review of(User user, Seat seat, String movieTitle, double rating, String content, String thumbnailUrl) {
+    public static Review of(User user, Seat seat, String movieTitle, double rating, String content) {
         return Review.builder()
                 .user(user)
                 .seat(seat)
                 .movieTitle(movieTitle)
-                .thumbnailUrl(thumbnailUrl)
+                .thumbnailUrl("thumbnailUrl")
                 .rating(rating)
                 .content(content)
                 .build();
+    }
+
+    /// 썸네일 추가 함수
+    public void changeThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
     }
 
 }

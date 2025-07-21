@@ -35,6 +35,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -115,7 +116,7 @@ class ReviewServiceIntTest {
          */
         @Test
         @DisplayName("[happy] 로그인한 유저 리뷰 정상 생성")
-        void createReviewByUser_happy() {
+        void createReviewByUser_happy() throws IOException {
             //given
             var request = ReviewRequest.builder()
                     .seatId(seat1.getId())
@@ -404,7 +405,7 @@ class ReviewServiceIntTest {
 
         @Test
         @DisplayName("[happy] 상세 조회에서 정상적으로 좋아요 개수가 출력")
-        public void happyLoad_Detail(){
+        public void happyLoad_Detail() throws IOException {
 
             //given
             var request = ReviewRequest.builder()
@@ -432,8 +433,8 @@ class ReviewServiceIntTest {
         }
 
         @Test
-        @DisplayName("[happy] 목록 조회에서 정상적으로 좋아요 개수가 출력")
-        public void happyLoad_List(){
+        @DisplayName("[happy] 여러명이 동시적으로 좋아요 출력 후, 목록 조회에서 정상적으로 좋아요 개수가 출력")
+        public void happyLoad_List() throws IOException {
 
             // given
             PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();

@@ -19,7 +19,7 @@ public interface ReviewImageUseCase {
     List<String> saveReviewImage(Review review, List<MultipartFile> photos) throws IOException;
 
     /// 리뷰에 따른 이미지 목록 조회
-    List<String> getReviewImagesByReview(Review review);
+    List<ReviewImage> getReviewImagesByReview(Review review);
 
     /// 삭제
     void deleteReviewImage(String fileName);

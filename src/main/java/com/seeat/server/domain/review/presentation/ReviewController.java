@@ -15,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/reviews")
@@ -33,7 +35,7 @@ public class ReviewController implements ReviewControllerSpec {
     )
     public ApiResponse<Void> createReview(
             @ModelAttribute @Valid ReviewRequest request,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user) throws IOException {
 
         // 서비스 호출
         reviewService.createReview(request, user.getId());

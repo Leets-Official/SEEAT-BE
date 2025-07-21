@@ -58,7 +58,7 @@ public class ReviewImageService implements ReviewImageUseCase {
 
     /// 조회하기
     @Override
-    public List<String> getReviewImagesByReview(Review review) {
+    public List<ReviewImage> getReviewImagesByReview(Review review) {
 
         /// 리뷰에 해당하는 이미지 주소 순서대로 가져오기
         List<ReviewImage> images = repository.findByReview(review);
@@ -67,7 +67,6 @@ public class ReviewImageService implements ReviewImageUseCase {
         return images.stream()
                 .sorted(Comparator
                         .comparing(ReviewImage::getDisplayOrder))
-                .map(ReviewImage::getImageUrl)
                 .toList();
     }
 

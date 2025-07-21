@@ -31,6 +31,7 @@ public enum ErrorCode {
     INVALID_FILE_FORMAT(400_001, HttpStatus.BAD_REQUEST, "업로드된 파일 형식이 올바르지 않습니다."),
     INVALID_INPUT(400_002, HttpStatus.BAD_REQUEST, "입력값이 올바르지 않습니다."),
     NULL_VALUE(400_003, HttpStatus.BAD_REQUEST, "Null 값이 들어왔습니다."),
+    BAD_TYPE_REQUEST(400_004, HttpStatus.BAD_REQUEST, "해당 Content-Type은 지원하지 않습니다."),
 
     // 401 Unauthorized
     TOKEN_EXPIRED(401_000, HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
@@ -59,6 +60,7 @@ public enum ErrorCode {
     /** 서버 내부 오류  */
     INTERNAL_SERVER_ERROR(500, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
     INTERNAL_S3_ERROR(500_001, HttpStatus.INTERNAL_SERVER_ERROR, "AWS S3 설정이 잘못되었습니다. 속성을 확인하세요."),
+    INTERNAL_FILE_ERROR(500_002, HttpStatus.INTERNAL_SERVER_ERROR, "이미지 등록 하는 과정에서 에러가 발생했습니다."),
 
     /** 요청 파라미터 오류 */
     BAD_PARAMETER(999, HttpStatus.BAD_REQUEST, "요청 파라미터에 문제가 존재합니다."),
@@ -80,7 +82,7 @@ public enum ErrorCode {
     NOT_THEATER(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 영화관이 존재하지 않습니다."),
     NOT_AUDITORIUM(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 상영관이 존재하지 않습니다."),
     NOT_SEAT(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 좌석이 존재하지 않습니다."),
-
+    TRANSACTION_ERROR(2999, HttpStatus.CONFLICT, "동시성 문제가 발생했습니다."),
     // ========================
     // 3000~3999 : 리뷰 관련 에러
     // ========================
