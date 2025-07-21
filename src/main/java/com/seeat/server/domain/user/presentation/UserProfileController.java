@@ -1,5 +1,9 @@
 package com.seeat.server.domain.user.presentation;
 
+import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
+import com.seeat.server.domain.review.application.usecase.BookmarkUseCase;
+import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
+import com.seeat.server.domain.user.application.UserUseCase;
 import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
 import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
@@ -8,7 +12,10 @@ import com.seeat.server.domain.user.application.usecase.UserProfileUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.presentation.swagger.UserProfileControllerSpec;
 import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.global.response.pageable.PageRequest;
+import com.seeat.server.global.response.pageable.SliceResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +27,10 @@ import java.util.List;
 public class UserProfileController implements UserProfileControllerSpec {
 
     private final UserProfileUseCase userProfileService;
+
+    /// 북마크 및 리뷰 조회
+    private final BookmarkUseCase bookmarkService;
+    private final ReviewUseCase reviewService;
 
     /**
      * 마이페이지에서 사용자 정보를 조회 합니다.
@@ -67,5 +78,42 @@ public class UserProfileController implements UserProfileControllerSpec {
         List<UserGradeResponse> responses = userProfileService.getUserGradeList();
 
         return ApiResponse.ok(responses);
+    }
+
+    /**
+     * 내가 작성한 리뷰 조회
+     *
+     * @param user        유저
+     * @param pageRequest 페이지
+     */
+    @GetMapping("/reviews")
+    public ApiResponse<SliceResponse<ReviewListResponse>> getMyReviews(
+            @AuthenticationPrincipal User user,
+            PageRequest pageRequest) {
+
+        /// 서비스 호출
+        SliceResponse<ReviewListResponse> response = reviewService.loadMyReviews(user.getId(), pageRequest);
+
+        return ApiResponse.ok(response);
+    }
+
+    /**
+     * 나의 북마크를 조회
+     *
+     * @param user        유저
+     * @param pageRequest 페이지
+     */
+    @GetMapping("/bookmark")
+    public ApiResponse<SliceResponse<ReviewListResponse>> getBookmarksByUser(
+            @AuthenticationPrincipal User user,
+            PageRequest pageRequest) {
+
+        /// 서비스 호출
+        Slice<ReviewListResponse> responses = bookmarkService.loadMyBookmarks(user.getId(), pageRequest);
+
+        /// DTO 변환
+        SliceResponse<ReviewListResponse> response = SliceResponse.from(responses);
+
+        return ApiResponse.ok(response);
     }
 }
