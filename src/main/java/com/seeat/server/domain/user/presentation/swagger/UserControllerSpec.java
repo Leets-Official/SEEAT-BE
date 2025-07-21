@@ -1,25 +1,22 @@
 package com.seeat.server.domain.user.presentation.swagger;
 
-import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
-import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
-import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
-import com.seeat.server.domain.user.application.dto.response.UserInfoUpdateResponse;
-import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
-import java.util.List;
-
+@Tag(name = "유저 API", description = "회원을 관리하는 API 입니다.")
 public interface UserControllerSpec {
 
     /**
      * 회원가입 API
-     * @param request 추가 정보 요청값
+     *
+     * @param request     추가 정보 요청값
      * @param tempUserKey 임시유저정보
      * @return 회원가입 완료 응답
      */
@@ -59,41 +56,5 @@ public interface UserControllerSpec {
             description = "30일 동안 유효한 개발용 토큰을 생성합니다."
     )
     ApiResponse<Void> generateDevToken(HttpServletResponse response);
-
-    /**
-     * 사용자 정보 조회 API
-     *
-     * @param user 유저
-     * @return UserInfoResponse 응답
-     */
-    @GetMapping
-    @Operation(summary = "사용자 정보 조회",
-                description = "마이페이지에서 사용자 정보를 조회합니다.")
-    ApiResponse<UserInfoResponse> getUserInfo(
-            @AuthenticationPrincipal User user);
-
-    /**
-     * 사용자 정보 수정 API
-     *
-     * @param user 유저
-     * @param request 수정할 정보
-     * @return UserInfoUpdateResponse 응답
-     */
-    @PatchMapping
-    @Operation(summary = "사용자 정보 수정",
-            description = "마이페이지에서 사용자 정보를 수정합니다.")
-    ApiResponse<UserInfoUpdateResponse> updateUserInfo(
-            @AuthenticationPrincipal User user,
-            @RequestBody UserInfoUpdateRequest request);
-
-    /**
-     * 사용자 등급 목록 조회 API
-     *
-     * @return List UserGradeResponse 응답
-     */
-    @GetMapping("/grades")
-    @Operation(summary = "사용자 등급 목록 조회",
-            description = "사용자 등급 목록을 조회합니다.")
-    ApiResponse<List<UserGradeResponse>> getUserGradeList();
 
 }
