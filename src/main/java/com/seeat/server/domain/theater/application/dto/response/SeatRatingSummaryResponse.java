@@ -31,23 +31,42 @@ public record SeatRatingSummaryResponse(
         int totalReviews,
 
         @Schema(description = "평균 점수")
-        float averageRating,
+        double averageRating,
 
         @Schema(description = "휠체어 좌석 여부")
-        boolean isWheelchair
+        boolean isWheelchair,
+
+        @Schema(description = "좌석의 상태")
+        SeatType type
 
 ) {
 
     /// 정적 팩토리 메서드
     public static SeatRatingSummaryResponse of(Seat seat, Integer totalReviews, Float averageRating) {
+
         // 좌석 추출
         return SeatRatingSummaryResponse.builder()
                 .seatId(seat.getId())
                 .row(seat.getRow())
                 .column(seat.getColumn())
                 .totalReviews(totalReviews == null ? 0 : totalReviews)
-                .averageRating(averageRating == null ? 0.0f : averageRating)
+                .averageRating(averageRating == null ? 0.0 : averageRating)
                 .isWheelchair(false)
+                .type(getType(totalReviews, averageRating))
                 .build();
+    }
+
+    /// enum 추출하기 위한 변수
+    private static SeatType getType(Integer totalReviews, Float averageRating) {
+
+        if (totalReviews == null || totalReviews == 0 || averageRating == null || averageRating == 0) {
+            return SeatType.NO_REVIEW;
+        } else if (averageRating > 4.5) {
+            return SeatType.HIGH_RATED;
+        } else if (averageRating < 1.5) {
+            return SeatType.LOW_RATED;
+        } else {
+            return SeatType.REVIEWED;
+        }
     }
 }
