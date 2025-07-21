@@ -94,6 +94,17 @@ public class ReviewController implements ReviewControllerSpec {
     }
 
 
+    @GetMapping("/my")
+    public ApiResponse<SliceResponse<ReviewListResponse>> getMyReviews(
+            @AuthenticationPrincipal User user,
+            PageRequest pageRequest) {
+
+        /// 서비스 호출
+        SliceResponse<ReviewListResponse> response = reviewService.loadMyReviews(user.getId(), pageRequest);
+
+        return ApiResponse.ok(response);
+    }
+
 
 
 }
