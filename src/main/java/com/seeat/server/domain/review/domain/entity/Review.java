@@ -36,12 +36,12 @@ public class Review extends BaseEntity {
 
     private String thumbnailUrl;
 
-    private double rating;
+    private float rating;
 
     private String content;
 
     /// 정적 팩토리 메서드
-    public static Review of(User user, Seat seat, String movieTitle, double rating, String content) {
+    public static Review of(User user, Seat seat, String movieTitle, float rating, String content) {
         return Review.builder()
                 .user(user)
                 .seat(seat)
