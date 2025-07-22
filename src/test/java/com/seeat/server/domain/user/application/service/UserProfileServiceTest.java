@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-public class UserServiceTest {
+public class UserProfileServiceTest {
 
     @Autowired
     private UserProfileService sut;
