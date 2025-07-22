@@ -5,6 +5,7 @@ import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.service.RedisService;
 import com.seeat.server.global.util.JwtConstants;
 import com.seeat.server.security.config.RequestMatcherHolder;
+import com.seeat.server.security.handler.JwtFailureHandler;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +21,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import jakarta.servlet.http.Cookie;
 
 import java.io.IOException;
-import java.security.Principal;
 
 /**
  * JWT 인증 필터
@@ -44,54 +44,55 @@ public class JwtFilter extends OncePerRequestFilter {
     private final RedisService redisService;
     private final RequestMatcherHolder requestMatcherHolder;
 
+    /// 핸들러 호출
+    private final JwtFailureHandler jwtFailureHandler;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) {
+                                    FilterChain filterChain) throws ServletException, IOException {
 
 
-        /// 액세스 토큰 추출
-        String accessToken = resolveToken(request, HttpHeaders.AUTHORIZATION);
-
-        /// 검증 확인,인증 정보 체크후 시큐리티 홀더에 저장
-        if (StringUtils.hasText(accessToken) && jwtProvider.validateToken(accessToken)) {
-            Authentication authentication = jwtProvider.getAuthentication(accessToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        } else {
-            /// 리프레시 쿠키를 헤더에서 추출하여, 액세스 토큰 재발급
-            String refreshToken = resolveRefreshTokenFromCookie(request);
-
-            if (StringUtils.hasText(refreshToken) && jwtProvider.validateToken(refreshToken)) {
-                Authentication refreshAuth = jwtProvider.getAuthentication(refreshToken);
-
-                User user = (User) refreshAuth.getPrincipal();
-                Long userId = user.getId();
-
-                String redisRefreshToken = redisService.getRefreshToken(userId);
-
-                if (refreshToken.equals(redisRefreshToken)) {
-                    Authentication authentication = refreshAuth;
-                    String newAccessToken = jwtProvider.generateAccessToken(authentication);
-
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                    response.setHeader(HttpHeaders.AUTHORIZATION, JwtConstants.TOKEN_TYPE + " " + newAccessToken);
-
-                } else {
-
-                    throw new JwtAuthenticationException(ErrorCode.INVALID_REFRESH_TOKEN.getMessage());
-                }
-
-            }
-        }
         try {
+            /// 액세스 토큰 추출
+            String accessToken = resolveToken(request, HttpHeaders.AUTHORIZATION);
+
+            /// 검증 확인,인증 정보 체크후 시큐리티 홀더에 저장
+            if (StringUtils.hasText(accessToken) && jwtProvider.validateToken(accessToken)) {
+                Authentication authentication = jwtProvider.getAuthentication(accessToken);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            } else {
+                /// 리프레시 쿠키를 헤더에서 추출하여, 액세스 토큰 재발급
+                String refreshToken = resolveRefreshTokenFromCookie(request);
+
+                if (StringUtils.hasText(refreshToken) && jwtProvider.validateToken(refreshToken)) {
+                    Authentication refreshAuth = jwtProvider.getAuthentication(refreshToken);
+
+                    User user = (User) refreshAuth.getPrincipal();
+                    Long userId = user.getId();
+
+                    String redisRefreshToken = redisService.getRefreshToken(userId);
+
+                    if (refreshToken.equals(redisRefreshToken)) {
+                        Authentication authentication = refreshAuth;
+                        String newAccessToken = jwtProvider.generateAccessToken(authentication);
+
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                        response.setHeader(HttpHeaders.AUTHORIZATION, JwtConstants.TOKEN_TYPE + " " + newAccessToken);
+
+                    } else {
+
+                        throw new JwtAuthenticationException(ErrorCode.INVALID_REFRESH_TOKEN.getMessage());
+                    }
+
+                }
+            }
 
             filterChain.doFilter(request, response);
-
-        } catch (ServletException | IOException e) {
-
-            throw new RuntimeException(e);
+        } catch (JwtAuthenticationException e) {
+            jwtFailureHandler.commence(request, response, e);
         }
     }
 
@@ -133,13 +134,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         /// requestMatcherHolder 통해 필터와 시큐리티를 한번에 해결, true 이면 필터 자체를 타지 않는다.
         /// ex) 개발용 토큰 자체에 필터를 타지 않도록 설정하여, 401,403 에러가 발생하지 않도록 설정
-        boolean matches = requestMatcherHolder.getRequestMatchersByMinRole(null)
+        return requestMatcherHolder.getRequestMatchersByMinRole(null)
                 .matches(request);
-
-        String requestURI = request.getRequestURI();
-        String method = request.getMethod();
-        log.info("[로그] 주소 {}, 방식 {}, 결과 {}}", requestURI, method, matches);
-
-        return matches;
     }
 }
