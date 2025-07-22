@@ -1,13 +1,21 @@
 package com.seeat.server.domain.user.application.service;
 
+import com.seeat.server.domain.seat.domain.AuditoriumFixtures;
+import com.seeat.server.domain.seat.domain.TheaterFixtures;
+import com.seeat.server.domain.theater.application.dto.response.AuditoriumResponse;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
+import com.seeat.server.domain.theater.domain.entity.Theater;
+import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
+import com.seeat.server.domain.theater.domain.repository.TheaterRepository;
 import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoUpdateResponse;
 import com.seeat.server.domain.user.domain.UserFixtures;
 import com.seeat.server.domain.user.domain.entity.User;
+import com.seeat.server.domain.user.domain.entity.UserAuditorium;
 import com.seeat.server.domain.user.domain.entity.UserGrade;
+import com.seeat.server.domain.user.domain.repository.UserAuditoriumRepository;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
 import org.assertj.core.api.Assertions;
@@ -22,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
@@ -37,6 +46,15 @@ public class UserServiceTest {
     @Autowired
     private UserRepository repository;
 
+    @Autowired
+    private AuditoriumRepository auditoriumRepository;
+
+    @Autowired
+    private TheaterRepository theaterRepository;
+
+    @Autowired
+    private UserAuditoriumRepository userAuditoriumRepository;
+
     @Nested
     @DisplayName("사용자 정보 조회 테스트")
     class getUserInfo{
@@ -45,10 +63,17 @@ public class UserServiceTest {
         void getUserInfo_Success() {
             // given
             User user = UserFixtures.createUser();
+            Theater theater = TheaterFixtures.createTheater();
             repository.save(user);
+            theaterRepository.save(theater);
+            Auditorium auditorium = AuditoriumFixtures.createAuditorium(theater, "aud1");
+            auditoriumRepository.save(auditorium);
+            userAuditoriumRepository.save(UserAuditorium.of(user, auditorium));
+
 
             // when
             UserInfoResponse response = sut.getUserInfo(user.getId());
+
 
             // then
             assertEquals(user.getId(), response.id());
@@ -59,6 +84,8 @@ public class UserServiceTest {
             assertEquals(user.getNickname(), response.nickname());
             assertEquals(user.getGenres(), response.genres());
             assertEquals(user.getSocial(), response.social());
+            List<AuditoriumResponse> auditoriumResponse = List.of(AuditoriumResponse.from(auditorium));
+            assertEquals(auditoriumResponse, response.auditoriums());
         }
 
         @Test
@@ -71,6 +98,19 @@ public class UserServiceTest {
             Assertions.assertThatThrownBy(() -> sut.getUserInfo(user.getId()))
                     .isInstanceOf(NoSuchElementException.class)
                     .hasMessageContaining(ErrorCode.NOT_USER.getMessage());
+        }
+
+        @Test
+        @DisplayName("상영관 정보 조회 예외 발생")
+        void getUserInfoAuditorium_Fail() {
+            // given
+            User user = UserFixtures.createUser();
+            repository.save(user);
+
+            // when & then
+            Assertions.assertThatThrownBy(() -> sut.getUserInfo(user.getId()))
+                    .isInstanceOf(NoSuchElementException.class)
+                    .hasMessageContaining(ErrorCode.NOT_AUDITORIUM.getMessage());
         }
     }
 
