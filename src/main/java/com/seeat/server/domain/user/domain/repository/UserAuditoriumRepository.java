@@ -17,4 +17,5 @@ public interface UserAuditoriumRepository extends JpaRepository<UserAuditorium, 
     """)
     List<Auditorium> findDistinctAuditoriumsByUserId(@Param("userId") Long userId);
 
+    void deleteByUserId(Long userId);
 }

@@ -99,4 +99,13 @@ public class TheaterService implements TheaterUseCase{
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_AUDITORIUM.getMessage()));
     }
 
+    /**
+     * 공통 응답 함수 public 불러오기
+     * @param auditoriumId 상영관 Id
+     * @return 상영관 entity
+     */
+    public Auditorium getAuditoriumById(String auditoriumId) {
+        return getAuditorium(auditoriumId);
+    }
+
 }

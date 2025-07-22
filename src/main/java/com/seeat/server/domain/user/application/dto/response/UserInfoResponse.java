@@ -21,7 +21,6 @@ public record UserInfoResponse(
         UserGrade grade,
         List<MovieGenre> genres,
         UserSocial social,
-
         List<AuditoriumResponse> auditoriums
 ) {
     public static UserInfoResponse from(User user ,List<Auditorium> auditoriums){

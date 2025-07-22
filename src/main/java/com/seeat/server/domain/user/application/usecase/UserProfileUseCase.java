@@ -2,6 +2,7 @@ package com.seeat.server.domain.user.application.usecase;
 
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
+import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
 import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoUpdateResponse;
@@ -14,8 +15,7 @@ public interface UserProfileUseCase {
     UserInfoResponse getUserInfo(Long userId);
 
     // 사용자 정보 수정
-    UserInfoUpdateResponse updateUserInfo(Long userId, String nickName, String imageUrl,
-                                          List<MovieGenre> genres, List<Auditorium> auditoriums);
+    UserInfoUpdateResponse updateUserInfo(Long userId, UserInfoUpdateRequest request);
 
     // 등급 목록 조회
     List<UserGradeResponse> getUserGradeList();

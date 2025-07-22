@@ -50,8 +50,7 @@ public class UserProfileController implements UserProfileControllerSpec {
             @RequestBody UserInfoUpdateRequest request){
 
         // 사용자 정보 수정
-        UserInfoUpdateResponse response = userProfileService.updateUserInfo(user.getId(), request.getNickname(),
-                request.getImageUrl(), request.getGenres(), request.getAuditoriums());
+        UserInfoUpdateResponse response = userProfileService.updateUserInfo(user.getId(), request);
 
         return ApiResponse.ok(response);
     }
