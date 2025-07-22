@@ -8,6 +8,7 @@ import com.seeat.server.domain.theater.domain.entity.MovieGenre;
 import com.seeat.server.domain.theater.domain.entity.Theater;
 import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
 import com.seeat.server.domain.theater.domain.repository.TheaterRepository;
+import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
 import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoUpdateResponse;
@@ -30,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
@@ -118,32 +118,41 @@ public class UserServiceTest {
     @DisplayName("사용자 정보 수정 테스트")
     class updateUserInfo {
         @Test
-        @DisplayName("로그인한 유저 사용 정상 수정")
+        @DisplayName("로그인한 유저 정보 정상 수정")
         void updateUserInfo_Success() {
             // given
             User user = UserFixtures.createUser();
+            Theater theater1 = TheaterFixtures.createTheater();
+            Theater theater2 = TheaterFixtures.createTheater();
             repository.save(user);
+            theaterRepository.save(theater1);
+            theaterRepository.save(theater2);
+            Auditorium auditorium1 = AuditoriumFixtures.createAuditorium(theater1, "audTest1");
+            Auditorium auditorium2 = AuditoriumFixtures.createAuditorium(theater2, "audTest2");
+            auditoriumRepository.save(auditorium1);
+            auditoriumRepository.save(auditorium2);
+            userAuditoriumRepository.save(UserAuditorium.of(user, auditorium1));
 
             // 수정 정보
             String newNickname = "updateNick";
             String newImageUrl = "https://update.image.url";
             List<MovieGenre> newGenres = List.of(MovieGenre.COMEDY, MovieGenre.HORROR);
-            List<Auditorium> auditoriums = null;
+            List<String> auditoriumIds = List.of("audTest2");
+            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, newImageUrl, newGenres, auditoriumIds);
 
             // when
-            /*
-            UserInfoUpdateResponse response = sut.updateUserInfo(user.getId(), newNickname, newImageUrl, newGenres, auditoriums);
+            UserInfoUpdateResponse response = sut.updateUserInfo(user.getId(), request);
 
             // then
             assertEquals(newNickname, response.nickname());
             assertEquals(newImageUrl, response.imageUrl());
             assertIterableEquals(newGenres, response.genres());
-
-             */
+            List<AuditoriumResponse> auditoriumResponse = List.of(AuditoriumResponse.from(auditorium2));
+            assertEquals(auditoriumResponse, response.auditoriums());
         }
 
         @Test
-        @DisplayName("로그인한 유저 사용 수정 사용자 예외 발생")
+        @DisplayName("로그인한 유저 사용자 예외 발생")
         void updateUserInfo_Fail() {
             // given
             User user = UserFixtures.fakeUser();
@@ -152,14 +161,33 @@ public class UserServiceTest {
             String newNickname = "updateNick";
             String newImageUrl = "https://update.image.url";
             List<MovieGenre> newGenres = List.of(MovieGenre.COMEDY, MovieGenre.HORROR);
-            List<Auditorium> auditoriums = null;
+            List<String> auditoriumIds = List.of("aud1");
+            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, newImageUrl, newGenres, auditoriumIds);
 
             // when & then
-            /*
-            Assertions.assertThatThrownBy(() -> sut.updateUserInfo(user.getId(), newNickname, newImageUrl, newGenres, auditoriums))
+            Assertions.assertThatThrownBy(() -> sut.updateUserInfo(user.getId(), request))
                     .isInstanceOf(NoSuchElementException.class)
                     .hasMessageContaining(ErrorCode.NOT_USER.getMessage());
-             */
+        }
+
+        @Test
+        @DisplayName("로그인한 유저 정보 수정 상영관 예외 발생")
+        void updateUserInfoAuditorium_Fail() {
+            // given
+            User user = UserFixtures.createUser();
+            repository.save(user);
+
+            // 수정 정보
+            String newNickname = "updateNick";
+            String newImageUrl = "https://update.image.url";
+            List<MovieGenre> newGenres = List.of(MovieGenre.COMEDY, MovieGenre.HORROR);
+            List<String> auditoriumIds = List.of("aud1");
+            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, newImageUrl, newGenres, auditoriumIds);
+
+            // when & then
+            Assertions.assertThatThrownBy(() -> sut.updateUserInfo(user.getId(), request))
+                    .isInstanceOf(NoSuchElementException.class)
+                    .hasMessageContaining(ErrorCode.NOT_AUDITORIUM.getMessage());
         }
     }
 
