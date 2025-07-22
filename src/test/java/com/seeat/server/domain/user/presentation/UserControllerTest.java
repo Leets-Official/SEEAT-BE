@@ -1,18 +1,21 @@
 package com.seeat.server.domain.user.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.seeat.server.domain.seat.domain.AuditoriumFixtures;
+import com.seeat.server.domain.seat.domain.TheaterFixtures;
+import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
 import com.seeat.server.domain.theater.domain.entity.Theater;
+import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
 import com.seeat.server.domain.theater.domain.repository.TheaterRepository;
-import com.seeat.server.domain.user.application.UserService;
+import com.seeat.server.domain.user.application.service.UserService;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
 import com.seeat.server.domain.user.domain.UserFixtures;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
-import com.seeat.server.domain.user.domain.entity.UserTheater;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
-import com.seeat.server.domain.user.domain.repository.UserTheaterRepository;
+import com.seeat.server.domain.user.domain.repository.UserAuditoriumRepository;
 import com.seeat.server.global.service.RedisService;
 import com.seeat.server.security.jwt.JwtProvider;
 import com.seeat.server.security.oauth2.application.dto.TempUserInfo;
@@ -58,36 +61,30 @@ public class UserControllerTest {
     private UserRepository userRepository;
 
     @Autowired
-    private UserService userService;
+    private AuditoriumRepository auditoriumRepository;
+
+    @Autowired TheaterRepository theaterRepository;
 
     @Autowired
-    private TheaterRepository theaterRepository;
-
-    @Autowired
-    private UserTheaterRepository userTheaterRepository;
+    private UserAuditoriumRepository userAuditoriumRepository;
     @Autowired
     private ObjectMapper objectMapper;
 
     @MockBean
     private JwtProvider jwtProvider;
 
+    private Auditorium auditorium1;
+    private Auditorium auditorium2;
+
     @BeforeEach
     void setUp() {
-        theaterRepository.save(Theater.builder()
-                .id("theater1")
-                .name("테스트 극장 10")
-                .address("서울시 강남구 10")
-                .latitude(37.123)
-                .longitude(127.123)
-                .build());
+        Theater theater1 = theaterRepository.save(TheaterFixtures.createTheater());
+        Theater theater2 = theaterRepository.save(TheaterFixtures.createTheater());
 
-        theaterRepository.save(Theater.builder()
-                .id("theater2")
-                .name("테스트 극장 30")
-                .address("서울시 강남구 30")
-                .latitude(37.456)
-                .longitude(127.456)
-                .build());
+        auditorium1 = AuditoriumFixtures.createAuditorium(theater1, "theater1");
+        auditorium2 = AuditoriumFixtures.createAuditorium(theater2, "theater2");
+
+        auditoriumRepository.saveAll(List.of(auditorium1, auditorium2));
     }
 
     @Test
@@ -99,7 +96,7 @@ public class UserControllerTest {
                 "nickname",
                 "https://example.com/profile.jpg",
                 List.of(MovieGenre.ROMANCE, MovieGenre.ACTION),
-                List.of("theater1", "theater2")
+                List.of(auditorium1.getId(), auditorium2.getId())
         );
 
         given(redisService.getValues(tempUserKey, TempUserInfo.class)).willReturn(tempUserInfo);
@@ -125,13 +122,13 @@ public class UserControllerTest {
         List<MovieGenre> expectedGenres = List.of(MovieGenre.ROMANCE, MovieGenre.ACTION);
         assertIterableEquals(expectedGenres, savedUser.getGenres());
 
-        List<UserTheater> userTheaters = userTheaterRepository.findByUserId(savedUser.getId());
-        List<String> savedTheaterIds = userTheaters.stream()
-                .map(ut -> ut.getTheater().getId())
+        List<Auditorium> auditoriums = userAuditoriumRepository.findDistinctAuditoriumsByUserId(savedUser.getId());
+        List<String> savedAuditoriumIds = auditoriums.stream()
+                .map(ut -> ut.getId())
                 .collect(Collectors.toList());
 
-        List<String> expectedTheaterIds = List.of("theater1", "theater2");
-        assertIterableEquals(expectedTheaterIds, savedTheaterIds);
+        List<String> expectedAuditoriumIds = List.of(auditorium1.getId(), auditorium2.getId());
+        assertIterableEquals(expectedAuditoriumIds, savedAuditoriumIds);
     }
 
     @Test

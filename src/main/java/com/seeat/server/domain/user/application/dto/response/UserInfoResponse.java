@@ -1,5 +1,6 @@
 package com.seeat.server.domain.user.application.dto.response;
 
+import com.seeat.server.domain.theater.application.dto.response.AuditoriumResponse;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
 import com.seeat.server.domain.user.domain.entity.User;
@@ -19,12 +20,14 @@ public record UserInfoResponse(
         String imageUrl,
         UserGrade grade,
         List<MovieGenre> genres,
-        UserSocial social
+        UserSocial social,
 
-       // List<Auditorium> auditoriums
+        List<AuditoriumResponse> auditoriums
 ) {
-    public static UserInfoResponse from(User user
-            /*, List<Auditorium> auditoriums*/){
+    public static UserInfoResponse from(User user ,List<Auditorium> auditoriums){
+        List<AuditoriumResponse> auditoriumResponses = auditoriums.stream()
+                .map(AuditoriumResponse::from)
+                .toList();
 
         return UserInfoResponse.builder()
                 .id(user.getId())
@@ -36,7 +39,7 @@ public record UserInfoResponse(
                 .grade(user.getGrade())
                 .genres(user.getGenres())
                 .social(user.getSocial())
-                // .auditoriums(auditoriums)
+                .auditoriums(auditoriumResponses)
                 .build();
     }
 }

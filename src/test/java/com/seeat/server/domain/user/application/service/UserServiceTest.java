@@ -2,7 +2,6 @@ package com.seeat.server.domain.user.application.service;
 
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
-import com.seeat.server.domain.user.application.UserService;
 import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoUpdateResponse;
@@ -33,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 public class UserServiceTest {
 
     @Autowired
-    private UserService sut;
+    private UserProfileService sut;
 
     @Autowired
     private UserRepository repository;
