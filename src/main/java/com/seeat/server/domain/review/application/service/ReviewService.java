@@ -237,6 +237,30 @@ public class ReviewService implements ReviewUseCase {
     }
 
     /**
+     * 베스트 리뷰 조회를 위해 사용되는 함수
+     * @param pageRequest   페이지
+     */
+    @Override
+    public SliceResponse<ReviewListResponse> getBestReviews(PageRequest pageRequest) {
+
+        /// Pageable 처리
+        Pageable pageable = getPageable(pageRequest);
+
+        Slice<ReviewWithLikeCount> reviews = repository.findBestReviews(pageable);
+
+        /// DTO 변경
+        // 리뷰 ID 목록 추출
+        List<Long> reviewIds = getLongs(reviews);
+
+        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
+
+        /// Slice 객체 처리
+        SliceImpl<ReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
+        return SliceResponse.from(slice);
+    }
+
+    /**
      * 리뷰의 Id를 얻기 위한 공통 로직
      * @param reviews ID를 추출할 리뷰 목록
      */

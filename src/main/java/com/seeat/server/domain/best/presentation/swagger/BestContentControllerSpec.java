@@ -1,0 +1,31 @@
+package com.seeat.server.domain.best.presentation.swagger;
+
+import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
+import com.seeat.server.domain.best.application.dto.response.BestAuditoriumListResponse;
+import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.global.response.pageable.PageRequest;
+import com.seeat.server.global.response.pageable.SliceResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "베스트 목록 API", description = "홈 화면에서 사용할 베스트 목록 API 입니다.")
+public interface BestContentControllerSpec {
+
+    @Operation(
+            summary = "인기 후기 목록 조회 API",
+            description = "인기있는 후기를 조회할 API 입니다"
+    )
+    ApiResponse<SliceResponse<ReviewListResponse>> getBestReviews(
+            PageRequest pageRequest);
+
+
+    @Operation(
+            summary = "인기 상영관 목록 조회 API",
+            description = "인기있는 상영관을 조회할 API 입니다"
+    )
+    ApiResponse<SliceResponse<BestAuditoriumListResponse>> getBestAuditoriums(
+            PageRequest pageRequest);
+
+
+
+}

@@ -37,10 +37,13 @@ public interface ReviewUseCase {
     /// 리뷰 삭제
     void deleteReview(Long reviewId, Long userId);
 
-
     /// 외부 의존성을 위한 유즈 케이스
     Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Long> reviews);
 
     Review getReview(Long reviewId);
+
+    SliceResponse<ReviewListResponse> getBestReviews(PageRequest pageRequest);
+
+
 }
 
