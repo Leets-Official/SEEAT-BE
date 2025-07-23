@@ -1,14 +1,15 @@
 package com.seeat.server.domain.best.presentation;
 
+import com.seeat.server.domain.best.application.dto.response.BestReviewListResponse;
 import com.seeat.server.domain.best.application.usecase.BestContentUseCase;
 import com.seeat.server.domain.best.presentation.swagger.BestContentControllerSpec;
-import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.best.application.dto.response.BestAuditoriumListResponse;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.SliceResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,11 +25,11 @@ public class BestContentController implements BestContentControllerSpec {
      */
 
     @GetMapping("/reviews")
-    public ApiResponse<SliceResponse<ReviewListResponse>> getBestReviews(
+    public ApiResponse<SliceResponse<BestReviewListResponse>> getBestReviews(
             PageRequest pageRequest) {
 
         /// 서비스
-        SliceResponse<ReviewListResponse> response = service.loadBestReviews(pageRequest);
+        SliceResponse<BestReviewListResponse> response = service.loadBestReviews(pageRequest);
 
         /// 리턴
         return ApiResponse.ok(response);
@@ -48,5 +49,18 @@ public class BestContentController implements BestContentControllerSpec {
         /// 리턴
         return ApiResponse.ok(response);
 
+    }
+
+    /**
+     * 인기 리뷰/상영관 수동 최신화 API
+     */
+    @PostMapping()
+    public ApiResponse<Void> saveBestContents(){
+
+        /// 서비스
+        service.saveBestContents();
+
+        /// 리턴
+        return ApiResponse.created();
     }
 }

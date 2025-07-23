@@ -4,13 +4,12 @@ import com.seeat.server.domain.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Entity
-@RequiredArgsConstructor
+@Getter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class BestAuditoriumSnapshot extends BaseEntity {
 
@@ -21,8 +20,20 @@ public class BestAuditoriumSnapshot extends BaseEntity {
     private String auditoriumId;
     private String auditoriumName;
 
-    private double avgRating;
-    private int reviewCount;
-    private double score;
+    private Double avgRating;
+    private Long reviewCount;
+    private Double score;
+
+    /// 정적 팩토리 메서드 생성
+    public static BestAuditoriumSnapshot of(String auditoriumId, String auditoriumName, Double avgRating, Long reviewCount, Double score) {
+        return BestAuditoriumSnapshot.builder()
+                .auditoriumId(auditoriumId)
+                .auditoriumName(auditoriumName)
+                .avgRating(avgRating)
+                .reviewCount(reviewCount)
+                .score(score)
+                .build();
+
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.seeat.server.domain.review.application.usecase;
 
+import com.seeat.server.domain.best.application.dto.response.BestReviewListResponse;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
@@ -29,8 +30,6 @@ public interface ReviewUseCase {
 
     SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(String seatId, PageRequest pageRequest);
 
-    SliceResponse<ReviewListResponse> loadFavoriteReviews(PageRequest pageRequest);
-
     /// 리뷰 수정
     void updateReview(ReviewUpdateRequest request, Long userId);
 
@@ -42,7 +41,7 @@ public interface ReviewUseCase {
 
     Review getReview(Long reviewId);
 
-    SliceResponse<ReviewListResponse> getBestReviews(PageRequest pageRequest);
+    SliceResponse<BestReviewListResponse> getBestReviews(PageRequest pageRequest);
 
 
 }

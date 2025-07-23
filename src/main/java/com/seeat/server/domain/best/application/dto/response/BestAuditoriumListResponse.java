@@ -1,5 +1,6 @@
 package com.seeat.server.domain.best.application.dto.response;
 
+import com.seeat.server.domain.best.domain.entity.BestAuditoriumSnapshot;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.Theater;
 import com.seeat.server.domain.theater.domain.repository.dto.AuditoriumWithScore;
@@ -51,4 +52,25 @@ public record BestAuditoriumListResponse(
         return new SliceImpl<>(responses, withScores.getPageable(), withScores.hasNext());
 
     }
+
+    /// 스냅샷 전용 정적 팩토리 메서드
+    public static BestAuditoriumListResponse from(BestAuditoriumSnapshot snapshot) {
+
+        return BestAuditoriumListResponse.builder()
+                .auditoriumId(snapshot.getAuditoriumId())
+                .auditoriumName(snapshot.getAuditoriumName())
+                .avgRating(snapshot.getAvgRating())
+                .reviewCount(snapshot.getReviewCount())
+                .score(snapshot.getScore())
+                .build();
+    }
+
+    /// 스냅샷 전용 정적 팩토리 메서드
+    public static List<BestAuditoriumListResponse> from(List<BestAuditoriumSnapshot> snapshots) {
+
+        return snapshots.stream()
+                .map(BestAuditoriumListResponse::from)
+                .toList();
+    }
+
 }
