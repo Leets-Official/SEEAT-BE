@@ -64,39 +64,60 @@ public class BestContentService implements BestContentUseCase {
 
     public SliceResponse<BestReviewListResponse> loadBestReviews(PageRequest pageRequest) {
 
-        /// 페이징
+        /// PageRequest로부터 Spring Data의 Pageable 객체 생성
         Pageable pageable = PageUtil.getPageable(pageRequest);
 
-        /// 레디스에서 있는지 가져오기
+        /// Redis에서 캐시된 JSON 문자열을 가져옴 (없을 수도 있으므로 Optional로 감쌈)
         Optional<String> cachedJson = Optional.ofNullable(redisTemplate.opsForValue().get(BEST_REVIEW_LIST_KEY));
 
-        /// 레디스에 존재한다면
+        /// Redis에 캐시가 존재한다면
         if (cachedJson.isPresent()) {
             try {
+                /// JSON 문자열을 BestReviewSnapshot 리스트로 역직렬화
                 List<BestReviewSnapshot> snapshots = objectMapper.readValue(
                         cachedJson.get(),
                         objectMapper.getTypeFactory().constructCollectionType(List.class, BestReviewSnapshot.class)
                 );
 
-                /// DTO 변경
                 log.info("[BestContent] 레디스에서 조회");
-                List<BestReviewListResponse> responses = BestReviewListResponse.from(snapshots);
-                boolean hasNext = responses.size() == pageable.getPageSize();
-                Slice<BestReviewListResponse> slice = new SliceImpl<>(responses, pageable, hasNext);
 
+                /// 페이징 계산을 위한 값 추출
+                int page = pageRequest.getPage() - 1;   // 요청된 페이지 번호
+                int size = pageRequest.getSize();   // 요청된 페이지 크기
+
+                /// 실제로 잘라낼 시작 인덱스와 끝 인덱스를 계산
+                int start = page * size;
+                int end = Math.min(start + size, snapshots.size());  // 범위를 벗어나지 않도록 제한
+
+                /// 시작 인덱스가 리스트 크기보다 크면 빈 페이지 반환
+                if (start >= snapshots.size()) {
+                    return SliceResponse.from(new SliceImpl<>(List.of(), pageable, false));
+                }
+
+                /// 지정한 범위만큼 subList로 잘라냄 (page에 해당하는 데이터만 추출)
+                List<BestReviewSnapshot> pageSnapshots = snapshots.subList(start, end);
+
+                /// Snapshot → DTO로 변환
+                List<BestReviewListResponse> responses = BestReviewListResponse.from(pageSnapshots);
+
+                /// 다음 페이지가 있는지 여부 판단 (hasNext는 end 인덱스가 전체 리스트보다 작을 경우 true)
+                boolean hasNext = end < snapshots.size();
+
+                /// SliceImpl로 슬라이스 객체 생성 후 커스텀 응답 객체로 변환
+                Slice<BestReviewListResponse> slice = new SliceImpl<>(responses, pageable, hasNext);
                 return SliceResponse.from(slice);
 
             } catch (JsonProcessingException e) {
-                /// 역직렬화 실패시 아래 DB 조회로 넘어가기에 로그만 찍어둔다.
+                /// Redis 역직렬화 실패 시 로그만 남기고 DB 조회로 fallback
                 log.error("[BestContent] Redis 역직렬화 실패: {}", e.getMessage(), e);
             }
         }
 
-        /// 레디스에 없다면 DB 조회를 통해서 제공
+        // Redis에 캐시가 없거나 실패한 경우, DB에서 직접 조회
         log.info("[BestContent] DB에서 조회");
         return reviewService.getBestReviews(pageRequest);
-
     }
+
 
     /**
      * 베스트 상영관 목록 조회
@@ -122,10 +143,31 @@ public class BestContentService implements BestContentUseCase {
 
                 /// DTO 변경
                 log.info("[BestContent] 레디스에서 조회");
-                List<BestAuditoriumListResponse> responses = BestAuditoriumListResponse.from(snapshots);
-                boolean hasNext = responses.size() == pageable.getPageSize();
-                Slice<BestAuditoriumListResponse> slice = new SliceImpl<>(responses, pageable, hasNext);
 
+                /// 페이징 계산을 위한 값 추출
+                int page = pageRequest.getPage() - 1;   // 요청된 페이지 번호
+                int size = pageRequest.getSize();   // 요청된 페이지 크기
+
+                /// 실제로 잘라낼 시작 인덱스와 끝 인덱스를 계산
+                int start = page * size;
+                int end = Math.min(start + size, snapshots.size());  // 범위를 벗어나지 않도록 제한
+
+                /// 시작 인덱스가 리스트 크기보다 크면 빈 페이지 반환
+                if (start >= snapshots.size()) {
+                    return SliceResponse.from(new SliceImpl<>(List.of(), pageable, false));
+                }
+
+                /// 지정한 범위만큼 subList로 잘라냄 (page에 해당하는 데이터만 추출)
+                List<BestAuditoriumSnapshot> pageSnapshots = snapshots.subList(start, end);
+
+                /// Snapshot → DTO로 변환
+                List<BestAuditoriumListResponse> responses = BestAuditoriumListResponse.from(pageSnapshots);
+
+                /// 다음 페이지가 있는지 여부 판단 (hasNext는 end 인덱스가 전체 리스트보다 작을 경우 true)
+                boolean hasNext = end < snapshots.size();
+
+                /// SliceImpl로 슬라이스 객체 생성 후 커스텀 응답 객체로 변환
+                Slice<BestAuditoriumListResponse> slice = new SliceImpl<>(responses, pageable, hasNext);
                 return SliceResponse.from(slice);
 
             } catch (JsonProcessingException e) {
