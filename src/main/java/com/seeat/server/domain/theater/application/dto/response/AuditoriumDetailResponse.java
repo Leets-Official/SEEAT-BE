@@ -1,6 +1,7 @@
 package com.seeat.server.domain.theater.application.dto.response;
 
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
+import com.seeat.server.domain.theater.domain.repository.dto.AuditoriumWithRating;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -42,13 +43,20 @@ public record AuditoriumDetailResponse(
 ) {
 
     /// 정적 팩토리 메서드
-    public static AuditoriumDetailResponse from(Auditorium auditorium) {
+    public static AuditoriumDetailResponse from(AuditoriumWithRating withRating) {
+
+        Auditorium auditorium = withRating.getAuditorium();
+        Integer reviewCount = withRating.getTotalReviews();
+        Float averageReview = withRating.getAverageRating();
+
         return AuditoriumDetailResponse.builder()
                 .theaterName(auditorium.getTheater().getName())
                 .auditoriumId(auditorium.getId())
                 .auditoriumName(auditorium.getName())
                 .screenSize(auditorium.getScreenSize())
                 .soundType(auditorium.getSoundType())
+                .reviewCount(reviewCount == null ? 0 : reviewCount)
+                .averageReview(averageReview == null ? 0 : averageReview)
                 .build();
     }
 }
