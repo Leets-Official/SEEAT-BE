@@ -1,6 +1,5 @@
 package com.seeat.server.domain.user.application.dto.request;
 
-import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
 import lombok.AllArgsConstructor;
 import lombok.Data;

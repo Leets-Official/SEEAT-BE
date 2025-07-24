@@ -15,7 +15,7 @@ import com.seeat.server.domain.theater.application.usecase.SeatRatingUseCase;
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.Seat;
-import com.seeat.server.domain.user.application.UserUseCase;
+import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.pageable.PageRequest;

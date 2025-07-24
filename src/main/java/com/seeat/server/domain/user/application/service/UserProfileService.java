@@ -1,10 +1,7 @@
 package com.seeat.server.domain.user.application.service;
 
-import com.nimbusds.openid.connect.sdk.UserInfoRequest;
-import com.seeat.server.domain.theater.application.TheaterService;
+import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
-import com.seeat.server.domain.theater.domain.entity.MovieGenre;
-import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
 import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
 import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
@@ -37,7 +34,7 @@ public class UserProfileService implements UserProfileUseCase {
     // 외부 의존성
     private final UserAuditoriumRepository userAuditoriumRepository;
 
-    private final TheaterService theaterService;
+    private final TheaterUseCase theaterService;
 
     /**
      * 마이페이지 사용자 정보 조회를 위한 로직
@@ -71,7 +68,7 @@ public class UserProfileService implements UserProfileUseCase {
 
         // request 상영관 예외 처리
         List<Auditorium> auditoriums = request.getAuditoriumIds().stream()
-                .map(theaterService::getAuditoriumById)
+                .map(theaterService::getAuditorium)
                 .collect(Collectors.toList());
 
         // 사용자 정보 수정
