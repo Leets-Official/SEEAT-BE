@@ -18,13 +18,15 @@ public interface AuditoriumRepository extends JpaRepository<Auditorium, String> 
     /// GPT 도움..
     @Query("""
     SELECT
-        r.seat.auditorium AS auditorium,
+        a AS auditorium,
         COUNT(r) AS reviewCount,
         AVG(r.rating) AS avgRating,
         (COUNT(r) * 0.3 + AVG(r.rating) * 0.7) AS score
-    FROM Review r
-    GROUP BY r.seat.auditorium
-    ORDER BY COUNT(r) * 0.3 + AVG(r.rating) * 0.7 DESC
+    FROM Auditorium a
+    LEFT JOIN Seat s ON s.auditorium = a
+    LEFT JOIN Review r ON r.seat = s
+    GROUP BY a.id, a.name
+    ORDER BY COUNT(r) * 0.3 + COALESCE(AVG(r.rating), 0) * 0.7 DESC
 """)
     Slice<AuditoriumWithScore> findBestAuditoriums(Pageable pageable);
 
