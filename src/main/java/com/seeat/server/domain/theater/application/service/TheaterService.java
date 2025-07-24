@@ -1,5 +1,6 @@
-package com.seeat.server.domain.theater.application;
+package com.seeat.server.domain.theater.application.service;
 
+import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.application.dto.response.*;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.AuditoriumType;
@@ -26,7 +27,7 @@ import java.util.NoSuchElementException;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class TheaterService implements TheaterUseCase{
+public class TheaterService implements TheaterUseCase {
 
     private final AuditoriumRepository auditoriumRepository;
     public final SeatRepository seatRepository;
@@ -89,23 +90,23 @@ public class TheaterService implements TheaterUseCase{
         return SeatListResponse.from(seats);
     }
 
-
     /**
      * 공통 응답 함수
      * @param auditoriumId  상영관 ID
      */
-    private Auditorium getAuditorium(String auditoriumId) {
+    public Auditorium getAuditorium(String auditoriumId) {
         return auditoriumRepository.findById(auditoriumId)
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_AUDITORIUM.getMessage()));
     }
 
     /**
-     * 공통 응답 함수 public 불러오기
-     * @param auditoriumId 상영관 Id
-     * @return 상영관 entity
+     * 공통 응답 함수
+     * @param seatId  좌석 ID
      */
-    public Auditorium getAuditoriumById(String auditoriumId) {
-        return getAuditorium(auditoriumId);
+    @Override
+    public Seat getSeat(String seatId) {
+        return seatRepository.findById(seatId)
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_SEAT.getMessage()));
     }
 
 }

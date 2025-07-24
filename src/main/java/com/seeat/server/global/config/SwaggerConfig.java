@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -43,5 +44,14 @@ public class SwaggerConfig {
                 .title("SEEAT Swagger")
                 .description("SEEAT 스웨거입니다.")
                 .version("1.0.0");
+    }
+
+    @Bean
+    public OpenApiCustomizer removeGenericSchemas() {
+        return openApi -> {
+            openApi.getComponents().getSchemas().keySet().removeIf(name ->
+                    name.contains("ApiResponse") || name.contains("SliceResponse")
+            );
+        };
     }
 }
