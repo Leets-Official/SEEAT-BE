@@ -13,9 +13,6 @@ public interface AuditoriumRepository extends JpaRepository<Auditorium, String> 
     /// 타입에 맞는 상영관 추출
     Slice<Auditorium> findByType(AuditoriumType type, Pageable pageable);
 
-    /// 베스트 영화관 추출하기
-    /// 내부에서 정렬하기 위해 nativeQuery 사용
-    /// GPT 도움..
     @Query("""
     SELECT
         a AS auditorium,
@@ -23,12 +20,10 @@ public interface AuditoriumRepository extends JpaRepository<Auditorium, String> 
         AVG(r.rating) AS avgRating,
         (COUNT(r) * 0.3 + AVG(r.rating) * 0.7) AS score
     FROM Auditorium a
-    LEFT JOIN Seat s ON s.auditorium = a
-    LEFT JOIN Review r ON r.seat = s
-    GROUP BY a.id, a.name
+    LEFT JOIN Review r ON r.seat.auditorium = a
+    GROUP BY a.id
     ORDER BY COUNT(r) * 0.3 + COALESCE(AVG(r.rating), 0) * 0.7 DESC
 """)
     Slice<AuditoriumWithScore> findBestAuditoriums(Pageable pageable);
-
 
 }
