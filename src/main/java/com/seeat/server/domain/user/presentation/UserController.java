@@ -1,7 +1,7 @@
 package com.seeat.server.domain.user.presentation;
 
 
-import com.seeat.server.domain.user.application.UserUseCase;
+import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
 import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.domain.user.presentation.swagger.UserControllerSpec;

@@ -1,10 +1,10 @@
 package com.seeat.server.domain.user.presentation;
 
-import com.seeat.server.domain.user.application.UserUseCase;
 import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
 import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoUpdateResponse;
+import com.seeat.server.domain.user.application.usecase.UserProfileUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.presentation.swagger.UserProfileControllerSpec;
 import com.seeat.server.global.response.ApiResponse;
@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/api/v1/profile")
 public class UserProfileController implements UserProfileControllerSpec {
 
-    private final UserUseCase userService;
+    private final UserProfileUseCase userProfileService;
 
     /**
      * 마이페이지에서 사용자 정보를 조회 합니다.
@@ -32,7 +32,7 @@ public class UserProfileController implements UserProfileControllerSpec {
             @AuthenticationPrincipal User user){
 
         // 사용자 정보 조회
-        UserInfoResponse response = userService.getUserInfo(user.getId());
+        UserInfoResponse response = userProfileService.getUserInfo(user.getId());
 
         return ApiResponse.ok(response);
     }
@@ -50,8 +50,7 @@ public class UserProfileController implements UserProfileControllerSpec {
             @RequestBody UserInfoUpdateRequest request){
 
         // 사용자 정보 수정
-        UserInfoUpdateResponse response = userService.updateUserInfo(user.getId(), request.getNickname(),
-                request.getImageUrl(), request.getGenres(), request.getAuditoriums());
+        UserInfoUpdateResponse response = userProfileService.updateUserInfo(user.getId(), request);
 
         return ApiResponse.ok(response);
     }
@@ -65,7 +64,7 @@ public class UserProfileController implements UserProfileControllerSpec {
     public ApiResponse<List<UserGradeResponse>> getUserGradeList(){
 
         // 등급 목록 조회
-        List<UserGradeResponse> responses = userService.getUserGradeList();
+        List<UserGradeResponse> responses = userProfileService.getUserGradeList();
 
         return ApiResponse.ok(responses);
     }

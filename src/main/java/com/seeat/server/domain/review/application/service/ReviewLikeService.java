@@ -5,7 +5,7 @@ import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewLike;
 import com.seeat.server.domain.review.domain.repository.ReviewLikeRepository;
-import com.seeat.server.domain.user.application.UserUseCase;
+import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;

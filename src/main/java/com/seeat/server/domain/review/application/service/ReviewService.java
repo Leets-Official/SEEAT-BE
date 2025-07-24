@@ -11,7 +11,7 @@ import com.seeat.server.domain.review.application.dto.response.ReviewListRespons
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.theater.domain.repository.SeatRepository;
-import com.seeat.server.domain.user.application.UserUseCase;
+import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.pageable.PageRequest;

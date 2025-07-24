@@ -28,5 +28,5 @@ public class UserInfoUpdateRequest {
     /**
      * 선호하는 상영관
      */
-    List<Auditorium> auditoriums;
+    List<String> auditoriumIds;
 }
