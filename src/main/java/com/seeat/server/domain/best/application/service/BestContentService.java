@@ -111,7 +111,7 @@ public class BestContentService implements BestContentUseCase {
      * 6시간마다 캐시 및 DB 최신화 작업 수행
      */
     @Override
-    @Scheduled(cron = "0 0 */6 * * *") // 1시간 간격
+    @Scheduled(cron = "0 0 * * * *") // 1시간 간격
     public void saveBestContents() {
         PageRequest pageRequest = PageRequest.builder()
                 .page(1)
