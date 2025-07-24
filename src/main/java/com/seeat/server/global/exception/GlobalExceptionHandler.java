@@ -5,6 +5,7 @@ import com.seeat.server.global.response.CustomException;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.FieldErrorResponse;
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,16 +28,22 @@ import java.util.NoSuchElementException;
 public class GlobalExceptionHandler {
 
     /// 공통 처리 메서드
-    private ApiResponse<CustomException> handleCustomException(CustomException customException) {
+    private ApiResponse<CustomException> handleCustomException(CustomException customException, HttpServletRequest request) {
+        String username = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "anonymous";
+        ErrorCode errorCode = customException.getErrorCode();
+
+        log.info("[EXCEPTION] 사용자: {}, 메서드: {}, URI: {}, 예외: {}",
+                username, request.getMethod(), request.getRequestURI(), errorCode.getMessage());
 
         return ApiResponse.fail(customException);
     }
+
 
     /// 예외 처리
     // 최하위 예외처리
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
-    public ApiResponse<CustomException> handleException(Exception e) {
+    public ApiResponse<CustomException> handleException(Exception e, HttpServletRequest request) {
 
         /// 로그 발생
         log.error(e.getMessage(), e);
@@ -47,13 +54,13 @@ public class GlobalExceptionHandler {
         /// 해당 예외 코드로 예외 처리
         CustomException exception = new CustomException(errorCode, null);
 
-        return handleCustomException(exception);
+        return handleCustomException(exception, request);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({
             IllegalStateException.class, IllegalArgumentException.class})
-    public ApiResponse<CustomException> handleIllegalStateException(Exception e) {
+    public ApiResponse<CustomException> handleIllegalStateException(Exception e, HttpServletRequest request) {
 
         /// 메세지 바탕으로 예외 코드 검색
         ErrorCode errorCode = ErrorCode.fromMessage(e.getMessage());
@@ -61,12 +68,12 @@ public class GlobalExceptionHandler {
         /// 해당 예외 코드로 예외 처리
         CustomException exception = new CustomException(errorCode, null);
 
-        return handleCustomException(exception);
+        return handleCustomException(exception, request);
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({NoSuchElementException.class, NoResourceFoundException.class})
-    public ApiResponse<CustomException> handleNoSuchException(Exception e) {
+    public ApiResponse<CustomException> handleNoSuchException(Exception e, HttpServletRequest request) {
 
         /// 메세지 바탕으로 예외 코드 검색
         ErrorCode errorCode = ErrorCode.fromMessage(e.getMessage());
@@ -74,12 +81,12 @@ public class GlobalExceptionHandler {
         /// 해당 예외 코드로 예외 처리
         CustomException exception = new CustomException(errorCode, null);
 
-        return handleCustomException(exception);
+        return handleCustomException(exception, request);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ApiResponse<CustomException> handleValidationExceptions(MethodArgumentNotValidException e) {
+    public ApiResponse<CustomException> handleValidationExceptions(MethodArgumentNotValidException e, HttpServletRequest request) {
 
         /// 파라미터용 예외 코드
         ErrorCode errorCode = ErrorCode.BAD_PARAMETER;
@@ -92,7 +99,7 @@ public class GlobalExceptionHandler {
 
         CustomException exception = new CustomException(errorCode, errors);
 
-        return handleCustomException(exception);
+        return handleCustomException(exception, request);
     }
 
 }

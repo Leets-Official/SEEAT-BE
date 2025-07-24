@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+import java.util.Arrays;
+
 /**
  * 애플리케이션 전역에서 사용하는 에러 코드 Enum입니다.
  * 각 에러는 고유 코드, HTTP 상태, 메시지를 포함합니다.
@@ -112,14 +114,11 @@ public enum ErrorCode {
      *
      * @param message 에러 메시지
      * @return 일치하는 ErrorCode
-     * @throws IllegalArgumentException 메시지에 해당하는 ErrorCode가 없을 때
      */
     public static ErrorCode fromMessage(String message) {
-        for (ErrorCode errorCode : ErrorCode.values()) {
-            if (errorCode.getMessage().equals(message)) {
-                return errorCode;
-            }
-        }
-        throw new IllegalArgumentException("해당 message를 가진 ErrorCode가 존재하지 않습니다: " + message);
+        return Arrays.stream(values())
+                .filter(code -> code.message.equalsIgnoreCase(message))
+                .findFirst()
+                .orElse(ErrorCode.INTERNAL_SERVER_ERROR); // 기본 에러 처리
     }
 }
