@@ -250,6 +250,9 @@ public class BestContentService implements BestContentUseCase {
         /// 기존 값 삭제 후 새로 저장
         reviewRepository.deleteAll();
 
+        /// 레디스 값도 삭제하기
+        redisTemplate.delete(BEST_REVIEW_LIST_KEY);
+
         /// 베스트 후기 조회 후, 저장하기
         SliceResponse<BestReviewListResponse> response = reviewService.getBestReviews(pageRequest);
 
@@ -283,6 +286,8 @@ public class BestContentService implements BestContentUseCase {
 
         /// 기존 값 삭제 후 새로 저장
         auditoriumRepository.deleteAll();
+        redisTemplate.delete(BEST_AUDITORIUM_LIST_KEY);
+
 
         /// 인기 상영관 조회
         SliceResponse<BestAuditoriumListResponse> response = theaterService.loadBestAuditoriums(pageRequest);
