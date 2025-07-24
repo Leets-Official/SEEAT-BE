@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +45,8 @@ public class BestReviewSnapshot extends BaseEntity {
 
     private Long heartCount;
 
+    private LocalDateTime originalCreatedAt;
+
     /// 정적 팩토리 메서드
     public static BestReviewSnapshot of(
             Long reviewId,
@@ -55,7 +58,8 @@ public class BestReviewSnapshot extends BaseEntity {
             Long userId,
             String nickname,
             String profileImageUrl,
-            Long heartCount
+            Long heartCount,
+            LocalDateTime originalCreatedAt
     ) {
         return BestReviewSnapshot.builder()
                 .reviewId(reviewId)
@@ -68,6 +72,7 @@ public class BestReviewSnapshot extends BaseEntity {
                 .nickname(nickname)
                 .profileImageUrl(profileImageUrl)
                 .heartCount(heartCount)
+                .originalCreatedAt(originalCreatedAt)
                 .build();
     }
 

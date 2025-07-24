@@ -7,6 +7,7 @@ import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.user.domain.entity.User;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -22,6 +23,8 @@ import java.util.List;
  * @param nickname          닉네임
  * @param profileImageUrl   프로필 이미지
  * @param heartCount        좋아요(하트) 수
+ * @param originalCreatedAt 원본 게시글의 작성시간
+ * @param createdAt         스냅샷 시간
  */
 
 @Builder
@@ -35,7 +38,9 @@ public record BestReviewListResponse(
         Long userId,
         String nickname,
         String profileImageUrl,
-        Long heartCount
+        Long heartCount,
+        LocalDateTime originalCreatedAt,
+        LocalDateTime createdAt
 ) {
 
     /// 정적 팩토리 메서드
@@ -52,6 +57,8 @@ public record BestReviewListResponse(
                 .nickname(snapshot.getNickname())
                 .profileImageUrl(snapshot.getProfileImageUrl())
                 .heartCount(snapshot.getHeartCount())
+                .originalCreatedAt(snapshot.getOriginalCreatedAt())
+                .createdAt(snapshot.getCreatedAt())
                 .build();
     }
 
@@ -62,7 +69,7 @@ public record BestReviewListResponse(
                 .toList();
     }
 
-    /// 정적 팩토리 메서드
+    /// DB에서 직접 조회 정적 팩토리 메서드
     public static BestReviewListResponse from(Review review, List<ReviewHashTag> hashTags, Long heartCount) {
 
         /// 해시태그들 정리
@@ -85,6 +92,8 @@ public record BestReviewListResponse(
                 .nickname(user.getNickname())
                 .profileImageUrl(user.getImageUrl())
                 .heartCount(heartCount)
+                .originalCreatedAt(review.getCreatedAt())
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 

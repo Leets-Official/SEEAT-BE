@@ -28,7 +28,8 @@ public class SnapShotConverter {
                 response.userId(),
                 response.nickname(),
                 response.profileImageUrl(),
-                response.heartCount()
+                response.heartCount(),
+                response.createdAt()
         );
     }
 
