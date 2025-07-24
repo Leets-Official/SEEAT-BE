@@ -1,4 +1,4 @@
-package com.seeat.server.domain.review.application.dto.request;
+package com.seeat.server.domain.bookmark.application.dto.request;
 
 import lombok.Builder;
 import lombok.Data;

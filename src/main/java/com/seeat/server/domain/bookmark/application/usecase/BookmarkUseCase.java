@@ -1,9 +1,9 @@
-package com.seeat.server.domain.review.application.usecase;
+package com.seeat.server.domain.bookmark.application.usecase;
 
 
-import com.seeat.server.domain.review.application.dto.request.BookmarkRequest;
+import com.seeat.server.domain.bookmark.application.dto.request.BookmarkRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
-import com.seeat.server.domain.review.domain.entity.Bookmark;
+import com.seeat.server.domain.bookmark.domain.entity.Bookmark;
 import com.seeat.server.global.response.pageable.PageRequest;
 import org.springframework.data.domain.Slice;
 

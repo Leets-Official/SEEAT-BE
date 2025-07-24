@@ -1,12 +1,12 @@
 package com.seeat.server.domain.review.application.service;
 
-import com.seeat.server.domain.review.application.dto.request.BookmarkRequest;
+import com.seeat.server.domain.bookmark.application.dto.request.BookmarkRequest;
+import com.seeat.server.domain.bookmark.application.service.BookmarkService;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
-import com.seeat.server.domain.review.domain.entity.Bookmark;
+import com.seeat.server.domain.bookmark.domain.entity.Bookmark;
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewLike;
-import com.seeat.server.domain.review.domain.repository.BookmarkRepository;
+import com.seeat.server.domain.bookmark.domain.repository.BookmarkRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.seat.domain.AuditoriumFixtures;
 import com.seeat.server.domain.seat.domain.SeatFixtures;
