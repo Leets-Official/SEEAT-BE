@@ -87,7 +87,7 @@ public class BestContentService implements BestContentUseCase {
      * @param pageRequest 페이지
      */
     @Override
-    @Cacheable(value = BEST_REVIEW_LIST_KEY, key = "#pageRequest.page + '-' + #pageRequest.size")
+    @Cacheable(value = BEST_AUDITORIUM_LIST_KEY, key = "#pageRequest.page + '-' + #pageRequest.size")
     public SliceResponse<BestAuditoriumListResponse> loadBestTheaters(PageRequest pageRequest) {
 
         log.info("[BestContent] DB에서 조회 (캐시 없거나 만료)");
