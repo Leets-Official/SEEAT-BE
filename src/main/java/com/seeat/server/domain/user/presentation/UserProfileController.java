@@ -8,10 +8,13 @@ import com.seeat.server.domain.user.application.usecase.UserProfileUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.presentation.swagger.UserProfileControllerSpec;
 import com.seeat.server.global.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -44,10 +47,12 @@ public class UserProfileController implements UserProfileControllerSpec {
      * @param request 수정 정보 요청값 (닉네임, 유저프로필, 선호 장르, 선호 상영관)
      * @return UserInfoUpdateResponse DTO 응답
      */
-    @PatchMapping
+    @PatchMapping(
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ApiResponse<UserInfoUpdateResponse> updateUserInfo(
             @AuthenticationPrincipal User user,
-            @RequestBody UserInfoUpdateRequest request){
+            @ModelAttribute @Valid UserInfoUpdateRequest request) throws IOException {
 
         // 사용자 정보 수정
         UserInfoUpdateResponse response = userProfileService.updateUserInfo(user.getId(), request);

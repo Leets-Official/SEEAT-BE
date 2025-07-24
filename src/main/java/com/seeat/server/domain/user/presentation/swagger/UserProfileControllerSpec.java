@@ -8,11 +8,14 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
+import java.io.IOException;
 import java.util.List;
 
 @Tag(name = "유저 프로필(마이페이지) API", description = "회원 정보를 관리하는 API 입니다.")
@@ -36,12 +39,14 @@ public interface UserProfileControllerSpec {
      * @param request 수정할 정보
      * @return UserInfoUpdateResponse 응답
      */
-    @PatchMapping
+    @PatchMapping(
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     @Operation(summary = "사용자 정보 수정",
             description = "마이페이지에서 사용자 정보를 수정합니다.")
     ApiResponse<UserInfoUpdateResponse> updateUserInfo(
             @AuthenticationPrincipal User user,
-            @RequestBody UserInfoUpdateRequest request);
+            @ModelAttribute @Valid UserInfoUpdateRequest request) throws IOException;
 
     /**
      * 사용자 등급 목록 조회 API

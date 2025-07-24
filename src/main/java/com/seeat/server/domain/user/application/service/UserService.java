@@ -9,6 +9,7 @@ import com.seeat.server.domain.user.domain.entity.UserAuditorium;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
 import com.seeat.server.domain.user.domain.repository.UserAuditoriumRepository;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
+import com.seeat.server.global.image.application.usecase.ImageUseCase;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.service.RedisService;
 import com.seeat.server.global.util.JwtConstants;
@@ -23,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -39,6 +41,8 @@ public class UserService implements UserUseCase {
     private final UserAuditoriumRepository userAuditoriumRepository;
     private final AuditoriumRepository auditoriumRepository;
 
+    /// 이미지 서비스 추가
+    private final ImageUseCase imageService;
 
     @Value("${server.ssl.enabled}")
     private boolean sslEnabled;
@@ -72,12 +76,20 @@ public class UserService implements UserUseCase {
      * @param request 회원가입을 위한 추가 정보
      */
     @Override
-    public void createUser(TempUserInfo tempUserInfo, UserSignUpRequest request) {
-        // 유저 DB에 저장
-        User user = User.of(tempUserInfo.getEmail(), tempUserInfo.getSocialId(), tempUserInfo.getSocial(), tempUserInfo.getUsername(),
-                            request.getNickname(), request.getImageUrl(), request.getGenres());
+    public void createUser(TempUserInfo tempUserInfo, UserSignUpRequest request) throws IOException {
 
-        repository.save(user);
+        String thumbnailImage = "thumbnail";
+
+        /// 존재한다면 이미지 추가
+        if (request.getImage() != null) {
+            thumbnailImage = imageService.uploadFile(request.getImage());
+        }
+        /// 유저 객체 생성
+        User requestUser = User.of(tempUserInfo.getEmail(), tempUserInfo.getSocialId(), tempUserInfo.getSocial(), tempUserInfo.getUsername(),
+                request.getNickname(), thumbnailImage, request.getGenres());
+
+        /// DB에 유저 저장
+        User user = repository.save(requestUser);
 
         // 선호하는 상영관 유무 체크 후 저장
         if (request.getAuditoriumId() != null) {
