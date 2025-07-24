@@ -11,9 +11,9 @@ import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
-import com.seeat.server.domain.seat.domain.AuditoriumFixtures;
-import com.seeat.server.domain.seat.domain.SeatFixtures;
-import com.seeat.server.domain.seat.domain.TheaterFixtures;
+import com.seeat.server.domain.theater.domain.AuditoriumFixtures;
+import com.seeat.server.domain.theater.domain.SeatFixtures;
+import com.seeat.server.domain.theater.domain.TheaterFixtures;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.theater.domain.entity.Theater;
@@ -44,7 +44,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertFalse;
 
-import java.util.List;
 /**
  * [리뷰 서비스의 통합 테스트 클래스]입니다.
  * 리뷰 생성, 조회에 대한 happy/unhappy 테스트를 수행합니다.

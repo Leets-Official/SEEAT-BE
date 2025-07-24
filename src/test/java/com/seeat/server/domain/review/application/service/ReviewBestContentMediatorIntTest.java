@@ -7,9 +7,9 @@ import com.seeat.server.domain.review.domain.ReviewFixtures;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.repository.HashTagRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
-import com.seeat.server.domain.seat.domain.AuditoriumFixtures;
-import com.seeat.server.domain.seat.domain.SeatFixtures;
-import com.seeat.server.domain.seat.domain.TheaterFixtures;
+import com.seeat.server.domain.theater.domain.AuditoriumFixtures;
+import com.seeat.server.domain.theater.domain.SeatFixtures;
+import com.seeat.server.domain.theater.domain.TheaterFixtures;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.theater.domain.entity.Theater;
@@ -34,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
