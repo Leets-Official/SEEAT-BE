@@ -1,12 +1,14 @@
 package com.seeat.server.domain.theater.application.service;
 
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
+import com.seeat.server.domain.best.application.dto.response.BestAuditoriumListResponse;
 import com.seeat.server.domain.theater.application.dto.response.*;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.AuditoriumType;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
 import com.seeat.server.domain.theater.domain.repository.SeatRepository;
+import com.seeat.server.domain.theater.domain.repository.dto.AuditoriumWithScore;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.PageUtil;
@@ -17,9 +19,8 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
+import static com.seeat.server.global.response.pageable.PageUtil.getPageable;
 
 /**
  * 영화관/상영관/좌석 관련 서비스
@@ -127,5 +128,31 @@ public class TheaterService implements TheaterUseCase {
         return seats;
     }
 
+
+    /**
+     * 외부 참조 함수
+     */
+    // 베스트 상영관 가져오기
+    @Override
+    public SliceResponse<BestAuditoriumListResponse> loadBestAuditoriums(PageRequest pageRequest) {
+
+        /// Pageable 가져오기
+        org.springframework.data.domain.PageRequest pageable = getPageable(pageRequest);
+
+        /// 서비스 조회
+        Slice<AuditoriumWithScore> slice = auditoriumRepository.findBestAuditoriums(pageable);
+
+        if (!slice.hasContent()) {
+
+            Slice<BestAuditoriumListResponse> emptySlice = new SliceImpl<>(Collections.emptyList(), pageable, false);
+
+            return SliceResponse.from(emptySlice);
+        }
+
+        /// DTO 변경
+        Slice<BestAuditoriumListResponse> sliceResponse = BestAuditoriumListResponse.from(slice);
+
+        return SliceResponse.from(sliceResponse);
+    }
 
 }

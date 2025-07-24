@@ -1,6 +1,7 @@
 package com.seeat.server.domain.review.application.service;
 
 import com.seeat.server.domain.review.application.usecase.ReviewImageUseCase;
+import com.seeat.server.domain.best.application.dto.response.BestReviewListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
@@ -187,31 +188,6 @@ public class ReviewService implements ReviewUseCase {
     }
 
     /**
-     * 홈 화면에서 사용할 인기 리뷰 목록 조회를 위한 로직 (무한 스크롤)
-     * @param pageRequest   페이지 네이션
-     */
-    @Override
-    public SliceResponse<ReviewListResponse> loadFavoriteReviews(PageRequest pageRequest) {
-
-        /// Pageable 처리
-        Pageable pageable = getPageable(pageRequest);
-
-        /// 인기 있는 리뷰 검색
-        Slice<ReviewWithLikeCount> reviews = repository.findAllOrderByPopularity(pageable);
-
-        /// DTO 변환
-        // 리뷰 ID 목록 추출
-        List<Long> reviewIds = getLongs(reviews);
-
-        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
-        List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
-
-        /// Slice 객체 처리
-        SliceImpl<ReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
-        return SliceResponse.from(slice);
-    }
-
-    /**
      * 내가 작성한 리뷰 확인하기
      * @param userId        로그인한 유저 ID
      * @param pageRequest   페이지 요청
@@ -335,6 +311,30 @@ public class ReviewService implements ReviewUseCase {
     }
 
     /**
+     * 베스트 리뷰 조회를 위해 사용되는 함수
+     * @param pageRequest   페이지
+     */
+    @Override
+    public SliceResponse<BestReviewListResponse> getBestReviews(PageRequest pageRequest) {
+
+        /// Pageable 처리
+        Pageable pageable = getPageable(pageRequest);
+
+        Slice<ReviewWithLikeCount> reviews = repository.findBestReviews(pageable);
+
+        /// DTO 변경
+        // 리뷰 ID 목록 추출
+        List<Long> reviewIds = getLongs(reviews);
+
+        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        List<BestReviewListResponse> result = getBestReviewListResponses(reviewIds, reviews);
+
+        /// Slice 객체 처리
+        SliceImpl<BestReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
+        return SliceResponse.from(slice);
+    }
+
+    /**
      * 리뷰의 Id를 얻기 위한 공통 로직
      * @param reviews ID를 추출할 리뷰 목록
      */
@@ -395,6 +395,31 @@ public class ReviewService implements ReviewUseCase {
         // DTO 변환
         return reviews.stream()
                 .map(review -> ReviewListResponse.from(
+                        review.getReview(),
+                        mapping.getOrDefault(review.getReview().getId(), List.of()),
+                        review.getLikeCount())
+                )
+                .toList();
+    }
+
+
+    /**
+     * 리뷰의 Id를 바탕으로 BestReview DTO 변경 공통 로직
+     * @param reviewIds ID 추출 목록
+     * @param reviews Page 처리를 한 리뷰 엔티티
+     */
+    private List<BestReviewListResponse> getBestReviewListResponses(List<Long> reviewIds, Slice<ReviewWithLikeCount> reviews) {
+
+        // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        List<ReviewHashTag> allHashTags = hashTagService.getReviewHashTagByReviews(reviewIds);
+
+        // 리뷰 ID를 바탕으로 해시태그 매핑
+        Map<Long, List<ReviewHashTag>> mapping = allHashTags.stream()
+                .collect(Collectors.groupingBy(ht -> ht.getReview().getId()));
+
+        // DTO 변환
+        return reviews.stream()
+                .map(review -> BestReviewListResponse.from(
                         review.getReview(),
                         mapping.getOrDefault(review.getReview().getId(), List.of()),
                         review.getLikeCount())

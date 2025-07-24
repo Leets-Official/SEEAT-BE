@@ -1,5 +1,6 @@
 package com.seeat.server.domain.review.application.usecase;
 
+import com.seeat.server.domain.best.application.dto.response.BestReviewListResponse;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
@@ -42,10 +43,13 @@ public interface ReviewUseCase {
     /// 리뷰 삭제
     void deleteReview(Long reviewId, Long userId);
 
-
     /// 외부 의존성을 위한 유즈 케이스
     Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Long> reviews);
 
     Review getReview(Long reviewId);
+
+    SliceResponse<BestReviewListResponse> getBestReviews(PageRequest pageRequest);
+
+
 }
 

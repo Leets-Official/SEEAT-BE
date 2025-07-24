@@ -71,6 +71,19 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "ORDER BY COUNT(rl) DESC, r.createdAt DESC")
     List<ReviewWithLikeCount> findByReviewIds(@Param("reviewIds") List<Long> reviewIds);
 
+    /**
+     * 좋아요 수를 기준으로 인기 리뷰 목록을 조회합니다.
+     * 최신순(createdAt)으로 정렬 기준이 보조적으로 적용됩니다.
+     *
+     * @param pageable 페이지네이션 정보
+     * @return 좋아요 수가 많은 순으로 정렬된 리뷰 목록
+     */
+    @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
+            "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
+            "GROUP BY r "+
+            "ORDER BY COUNT(rl) DESC, r.createdAt DESC")
+    Slice<ReviewWithLikeCount> findBestReviews(Pageable pageable);
+
 
     /**
      * 나의 리뷰 검색

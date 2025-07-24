@@ -1,5 +1,6 @@
 package com.seeat.server.domain.review.application.service;
 
+import com.seeat.server.domain.best.application.dto.response.BestReviewListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.review.domain.HashTagFixtures;
 import com.seeat.server.domain.review.domain.ReviewFixtures;
@@ -531,10 +532,10 @@ class ReviewServiceIntTest {
             likeService.reviewLike(user1.getId(), review1.getId());
 
             //when
-            SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
+            SliceResponse<BestReviewListResponse> response = sut.getBestReviews(pageRequest);
 
             // then
-            List<ReviewListResponse> contents = response.content();
+            List<BestReviewListResponse> contents = response.content();
 
             // 응답 리스트가 Null 이 아니고 사이즈가 2개인지 확인
             Assertions.assertThat(contents).isNotNull();
@@ -557,8 +558,8 @@ class ReviewServiceIntTest {
             likeService.reviewLike(user1.getId(), newer.getId());
 
             // when
-            SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
-            List<ReviewListResponse> contents = response.content();
+            SliceResponse<BestReviewListResponse> response = sut.getBestReviews(pageRequest);
+            List<BestReviewListResponse> contents = response.content();
 
             // then
             Assertions.assertThat(contents.size()).isEqualTo(2);
@@ -585,8 +586,8 @@ class ReviewServiceIntTest {
             likeService.reviewLike(user2.getId(), revB.getId());
 
             // when
-            SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
-            List<ReviewListResponse> contents = response.content();
+            SliceResponse<BestReviewListResponse> response = sut.getBestReviews(pageRequest);
+            List<BestReviewListResponse> contents = response.content();
 
             // then
             Assertions.assertThat(contents.size()).isEqualTo(2);
@@ -604,8 +605,8 @@ class ReviewServiceIntTest {
             PageRequest pageRequest = PageRequest.builder().page(1).size(5).build();
 
             // when
-            SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
-            List<ReviewListResponse> contents = response.content();
+            SliceResponse<BestReviewListResponse> response = sut.getBestReviews(pageRequest);
+            List<BestReviewListResponse> contents = response.content();
 
             // then
             Assertions.assertThat(contents).isEmpty();
