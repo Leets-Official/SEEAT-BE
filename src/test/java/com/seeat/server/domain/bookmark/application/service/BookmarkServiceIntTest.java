@@ -1,7 +1,6 @@
-package com.seeat.server.domain.review.application.service;
+package com.seeat.server.domain.bookmark.application.service;
 
 import com.seeat.server.domain.bookmark.application.dto.request.BookmarkRequest;
-import com.seeat.server.domain.bookmark.application.service.BookmarkService;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.bookmark.domain.entity.Bookmark;
