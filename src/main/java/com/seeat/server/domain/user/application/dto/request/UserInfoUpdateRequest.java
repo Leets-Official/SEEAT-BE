@@ -1,6 +1,5 @@
 package com.seeat.server.domain.user.application.dto.request;
 
-import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,5 +27,5 @@ public class UserInfoUpdateRequest {
     /**
      * 선호하는 상영관
      */
-    List<Auditorium> auditoriums;
+    List<String> auditoriumIds;
 }

@@ -2,6 +2,7 @@ package com.seeat.server.domain.theater.presentation.swagger;
 
 import com.seeat.server.domain.theater.application.dto.response.AuditoriumDetailResponse;
 import com.seeat.server.domain.theater.application.dto.response.SeatListResponse;
+import com.seeat.server.domain.theater.application.dto.response.SeatRatingSummaryResponse;
 import com.seeat.server.domain.theater.application.dto.response.TheaterListResponse;
 import com.seeat.server.domain.theater.domain.entity.AuditoriumType;
 import com.seeat.server.global.response.ApiResponse;
@@ -44,6 +45,16 @@ public interface TheaterControllerSpec {
             description = "상영관 ID를 바탕으로 좌석배치도 조회"
     )
     ApiResponse<List<SeatListResponse>> getSeats(
+            @Parameter(
+                    description = "조회할 상영관 Id",
+                    example = "13018")
+            @PathVariable String auditoriumId);
+
+    @Operation(
+            summary = "평점/개수 포함된 좌석 배치도 조회 API",
+            description = "상영관 ID를 바탕으로 평점/개수 포함된 좌석배치도 조회"
+    )
+    ApiResponse<List<SeatRatingSummaryResponse>> getSeatRatings(
             @Parameter(
                     description = "조회할 상영관 Id",
                     example = "13018")

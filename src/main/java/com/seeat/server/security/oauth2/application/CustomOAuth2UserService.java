@@ -1,6 +1,6 @@
 package com.seeat.server.security.oauth2.application;
 
-import com.seeat.server.domain.user.application.UserService;
+import com.seeat.server.domain.user.application.service.UserService;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
 import com.seeat.server.global.response.CustomException;

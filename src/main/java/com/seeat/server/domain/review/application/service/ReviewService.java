@@ -1,18 +1,22 @@
 package com.seeat.server.domain.review.application.service;
 
+import com.seeat.server.domain.review.application.usecase.ReviewImageUseCase;
 import com.seeat.server.domain.best.application.dto.response.BestReviewListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
+import com.seeat.server.domain.review.domain.entity.ReviewImage;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
+import com.seeat.server.domain.theater.application.usecase.SeatRatingUseCase;
+import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
+import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.Seat;
-import com.seeat.server.domain.theater.domain.repository.SeatRepository;
-import com.seeat.server.domain.user.application.UserUseCase;
+import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.pageable.PageRequest;
@@ -24,6 +28,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -39,9 +44,13 @@ public class ReviewService implements ReviewUseCase {
     private final ReviewRepository repository;
     private final ReviewHashTagService hashTagService;
 
+    /// 이미지 의존성 처리
+    private final ReviewImageUseCase imageService;
+
     /// 외부 의존성 처리
-    private final SeatRepository seatRepository;
+    private final TheaterUseCase theaterService;
     private final UserUseCase userService;
+    private final SeatRatingUseCase seatRatingService;
 
     // ========================
     //  저장 함수
@@ -52,23 +61,34 @@ public class ReviewService implements ReviewUseCase {
      * @param userId  리뷰를 작성할 유저 id (@AuthenticationPrincipal)
      */
     @Override
-    public Review createReview(ReviewRequest request, Long userId) {
+    public Review createReview(ReviewRequest request, Long userId) throws IOException {
 
         // 좌석 예외 처리
-        Seat seat = seatRepository.findById(request.getSeatId())
-                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_SEAT.getMessage()));
+        Seat seat = theaterService.getSeat(request.getSeatId());
 
         // 유저 예외처리
         User user = userService.getUser(userId);
 
         // 객체 생성
-        Review requestReview = Review.of(user, seat, request.getMovieTitle(), request.getRating(), request.getContent(), "thumbnail");
+        Review requestReview = Review.of(user, seat, request.getMovieTitle(), request.getRating(), request.getContent());
 
         // DB 내 저장
         Review review = repository.save(requestReview);
 
+        // 이미지가 존재하는 경우
+        if (request.getPhotos()!=null) {
+            // 이미지 저장
+            String thumbnail = imageService.saveReviewImage(review, request.getPhotos()).get(0);
+
+            // 현재 이미지를 저장할 때 더티 체킹으로 진행
+            review.changeThumbnailUrl(thumbnail);
+        }
+
         // 리뷰 내 해시태그 생성
         hashTagService.createReviewHashTag(review, request.getHashtags());
+
+        // 좌석 배치도 업데이트
+        seatRatingService.saveSeatRating(review, seat);
 
         return review;
     }
@@ -85,14 +105,20 @@ public class ReviewService implements ReviewUseCase {
     @Override
     public ReviewDetailResponse loadReview(Long reviewId) {
 
-        /// ReviewId를 바탕으로 조회
+        /// ReviewId를 바탕으로 조회 (리뷰와 좋아요 동시에 조회)
         ReviewWithLikeCount result = repository.findReviewAndCountById(reviewId)
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_REVIEW.getMessage()));
 
-        /// ReviewId를 바탕으로 작성한 해시태그 조회
-        List<ReviewHashTag> hashTags = hashTagService.getReviewHashTagByReview(result.getReview());
+        /// 리뷰
+        Review review = result.getReview();
 
-        return ReviewDetailResponse.from(result.getReview(), hashTags, result.getLikeCount());
+        /// ReviewId를 바탕으로 작성한 해시태그 조회
+        List<ReviewHashTag> hashTags = hashTagService.getReviewHashTagByReview(review);
+
+        /// 이미지 주소 조회
+        List<ReviewImage> images = imageService.getReviewImagesByReview(review);
+
+        return ReviewDetailResponse.from(review, hashTags, result.getLikeCount(), images);
     }
 
     /**
@@ -104,11 +130,14 @@ public class ReviewService implements ReviewUseCase {
     @Override
     public SliceResponse<ReviewListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest) {
 
+        /// 좌석 예외처리
+        Seat seat = theaterService.getSeat(seatId);
+
         // Pageable 처리
         Pageable pageable = getPageable(pageRequest);
 
         // DB 조회
-        Slice<ReviewWithLikeCount> reviews = repository.findBySeat_Id(seatId, pageable);
+        Slice<ReviewWithLikeCount> reviews = repository.findBySeat_Id(seat.getId(), pageable);
 
         // 리뷰 ID 목록 추출
         List<Long> reviewIds = getLongs(reviews);
@@ -130,11 +159,14 @@ public class ReviewService implements ReviewUseCase {
     @Override
     public SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(String auditoriumId, PageRequest pageRequest) {
 
+        /// 상영관 존재 예외처리
+        Auditorium auditorium = theaterService.getAuditorium(auditoriumId);
+
         // Pageable 처리
         Pageable pageable = getPageable(pageRequest);
 
         // DB 조회
-        Slice<ReviewWithLikeCount> reviews = repository.findByAuditorium_Id(auditoriumId, pageable);
+        Slice<ReviewWithLikeCount> reviews = repository.findByAuditorium_Id(auditorium.getId(), pageable);
 
         // 리뷰 ID 목록 추출
         List<Long> reviewIds = getLongs(reviews);

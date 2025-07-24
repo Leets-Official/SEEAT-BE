@@ -4,12 +4,10 @@ import com.seeat.server.domain.best.application.dto.response.BestReviewListRespo
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.review.domain.HashTagFixtures;
 import com.seeat.server.domain.review.domain.ReviewFixtures;
-import com.seeat.server.domain.review.domain.entity.HashTag;
-import com.seeat.server.domain.review.domain.entity.HashTagType;
-import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
+import com.seeat.server.domain.review.domain.entity.*;
 import com.seeat.server.domain.review.domain.repository.HashTagRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewHashTagRepository;
+import com.seeat.server.domain.review.domain.repository.ReviewImageRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
@@ -33,12 +31,20 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertFalse;
 
 /**
@@ -79,6 +85,9 @@ class ReviewServiceIntTest {
     @Autowired
     private ReviewLikeUseCase likeService;
 
+    @Autowired
+    private ReviewImageRepository imageRepository;
+
     private Seat seat1;
     private Seat seat2;
     private User user1;
@@ -95,7 +104,7 @@ class ReviewServiceIntTest {
      * 각 테스트 실행 전 공통으로 필요한 영화관, 상영관, 좌석, 유저 데이터를 준비합니다.
      */
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         theater = theaterRepository.save(TheaterFixtures.createTheater());
         auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
         seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
@@ -108,15 +117,15 @@ class ReviewServiceIntTest {
     }
 
     @Nested
-    @DisplayName("생성 테스트")
+    @DisplayName("생성 테스트 [이미지 포함]")
     class CreateReview {
 
         /**
          * 정상적인 유저가 리뷰를 생성하는 경우를 검증합니다.
          */
         @Test
-        @DisplayName("[happy] 로그인한 유저 리뷰 정상 생성")
-        void createReviewByUser_happy() {
+        @DisplayName("[happy] 이미지 없이 로그인한 유저 리뷰 정상 생성")
+        void createReviewByUser_happy() throws IOException {
             //given
             var request = ReviewRequest.builder()
                     .seatId(seat1.getId())
@@ -156,6 +165,173 @@ class ReviewServiceIntTest {
             Assertions.assertThat(actualHashTagIds)
                     .containsExactlyInAnyOrderElementsOf(request.getHashtags());
         }
+
+        /**
+         * 정상적인 유저가 이미지 한 장을 통해 리뷰를 생성하는 경우를 검증합니다.
+         */
+        @Test
+        @DisplayName("[happy] 로그인한 유저 이미지 1장으로 리뷰 정상 생성")
+        void createReviewByUser_happy_with_photos() throws IOException {
+            //given
+            InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
+
+            MockMultipartFile file1 = new MockMultipartFile("photos", "sample1.png", MediaType.IMAGE_PNG_VALUE, inputStream1);
+
+            var request = ReviewRequest.builder()
+                    .seatId(seat1.getId())
+                    .content("test")
+                    .movieTitle("ReviewTestTitle")
+                    .rating(5)
+                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                    .photos(List.of(file1))
+                    .build();
+
+            //when
+            sut.createReview(request, user1.getId());
+
+            //then
+            /// 리뷰 체크
+            List<Review> reviews = repository.findAll();
+
+            // 1. 개수 검증
+            Assertions.assertThat(reviews).hasSize(1);
+
+            // 2. 리뷰와 정보들이 일치하는지 검증
+            Review review = reviews.get(0);
+            Assertions.assertThat(review.getContent()).isEqualTo(request.getContent());
+            Assertions.assertThat(review.getRating()).isEqualTo(request.getRating());
+            Assertions.assertThat(review.getSeat().getId()).isEqualTo(seat1.getId());
+            Assertions.assertThat(review.getSeat().getAuditorium().getTheater().getName()).isEqualTo("Test Theater");
+
+            /// 해시태그 체크
+            List<ReviewHashTag> reviewHashTags = reviewHashTagRepository.findByReview(review);
+            // 1. 개수 검증
+            Assertions.assertThat(reviewHashTags).hasSize(3);
+
+            // 2. 실제 연결된 해시태그 ID와 요청한 해시태그 ID가 일치하는지 검증
+            List<Long> actualHashTagIds = reviewHashTags.stream()
+                    .map(rht -> rht.getHashTag().getId())
+                    .toList();
+            Assertions.assertThat(actualHashTagIds)
+                    .containsExactlyInAnyOrderElementsOf(request.getHashtags());
+
+            // 이미지 검증
+            String thumbnailUrl = review.getThumbnailUrl();
+            Assertions.assertThat(thumbnailUrl.contains("sample"));
+        }
+
+        /**
+         * 정상적인 유저가 이미지 3 장을 통해 리뷰를 생성하는 경우를 검증합니다.
+         */
+        @Test
+        @DisplayName("[happy] 로그인한 유저 이미지 3장으로 리뷰 정상 생성")
+        void createReviewByUser_happy_with_photos_3() throws IOException {
+            //given
+
+            InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
+            InputStream inputStream2 = getClass().getClassLoader().getResourceAsStream("static/testImage2.jpg");
+            InputStream inputStream3 = getClass().getClassLoader().getResourceAsStream("static/testImage3.png");
+
+            MockMultipartFile file1 = new MockMultipartFile("photos", "sample1.jpg", MediaType.IMAGE_PNG_VALUE, inputStream1);
+            MockMultipartFile file2 = new MockMultipartFile("photos", "sample2.png", MediaType.IMAGE_JPEG_VALUE, inputStream2);
+            MockMultipartFile file3 = new MockMultipartFile("photos", "sample3.jpeg", MediaType.IMAGE_PNG_VALUE, inputStream3);
+
+
+            var request = ReviewRequest.builder()
+                    .seatId(seat1.getId())
+                    .content("test")
+                    .movieTitle("ReviewTestTitle")
+                    .rating(3)
+                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                    .photos(List.of(file1, file2, file3))
+                    .build();
+
+            //when
+            sut.createReview(request, user1.getId());
+
+            //then
+            /// 리뷰 체크
+            List<Review> reviews = repository.findAll();
+
+            // 1. 개수 검증
+            Assertions.assertThat(reviews).hasSize(1);
+
+            // 2. 리뷰와 정보들이 일치하는지 검증
+            Review review = reviews.get(0);
+            Assertions.assertThat(review.getContent()).isEqualTo(request.getContent());
+            Assertions.assertThat(review.getRating()).isEqualTo(request.getRating());
+            Assertions.assertThat(review.getSeat().getId()).isEqualTo(seat1.getId());
+            Assertions.assertThat(review.getSeat().getAuditorium().getTheater().getName()).isEqualTo("Test Theater");
+
+            /// 해시태그 체크
+            List<ReviewHashTag> reviewHashTags = reviewHashTagRepository.findByReview(review);
+            // 1. 개수 검증
+            Assertions.assertThat(reviewHashTags).hasSize(3);
+
+            // 2. 실제 연결된 해시태그 ID와 요청한 해시태그 ID가 일치하는지 검증
+            List<Long> actualHashTagIds = reviewHashTags.stream()
+                    .map(rht -> rht.getHashTag().getId())
+                    .toList();
+            Assertions.assertThat(actualHashTagIds)
+                    .containsExactlyInAnyOrderElementsOf(request.getHashtags());
+
+            //3. 미지 검증
+            List<ReviewImage> reviewImages = imageRepository.findByReview(review);
+            Assertions.assertThat(reviewImages).hasSize(3);
+
+            // 파일명 포함 여부 확인
+            List<String> storedFileNames = reviewImages.stream()
+                    .map(ReviewImage::getImageUrl)
+                    .toList();
+
+            assertThat(storedFileNames)
+                    .anyMatch(url -> url.endsWith(".jpg"))
+                    .anyMatch(url -> url.endsWith(".jpeg"))
+                    .anyMatch(url -> url.endsWith(".png"));
+
+            // 썸네일 검사
+            assertThat(review.getThumbnailUrl()).isEqualTo(storedFileNames.stream().findFirst().get());
+
+        }
+
+        /**
+         * 정상적인 유저가 이미지 6 장을 통해 에러가 발생합니다..
+         */
+        @Test
+        @DisplayName("[unhappy] 로그인한 유저가 이미지 6장 이상 등록 시 예외 발생")
+        void createReviewByUser_unhappy_with_photos_6() throws IOException {
+            // given
+            InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
+            InputStream inputStream2 = getClass().getClassLoader().getResourceAsStream("static/testImage2.jpg");
+            InputStream inputStream3 = getClass().getClassLoader().getResourceAsStream("static/testImage3.png");
+            InputStream inputStream4 = getClass().getClassLoader().getResourceAsStream("static/testImage4.jpg");
+            InputStream inputStream5 = getClass().getClassLoader().getResourceAsStream("static/testImage5.jpg");
+            InputStream inputStream6 = getClass().getClassLoader().getResourceAsStream("static/testImage6.png");
+
+            MockMultipartFile file1 = new MockMultipartFile("photos", "sample1.png", MediaType.IMAGE_PNG_VALUE, inputStream1);
+            MockMultipartFile file2 = new MockMultipartFile("photos", "sample2.jpg", MediaType.IMAGE_JPEG_VALUE, inputStream2);
+            MockMultipartFile file3 = new MockMultipartFile("photos", "sample3.png", MediaType.IMAGE_PNG_VALUE, inputStream3);
+            MockMultipartFile file4 = new MockMultipartFile("photos", "sample4.jpg", MediaType.IMAGE_JPEG_VALUE, inputStream4);
+            MockMultipartFile file5 = new MockMultipartFile("photos", "sample5.jpg", MediaType.IMAGE_JPEG_VALUE, inputStream5);
+            MockMultipartFile file6 = new MockMultipartFile("photos", "sample6.png", MediaType.IMAGE_PNG_VALUE, inputStream6);
+
+            var request = ReviewRequest.builder()
+                    .seatId(seat1.getId())
+                    .content("test")
+                    .movieTitle("ReviewTestTitle")
+                    .rating(3)
+                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                    .photos(List.of(file1, file2, file3, file4, file5, file6))
+                    .build();
+
+            // when & then
+            assertThatThrownBy(() -> sut.createReview(request, user1.getId()))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage(ErrorCode.TOO_MANY_IMAGES.getMessage());
+        }
+
+
+
 
         /**
          * 존재하지 않는 유저가 리뷰를 생성할 때 예외가 발생하는지 검증합니다.
@@ -405,7 +581,7 @@ class ReviewServiceIntTest {
 
         @Test
         @DisplayName("[happy] 상세 조회에서 정상적으로 좋아요 개수가 출력")
-        public void happyLoad_Detail(){
+        public void happyLoad_Detail() throws IOException {
 
             //given
             var request = ReviewRequest.builder()
@@ -433,8 +609,8 @@ class ReviewServiceIntTest {
         }
 
         @Test
-        @DisplayName("[happy] 목록 조회에서 정상적으로 좋아요 개수가 출력")
-        public void happyLoad_List(){
+        @DisplayName("[happy] 여러명이 동시적으로 좋아요 출력 후, 목록 조회에서 정상적으로 좋아요 개수가 출력")
+        public void happyLoad_List() throws IOException {
 
             // given
             PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();

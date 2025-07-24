@@ -33,6 +33,11 @@ public class RequestMatcherHolder {
             new RequestInfo(POST, "/api/v1/users/logout", USER),
             new RequestInfo(POST, "/api/v1/users/dev/long-token", null),
 
+            // 마이페이지 관련
+            new RequestInfo(GET, "/api/v1/profile", USER),
+            new RequestInfo(PATCH, "/api/v1/profile", USER),
+            new RequestInfo(GET, "/api/v1/profile/grades", null),
+
             // 리뷰 관련
             new RequestInfo(POST, "/api/v1/reviews/**", USER),
             new RequestInfo(GET, "/api/v1/reviews/**", null),

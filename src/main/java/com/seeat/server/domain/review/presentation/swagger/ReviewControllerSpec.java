@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 @Tag(name = "리뷰 API")
 public interface ReviewControllerSpec {
 
@@ -31,7 +32,7 @@ public interface ReviewControllerSpec {
     ApiResponse<Void> createReview(
             @ModelAttribute @Valid ReviewRequest request,
             @Parameter(hidden = true) @AuthenticationPrincipal User user
-    );
+    ) throws IOException;
 
     /**
      * 리뷰 상세 조회 API

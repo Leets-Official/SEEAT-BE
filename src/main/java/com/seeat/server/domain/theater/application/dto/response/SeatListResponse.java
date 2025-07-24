@@ -1,6 +1,7 @@
 package com.seeat.server.domain.theater.application.dto.response;
 
 import com.seeat.server.domain.theater.domain.entity.Seat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import java.util.List;
 
@@ -10,11 +11,18 @@ import java.util.List;
  * @param row           행
  * @param column        열
  */
+@Schema(name = "좌석 배치도 DTO", description = "좌석 배치도를 위한 응답 DTO")
 @Builder
 public record SeatListResponse(
+
+        @Schema(description = "좌석 ID", example = "SEAT123")
         String seatId,
+
+        @Schema(description = "좌석 행(Row)", example = "C")
         String row,
-        String column) {
+
+        @Schema(description = "좌석 열(Column)", example = "12")
+        String column){
 
     /// 정적 팩토리 메서드
     public static SeatListResponse from(Seat seat) {

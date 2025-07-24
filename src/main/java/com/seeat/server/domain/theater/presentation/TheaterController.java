@@ -1,6 +1,8 @@
 package com.seeat.server.domain.theater.presentation;
 
-import com.seeat.server.domain.theater.application.TheaterUseCase;
+import com.seeat.server.domain.theater.application.dto.response.SeatRatingSummaryResponse;
+import com.seeat.server.domain.theater.application.usecase.SeatRatingUseCase;
+import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.application.dto.response.AuditoriumDetailResponse;
 import com.seeat.server.domain.theater.application.dto.response.SeatListResponse;
 import com.seeat.server.domain.theater.application.dto.response.TheaterListResponse;
@@ -20,6 +22,8 @@ import java.util.List;
 public class TheaterController implements TheaterControllerSpec {
 
     private final TheaterUseCase theaterService;
+
+    private final SeatRatingUseCase seatRatingService;
 
     /**
      * 상영관 목록 조회
@@ -60,6 +64,18 @@ public class TheaterController implements TheaterControllerSpec {
         /// 서비스 호출
         List<SeatListResponse> responses = theaterService.loadSeatsByAuditorium(auditoriumId);
 
+        return ApiResponse.ok(responses);
+    }
+
+    /**
+     * 좌석 배치도 조회 API
+     * @param auditoriumId  상영관 ID
+     */
+    @GetMapping("/seat/rating/{auditoriumId}")
+    public ApiResponse<List<SeatRatingSummaryResponse>> getSeatRatings(@PathVariable String auditoriumId) {
+
+        /// 서비스 호출
+        List<SeatRatingSummaryResponse> responses = seatRatingService.getSeatRatingSummariesByAuditoriumId(auditoriumId);
         return ApiResponse.ok(responses);
     }
 
