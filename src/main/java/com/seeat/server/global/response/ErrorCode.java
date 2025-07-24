@@ -34,6 +34,8 @@ public enum ErrorCode {
     INVALID_INPUT(400_002, HttpStatus.BAD_REQUEST, "입력값이 올바르지 않습니다."),
     NULL_VALUE(400_003, HttpStatus.BAD_REQUEST, "Null 값이 들어왔습니다."),
     BAD_TYPE_REQUEST(400_004, HttpStatus.BAD_REQUEST, "해당 Content-Type은 지원하지 않습니다."),
+    NOT_IMAGE(404_002, HttpStatus.BAD_REQUEST, "저장할 이미지가 없습니다."),
+
 
     // 401 Unauthorized
     TOKEN_EXPIRED(401_000, HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),

@@ -44,8 +44,9 @@ public class S3Service implements ImageUseCase {
     public String uploadFile(MultipartFile file) throws IOException {
 
         /// 예외처리
-        if(file == null || file.isEmpty())
-            return "";
+        if(file == null || file.isEmpty()){
+            throw new IllegalArgumentException(ErrorCode.NOT_IMAGE.getMessage());
+        }
 
         /// 파일 임시 저장
         File fileObj = convertMultiPartFileToFile(file);
@@ -67,8 +68,9 @@ public class S3Service implements ImageUseCase {
     public List<String> uploadFiles(List<MultipartFile> files) throws IOException {
 
         /// files 갯수 0 이면 반환 ""
-        if(files == null || files.size() == 0)
-            return List.of();
+        if(files == null || files.isEmpty()){
+            throw new IllegalArgumentException(ErrorCode.NOT_IMAGE.getMessage());
+        }
 
         /// 리스트 생성
         List<String> images = new ArrayList<>();
