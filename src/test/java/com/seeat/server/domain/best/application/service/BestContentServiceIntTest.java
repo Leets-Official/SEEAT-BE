@@ -128,10 +128,10 @@ class BestContentServiceIntTest {
 
             /// 리뷰 저장 후
             var request = getReviewRequest(3);
-            Review review = reviewService.createReview(request, user1.getId());
+            List<Review> review = reviewService.createReview(request, user1.getId());
 
             /// 유저1이 작성한 리뷰에만 좋아요 구현
-            likeService.reviewLike(user2.getId(), review.getId());
+            likeService.reviewLike(user2.getId(), review.get(0).getId());
 
             /// 페이징 처리
             PageRequest pageRequest = PageRequest.builder()
@@ -146,7 +146,7 @@ class BestContentServiceIntTest {
 
             //then
             assertNotNull(response);
-            Assertions.assertEquals(response.content().get(0).reviewId(), review.getId());
+            Assertions.assertEquals(response.content().get(0).reviewId(), review.get(0).getId());
             Assertions.assertEquals(response.content().size(), 4);
             Assertions.assertTrue(
                     response.content().get(2).createdAt().isAfter(response.content().get(1).createdAt())
@@ -194,7 +194,7 @@ class BestContentServiceIntTest {
         public void load_best_auditoriums() throws Exception {
 
             //given
-            /// 2번째 좌석에 3개의 리뷰를 저장한다.
+            /// 2번째 좌석에 4개의 리뷰를 저장한다.
             for (int i = 0; i < 4; i++) {
                 var request = getReviewRequest(1, seat2.getId());
                 reviewService.createReview(request, user2.getId());
@@ -296,7 +296,7 @@ class BestContentServiceIntTest {
         public void load_redis_best_reviews() throws Exception {
 
             // given
-            Review review = reviewService.createReview(getReviewRequest(5), user1.getId());
+            List<Review> review = reviewService.createReview(getReviewRequest(5), user1.getId());
             sut.saveBestContents();
 
             // Redis에 key가 존재해야 함
@@ -309,7 +309,7 @@ class BestContentServiceIntTest {
             // then
             assertNotNull(response);
             assertFalse(response.content().isEmpty());
-            assertEquals(review.getId(), response.content().get(0).reviewId());
+            assertEquals(review.get(0).getId(), response.content().get(0).reviewId());
         }
 
 
@@ -318,7 +318,7 @@ class BestContentServiceIntTest {
         public void load_db_best_reviews() throws Exception {
 
             // given
-            Review review = reviewService.createReview(getReviewRequest(3), user1.getId());
+            List<Review> review = reviewService.createReview(getReviewRequest(3), user1.getId());
 
             /// 1차 레디스 저장X 및 2차로 Redis에서 삭제 (강제로 캐시 없음 상태로 만들기)
             redisTemplate.delete(BEST_REVIEW_LIST_KEY);
@@ -330,7 +330,7 @@ class BestContentServiceIntTest {
             // then
             assertNotNull(response);
             assertFalse(response.content().isEmpty());
-            assertEquals(review.getId(), response.content().get(0).reviewId());
+            assertEquals(review.get(0).getId(), response.content().get(0).reviewId());
         }
 
         @Test
@@ -338,7 +338,7 @@ class BestContentServiceIntTest {
         public void load_redis_best_auditoriums() throws Exception {
 
             // given
-            Review review = reviewService.createReview(getReviewRequest(5), user1.getId());
+            List<Review> review = reviewService.createReview(getReviewRequest(5), user1.getId());
             sut.saveBestContents();
 
             // Redis에 key가 존재해야 함
@@ -351,7 +351,7 @@ class BestContentServiceIntTest {
             // then
             assertNotNull(response);
             assertFalse(response.content().isEmpty());
-            assertEquals(review.getSeat().getAuditorium().getId(), response.content().get(0).auditoriumId());
+            assertEquals(review.get(0).getSeat().getAuditorium().getId(), response.content().get(0).auditoriumId());
         }
 
         @Test
@@ -359,7 +359,7 @@ class BestContentServiceIntTest {
         public void load_db_best_auditoriums() throws Exception {
 
             // given
-            Review review = reviewService.createReview(getReviewRequest(5), user1.getId());
+            List<Review> review = reviewService.createReview(getReviewRequest(5), user1.getId());
 
             /// 1차 레디스 저장X 및 2차로 Redis에서 삭제 (강제로 캐시 없음 상태로 만들기)
             redisTemplate.delete(BEST_AUDITORIUM_LIST_KEY);
@@ -371,7 +371,7 @@ class BestContentServiceIntTest {
             // then
             assertNotNull(response);
             assertFalse(response.content().isEmpty());
-            assertEquals(review.getSeat().getAuditorium().getId(), response.content().get(0).auditoriumId());
+            assertEquals(review.get(0).getSeat().getAuditorium().getId(), response.content().get(0).auditoriumId());
 
         }
     }
@@ -418,7 +418,7 @@ class BestContentServiceIntTest {
     /// 공통 함수
     private ReviewRequest getReviewRequest(double rating) {
         return ReviewRequest.builder()
-                .seatId(seat1.getId())
+                .seatIds(List.of(seat1.getId()))
                 .content("test")
                 .movieTitle("ReviewTestTitle")
                 .photos(null)
@@ -430,7 +430,7 @@ class BestContentServiceIntTest {
     private ReviewRequest getReviewRequest(double rating, String seatId) {
 
         return ReviewRequest.builder()
-                .seatId(seatId)
+                .seatIds(List.of(seatId))
                 .content("test")
                 .movieTitle("ReviewTestTitle")
                 .photos(null)

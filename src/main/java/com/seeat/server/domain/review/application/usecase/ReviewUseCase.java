@@ -32,8 +32,6 @@ public interface ReviewUseCase {
 
     SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(String seatId, PageRequest pageRequest);
 
-    SliceResponse<ReviewListResponse> loadFavoriteReviews(PageRequest pageRequest);
-
     // 나의 후기 목록 조회하기
     SliceResponse<ReviewListResponse> loadMyReviews(Long userId, PageRequest pageRequest);
 
