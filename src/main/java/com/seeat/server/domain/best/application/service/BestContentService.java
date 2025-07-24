@@ -113,9 +113,22 @@ public class BestContentService implements BestContentUseCase {
             }
         }
 
-        // Redis에 캐시가 없거나 실패한 경우, DB에서 직접 조회
+        // Redis에 캐시가 없는 경우, 먼저 스냅샷 DB 조회
         log.info("[BestContent] DB에서 조회");
-        return reviewService.getBestReviews(pageRequest);
+
+        // Redis 캐시 없거나 역직렬화 실패 시 스냅샷 테이블에서 페이징 조회
+        Slice<BestReviewSnapshot> snapshots = reviewRepository.findAll(pageable);
+
+        if (snapshots.isEmpty()) {
+            // 스냅샷 DB에도 데이터가 없으면 기존 조인 쿼리로 조회!
+            log.info("[BestContent] 기존 쿼리에서 조회");
+            return reviewService.getBestReviews(pageRequest);
+        }
+
+        List<BestReviewListResponse> responses = BestReviewListResponse.from(snapshots.getContent());
+        Slice<BestReviewListResponse> slice = new SliceImpl<>(responses, snapshots.getPageable(), snapshots.hasNext());
+        return SliceResponse.from(slice);
+
     }
 
 
@@ -176,9 +189,21 @@ public class BestContentService implements BestContentUseCase {
             }
         }
 
-        /// 레디스에 없다면 DB 조회를 통해서 제공
+        // Redis 캐시 없거나 역직렬화 실패 시 스냅샷 테이블에서 페이징 조회
+        Slice<BestAuditoriumSnapshot> snapshots = auditoriumRepository.findAll(pageable);
+
+        /// DB에서 조회
         log.info("[BestContent] DB에서 조회");
-        return theaterService.loadBestAuditoriums(pageRequest);
+
+        if (snapshots.isEmpty()) {
+            // 스냅샷 DB에도 데이터가 없으면 기존 조인 쿼리로 조회!
+            log.info("[BestContent] 기존 쿼리에서 조회");
+            return theaterService.loadBestAuditoriums(pageRequest);
+        }
+
+        List<BestAuditoriumListResponse> responses = BestAuditoriumListResponse.from(snapshots.getContent());
+        Slice<BestAuditoriumListResponse> slice = new SliceImpl<>(responses, snapshots.getPageable(), snapshots.hasNext());
+        return SliceResponse.from(slice);
     }
 
 
