@@ -61,7 +61,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             case "kakao" -> new KakaoUserInfo(attributes);
             case "naver" -> new NaverUserInfo(attributes);
 
-            default -> throw new CustomException(ErrorCode.UNSUPPORTED_SOCIAL_LOGIN, null);
+            default -> throw new IllegalArgumentException(ErrorCode.UNSUPPORTED_SOCIAL_LOGIN.getMessage());
         };
     }
 }
