@@ -9,7 +9,7 @@ import com.seeat.server.domain.best.domain.entity.BestAuditoriumSnapshot;
 import com.seeat.server.domain.best.domain.entity.BestReviewSnapshot;
 import com.seeat.server.domain.best.domain.repository.BestAuditoriumRepository;
 import com.seeat.server.domain.best.domain.repository.BestReviewRepository;
-import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
+import com.seeat.server.domain.review.application.usecase.ReviewBestContentMediatorUseCase;
 import com.seeat.server.domain.best.application.dto.response.BestAuditoriumListResponse;
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.global.response.pageable.PageRequest;
@@ -54,7 +54,7 @@ public class BestContentService implements BestContentUseCase {
     private static final Duration REDIS_TTL = Duration.ofHours(1);
 
     /// 외부 의존성
-    private final ReviewUseCase reviewService;
+    private final ReviewBestContentMediatorUseCase reviewService;
     private final TheaterUseCase theaterService;
 
     /**
@@ -184,12 +184,27 @@ public class BestContentService implements BestContentUseCase {
     }
 
     /**
-     * 인기 데이터 전체 삭제
+     * 인기 데이터 초기화
      */
     @Override
     @CacheEvict(value = {BEST_REVIEW_LIST_KEY, BEST_AUDITORIUM_LIST_KEY}, allEntries = true)
-    public void deleteBestContents() {
+    public void resetBestContents() {
+        /// 기존 값 삭제
         reviewRepository.deleteAll();
         auditoriumRepository.deleteAll();
+
+        /// 새로 초기화
+        saveBestContents();
     }
+
+    /**
+     * 외부에서 참조할 서비스
+     * - 리뷰 삭제할 때 사용
+     * @param reviewId  리뷰ID
+     */
+    @Override
+    public boolean checkBestContentsByReviewId(Long reviewId) {
+        return reviewRepository.existsByReviewId((reviewId));
+    }
+
 }

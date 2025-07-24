@@ -1,7 +1,7 @@
 package com.seeat.server.domain.review.application.service;
 
+import com.seeat.server.domain.best.application.usecase.BestContentUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewImageUseCase;
-import com.seeat.server.domain.best.application.dto.response.BestReviewListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
@@ -52,6 +52,7 @@ public class ReviewService implements ReviewUseCase {
     private final TheaterUseCase theaterService;
     private final UserUseCase userService;
     private final SeatRatingUseCase seatRatingService;
+    private final BestContentUseCase bestContentService;
 
     // ========================
     //  저장 함수
@@ -221,17 +222,18 @@ public class ReviewService implements ReviewUseCase {
 
     /**
      * 리뷰 수정을 위한 로직
-     * @param request 수정을 위한 DTO
-     * @param userId 수정을 원하는 유저 Id (@AuthenticationPrincipal)
+     * @param reviewId   수정을 위한 Id
+     * @param request    수정을 위한 DTO
+     * @param userId     수정을 원하는 유저 Id (@AuthenticationPrincipal)
      */
     @Override
-    public void updateReview(ReviewUpdateRequest request, Long userId) throws IOException {
+    public void updateReview(Long reviewId, ReviewUpdateRequest request, Long userId) throws IOException {
 
         /// 유저가 맞는지 예외처리
         User user = userService.getUser(userId);
 
         /// 글을 작성한 유저가 맞는지 예외처리
-        Review review = getReview(request.getReviewId(), user);
+        Review review = getReview(reviewId, user);
 
         /// 도메인 로직을 통한 더티체킹 수행
         review.updateReview(request.getRating(), request.getContent());
@@ -263,6 +265,25 @@ public class ReviewService implements ReviewUseCase {
     @Override
     public void deleteReview(Long reviewId, Long userId) {
 
+        /// 유저가 맞는지 예외처리
+        User user = userService.getUser(userId);
+
+        /// 글을 작성한 유저가 맞는지 예외처리
+        Review review = getReview(reviewId, user);
+
+        /// 해시태그 삭제
+        hashTagService.deleteReviewHashTagByReviewId(review.getId());
+
+        /// DB 삭제
+        repository.deleteById(reviewId);
+
+        /// 인기 게시글이라면, 캐싱 초기화
+        boolean checked = bestContentService.checkBestContentsByReviewId(reviewId);
+
+        if (checked) {
+            /// 인기 게시글을 삭제 후, 다시 초기화 (리셋)
+            bestContentService.resetBestContents();
+        }
     }
 
 
@@ -308,40 +329,6 @@ public class ReviewService implements ReviewUseCase {
     private Review getReview(Long reviewId, User user) {
         return repository.findByUserAndId(user, reviewId)
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_OWN_USER_REVIEW.getMessage()));
-    }
-
-    /**
-     * 베스트 리뷰 조회를 위해 사용되는 함수
-     * @param pageRequest   페이지
-     */
-    @Override
-    public SliceResponse<BestReviewListResponse> getBestReviews(PageRequest pageRequest) {
-
-        /// Pageable 처리
-        Pageable pageable = getPageable(pageRequest);
-
-        Slice<ReviewWithLikeCount> reviews = repository.findBestReviews(pageable);
-
-        /// DTO 변경
-        // 리뷰 ID 목록 추출
-        List<Long> reviewIds = getLongs(reviews);
-
-        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
-        List<BestReviewListResponse> result = getBestReviewListResponses(reviewIds, reviews);
-
-        /// Slice 객체 처리
-        SliceImpl<BestReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
-        return SliceResponse.from(slice);
-    }
-
-    /**
-     * 리뷰의 Id를 얻기 위한 공통 로직
-     * @param reviews ID를 추출할 리뷰 목록
-     */
-    private List<Long> getLongs(List<Review> reviews) {
-        return reviews.stream()
-                .map(Review::getId)
-                .toList();
     }
 
     /**
@@ -403,29 +390,7 @@ public class ReviewService implements ReviewUseCase {
     }
 
 
-    /**
-     * 리뷰의 Id를 바탕으로 BestReview DTO 변경 공통 로직
-     * @param reviewIds ID 추출 목록
-     * @param reviews Page 처리를 한 리뷰 엔티티
-     */
-    private List<BestReviewListResponse> getBestReviewListResponses(List<Long> reviewIds, Slice<ReviewWithLikeCount> reviews) {
 
-        // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
-        List<ReviewHashTag> allHashTags = hashTagService.getReviewHashTagByReviews(reviewIds);
-
-        // 리뷰 ID를 바탕으로 해시태그 매핑
-        Map<Long, List<ReviewHashTag>> mapping = allHashTags.stream()
-                .collect(Collectors.groupingBy(ht -> ht.getReview().getId()));
-
-        // DTO 변환
-        return reviews.stream()
-                .map(review -> BestReviewListResponse.from(
-                        review.getReview(),
-                        mapping.getOrDefault(review.getReview().getId(), List.of()),
-                        review.getLikeCount())
-                )
-                .toList();
-    }
 
 }
 

@@ -11,13 +11,6 @@ import java.util.List;
 public class ReviewUpdateRequest {
 
     /**
-     * 수정할 리뷰 ID
-     */
-    @Schema(example = "1")
-    @NotNull(message = "수정할 리뷰ID는 필수입니다.")
-    private Long reviewId;
-
-    /**
      * 평점 (1~5)
      */
     @NotNull(message = "평점은 필수입니다.")

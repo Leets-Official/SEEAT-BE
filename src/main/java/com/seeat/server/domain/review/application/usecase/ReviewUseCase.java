@@ -36,7 +36,7 @@ public interface ReviewUseCase {
     SliceResponse<ReviewListResponse> loadMyReviews(Long userId, PageRequest pageRequest);
 
     /// 리뷰 수정
-    void updateReview(ReviewUpdateRequest request, Long userId) throws IOException;
+    void updateReview(Long reviewId, ReviewUpdateRequest request, Long userId) throws IOException;
 
     /// 리뷰 삭제
     void deleteReview(Long reviewId, Long userId);
@@ -45,9 +45,6 @@ public interface ReviewUseCase {
     Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Long> reviews);
 
     Review getReview(Long reviewId);
-
-    SliceResponse<BestReviewListResponse> getBestReviews(PageRequest pageRequest);
-
 
 }
 

@@ -94,7 +94,16 @@ public interface ReviewControllerSpec {
     )
     @PatchMapping("/{reviewId}")
     ApiResponse<Void> updateReview(
+            @PathVariable Long reviewId,
             @ModelAttribute @Valid ReviewUpdateRequest request,
             @Parameter(hidden = true) @AuthenticationPrincipal User user) throws IOException;;
 
+    @Operation(
+            summary = "리뷰 삭제",
+            description = "JWT를 기반으로 리뷰를 삭제합니다."
+    )
+    @DeleteMapping("/{reviewId}")
+    ApiResponse<Void> deleteReview(
+            @PathVariable Long reviewId,
+            @Parameter(hidden = true) @AuthenticationPrincipal User user);
 }

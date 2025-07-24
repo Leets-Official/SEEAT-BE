@@ -10,6 +10,7 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.SliceResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -99,15 +100,27 @@ public class ReviewController implements ReviewControllerSpec {
      * @param request       수정 DTO
      * @param user          유저
      */
-    @Override
+    @PatchMapping("/{reviewId}")
     public ApiResponse<Void> updateReview(
+            @PathVariable Long reviewId,
             @ModelAttribute @Valid ReviewUpdateRequest request,
             @AuthenticationPrincipal User user) throws IOException {
 
         /// 서비스 호출
-        reviewService.updateReview(request, user.getId());
+        reviewService.updateReview(reviewId,request, user.getId());
 
         return ApiResponse.updated();
+    }
+
+    @DeleteMapping("/{reviewId}")
+    public ApiResponse<Void> deleteReview(
+            @PathVariable Long reviewId,
+            @Parameter(hidden = true) @AuthenticationPrincipal User user){
+
+        /// 서비스 호출
+        reviewService.deleteReview(reviewId, user.getId());
+
+        return ApiResponse.deleted();
     }
 
 }
