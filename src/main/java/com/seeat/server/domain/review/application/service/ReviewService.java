@@ -249,7 +249,29 @@ public class ReviewService implements ReviewUseCase {
      * @param userId 수정을 원하는 유저 Id (@AuthenticationPrincipal)
      */
     @Override
-    public void updateReview(ReviewUpdateRequest request, Long userId) {
+    public void updateReview(ReviewUpdateRequest request, Long userId) throws IOException {
+
+        /// 유저가 맞는지 예외처리
+        User user = userService.getUser(userId);
+
+        /// 글을 작성한 유저가 맞는지 예외처리
+        Review review = getReview(request.getReviewId(), user);
+
+        /// 도메인 로직을 통한 더티체킹 수행
+        review.updateReview(request.getRating(), request.getContent());
+
+        /// 이미지 있다면 이미지도 처리
+        // 이미지 저장
+        if (request.getPhotos() != null && !request.getPhotos().isEmpty()) {
+            String thumbnail = imageService.saveReviewImage(review, request.getPhotos()).get(0);
+            review.changeThumbnailUrl(thumbnail);
+        }
+
+        /// 해시태그 삭제후, 저장하기
+        hashTagService.deleteReviewHashTagByReviewId(review.getId());
+
+        /// 해시태그 저장하기
+        hashTagService.createReviewHashTag(review, request.getHashtags());
 
     }
 
@@ -300,6 +322,16 @@ public class ReviewService implements ReviewUseCase {
     public Review getReview(Long reviewId) {
         return repository.findById(reviewId)
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_REVIEW.getMessage()));
+    }
+
+    /**
+     * 내부 서비스에서 유저와 리뷰가 동일하지 확인하는 공통 함수
+     * @param reviewId   리뷰 ID
+     * @param user      유저
+     */
+    private Review getReview(Long reviewId, User user) {
+        return repository.findByUserAndId(user, reviewId)
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_OWN_USER_REVIEW.getMessage()));
     }
 
     /**

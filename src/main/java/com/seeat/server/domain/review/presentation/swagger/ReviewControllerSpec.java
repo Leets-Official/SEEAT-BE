@@ -1,6 +1,7 @@
 package com.seeat.server.domain.review.presentation.swagger;
 
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
+import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.user.domain.entity.User;
@@ -16,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+
 @Tag(name = "리뷰 API")
 public interface ReviewControllerSpec {
 
@@ -85,4 +87,14 @@ public interface ReviewControllerSpec {
             @PathVariable String seatId,
             PageRequest pageRequest
     );
+
+    @Operation(
+            summary = "리뷰 수정",
+            description = "JWT를 기반으로 리뷰를 수정합니다."
+    )
+    @PatchMapping("/{reviewId}")
+    ApiResponse<Void> updateReview(
+            @ModelAttribute @Valid ReviewUpdateRequest request,
+            @Parameter(hidden = true) @AuthenticationPrincipal User user) throws IOException;;
+
 }

@@ -1,5 +1,6 @@
 package com.seeat.server.domain.review.presentation;
 
+import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
@@ -91,6 +92,22 @@ public class ReviewController implements ReviewControllerSpec {
         SliceResponse<ReviewListResponse> response = reviewService.loadReviewsBySeatId(seatId, pageRequest);
 
         return ApiResponse.ok(response);
+    }
+
+    /**
+     * 리뷰 수정
+     * @param request       수정 DTO
+     * @param user          유저
+     */
+    @Override
+    public ApiResponse<Void> updateReview(
+            @ModelAttribute @Valid ReviewUpdateRequest request,
+            @AuthenticationPrincipal User user) throws IOException {
+
+        /// 서비스 호출
+        reviewService.updateReview(request, user.getId());
+
+        return ApiResponse.updated();
     }
 
 }

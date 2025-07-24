@@ -2,6 +2,7 @@ package com.seeat.server.domain.review.domain.repository;
 
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
+import com.seeat.server.domain.user.domain.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -84,5 +85,13 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
                     "GROUP BY r " +
                     "ORDER BY COUNT(rl) DESC, r.createdAt DESC ")
     Slice<ReviewWithLikeCount> findMyReviews(@Param("userId") Long userId, Pageable pageable);
+
+
+    /**
+     * 유저와 리뷰가 동일한지 체크
+     * @param user  유저
+     * @param id    아이디
+     */
+    Optional<Review> findByUserAndId(User user, Long id);
 
 }
