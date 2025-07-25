@@ -1,6 +1,5 @@
 package com.seeat.server.domain.bookmark.application.service;
 
-import com.seeat.server.domain.bookmark.application.dto.request.BookmarkRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.bookmark.domain.entity.Bookmark;
@@ -103,13 +102,8 @@ class BookmarkServiceIntTest {
             //given
             Review review = saveReview(user, seat, "test", 5);
 
-            var bookmarkRequest = BookmarkRequest.builder()
-                    .userId(user.getId())
-                    .reviewId(review.getId())
-                    .build();
-
             //when
-            Bookmark bookmark = sut.createBookmark(bookmarkRequest);
+            Bookmark bookmark = sut.createBookmark(review.getId(), user.getId());
 
             //then
             Assertions.assertEquals(bookmark.getUser().getId(), user.getId());
@@ -120,13 +114,10 @@ class BookmarkServiceIntTest {
         @DisplayName("[unhappy] 리뷰가 없는 경우 예외 체크")
         public void createBookmark_review_throw_exception() {
             //given
-            var bookmarkRequest = BookmarkRequest.builder()
-                    .userId(user.getId())
-                    .reviewId(9999L) // 존재하지 않는 리뷰 ID
-                    .build();
+            Long nonReviewId = 9999L;
 
             //when & then
-            assertThatThrownBy(() -> sut.createBookmark(bookmarkRequest))
+            assertThatThrownBy(() -> sut.createBookmark(nonReviewId, user.getId()))
                     .isInstanceOf(NoSuchElementException.class)
                     .hasMessageContaining(ErrorCode.NOT_REVIEW.getMessage());
         }
@@ -136,14 +127,11 @@ class BookmarkServiceIntTest {
         public void createBookmark_user_throw_exception() {
             //given
             Review review = saveReview(user, seat, "test", 5);
+            Long nonUserId = 9999L;
 
-            var bookmarkRequest = BookmarkRequest.builder()
-                    .userId(9999L) // 존재하지 않는 유저
-                    .reviewId(review.getId())
-                    .build();
 
             //when & then
-            assertThatThrownBy(() -> sut.createBookmark(bookmarkRequest))
+            assertThatThrownBy(() -> sut.createBookmark(review.getId(), nonUserId))
                     .isInstanceOf(NoSuchElementException.class)
                     .hasMessageContaining(ErrorCode.NOT_USER.getMessage());
         }
@@ -159,12 +147,7 @@ class BookmarkServiceIntTest {
             //given
             Review review = saveReview(user, seat, "test", 5);
 
-            var bookmarkRequest = BookmarkRequest.builder()
-                    .userId(user.getId())
-                    .reviewId(review.getId())
-                    .build();
-
-            sut.createBookmark(bookmarkRequest);
+            sut.createBookmark(review.getId(), user.getId());
 
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
@@ -200,17 +183,11 @@ class BookmarkServiceIntTest {
 
             //given
             Review review = saveReview(user, seat, "test", 5);
-
-            var bookmarkRequest = BookmarkRequest.builder()
-                    .userId(user.getId())
-                    .reviewId(review.getId())
-                    .build();
-
             PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();
 
             // 좋아요 추가
             likeService.reviewLike(user.getId(), review.getId());
-            sut.createBookmark(bookmarkRequest);
+            sut.createBookmark(review.getId(), user.getId());
 
             //when
             Slice<ReviewListResponse> responses = sut.loadMyBookmarks(user.getId(), pageRequest);
@@ -233,12 +210,7 @@ class BookmarkServiceIntTest {
             //given
             Review review = saveReview(user, seat, "delete test", 4);
 
-            var bookmarkRequest = BookmarkRequest.builder()
-                    .userId(user.getId())
-                    .reviewId(review.getId())
-                    .build();
-
-            Bookmark bookmark = sut.createBookmark(bookmarkRequest);
+            Bookmark bookmark = sut.createBookmark(review.getId(), user.getId());
 
             //when
             sut.deleteBookmark(bookmark.getId(), user.getId());
@@ -255,12 +227,7 @@ class BookmarkServiceIntTest {
 
             Review review = saveReview(user, seat, "delete test", 4);
 
-            Bookmark bookmark = sut.createBookmark(
-                    BookmarkRequest.builder()
-                            .userId(user.getId())
-                            .reviewId(review.getId())
-                            .build()
-            );
+            Bookmark bookmark = sut.createBookmark(review.getId(), user.getId());
 
             //when & then
             assertThatThrownBy(() -> sut.deleteBookmark(bookmark.getId(), otherUser.getId()))
