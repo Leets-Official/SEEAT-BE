@@ -24,6 +24,7 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.SliceResponse;
+import org.junit.Assert;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,6 +36,7 @@ import java.util.List;
 
 import static com.seeat.server.global.util.RedisKeyUtil.BEST_REVIEW_LIST_KEY;
 import static com.seeat.server.global.util.RedisKeyUtil.BEST_AUDITORIUM_LIST_KEY;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -384,10 +386,26 @@ class BestContentServiceIntTest {
         public void delete_reviews_redis_best_reviews() throws Exception {
 
             //given
+            List<Review> review1 = reviewService.createReview(getReviewRequest(5), user1.getId());
+            List<Review> review2 = reviewService.createReview(getReviewRequest(4), user2.getId());
+            sut.saveBestContents();
+
+            /// 기존에 존재하는지 체크
+            boolean checked = sut.checkBestContentsByReviewId(review1.get(0).getId());
+            Assert.assertTrue(checked);
+
+            /// 리뷰 삭제
+            reviewService.deleteReview(review1.get(0).getId(), user1.getId());
 
             //when
+            /// 인기 리뷰 캐시를 다시 조회
+            SliceResponse<BestReviewListResponse> response = sut.loadBestReviews(PageRequest.builder().page(1).size(4).build());
 
             //then
+            /// 삭제한 리뷰 ID가 캐시에서 없어야 한다
+            assertFalse(sut.checkBestContentsByReviewId(review1.get(0).getId()));
+            assertEquals(response.content().get(0).reviewId(), review2.get(0).getId());
+
         }
 
         @Test
@@ -396,9 +414,36 @@ class BestContentServiceIntTest {
 
             //given
 
-            //when
+            /// 25개 리뷰 생성
+            for (int i = 1; i <= 20; i++) {
+                List<Review> review = reviewService.createReview(getReviewRequest(5), user1.getId());
 
-            //then
+                // 20개는 좋아요 눌러 인기 리뷰로 만들기
+                likeService.reviewLike(user2.getId(), review.get(0).getId());
+            }
+
+            /// 삭제할 리뷰 저장
+            List<Review> review21 = reviewService.createReview(getReviewRequest(1), user1.getId());
+            Long deleteId = review21.get(0).getId();
+
+            /// 인기 리뷰 캐시 저장
+            sut.saveBestContents();
+
+            /// 애초에 삭제 전 캐시에 없는지 확인
+            assertFalse(sut.checkBestContentsByReviewId(deleteId));
+
+            // when
+            /// 비인기 리뷰 삭제
+            reviewService.deleteReview(deleteId, user1.getId());
+
+            // then
+            /// 삭제 후 인기 리뷰 캐시 변화 없음을 확인
+            SliceResponse<BestReviewListResponse> response = sut.loadBestReviews(PageRequest.builder().page(1).size(20).build());
+
+            /// 캐시된 인기 리뷰에는 삭제 리뷰가 없어야 함
+            assertFalse(response.content().stream()
+                    .anyMatch(r -> r.reviewId() == deleteId));
+
         }
 
         @Test
