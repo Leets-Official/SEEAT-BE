@@ -21,7 +21,7 @@ public class BookmarkController implements BookmarkControllerSpec {
      * @param user       유저
      * @param reviewId   북마크할 리뷰 ID
      */
-    @PostMapping("/{reviewId")
+    @PostMapping()
     public ApiResponse<Void> saveBookmark(@AuthenticationPrincipal User user,
                                           @RequestParam Long reviewId) {
         /// 서비스 호출

@@ -48,7 +48,7 @@ public interface ReviewControllerSpec {
     )
     @GetMapping("/{reviewId}")
     ApiResponse<ReviewDetailResponse> getReview(
-            @Parameter(example = "1")
+            @Parameter(description = "조회할 리뷰ID",example = "1")
             @PathVariable Long reviewId
     );
 
@@ -64,7 +64,7 @@ public interface ReviewControllerSpec {
     )
     @GetMapping("/auditorium/{auditoriumId}")
     ApiResponse<SliceResponse<ReviewListResponse>> getReviewsByAuditorium(
-            @Parameter(example = "1")
+            @Parameter(description = "조회할 상영관ID",example = "13018")
             @PathVariable String auditoriumId,
             PageRequest pageRequest
     );
@@ -76,34 +76,49 @@ public interface ReviewControllerSpec {
      * @param pageRequest 페이지 요청 정보
      * @return 리뷰 목록 페이지
      */
-
     @Operation(
             summary = "좌석별 리뷰 목록 조회",
             description = "좌석 ID로 리뷰 목록을 조회합니다."
     )
     @GetMapping("/seat/{seatId}")
     ApiResponse<SliceResponse<ReviewListResponse>> getReviewsBySeat(
-            @Parameter(example = "1")
+            @Parameter(description = "조회할 좌석ID", example = "13018A4")
             @PathVariable String seatId,
             PageRequest pageRequest
     );
 
+    /**
+     * 리뷰 수정 API
+     * @param reviewId  리뷰ID
+     * @param request   수정할 내용
+     * @param user      유저
+     */
     @Operation(
             summary = "리뷰 수정",
             description = "JWT를 기반으로 리뷰를 수정합니다."
     )
-    @PatchMapping("/{reviewId}")
+    @PatchMapping(path = "/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ApiResponse<Void> updateReview(
+
+            @Parameter(description = "수정할 리뷰ID", example = "1")
             @PathVariable Long reviewId,
             @ModelAttribute @Valid ReviewUpdateRequest request,
             @Parameter(hidden = true) @AuthenticationPrincipal User user) throws IOException;;
 
+
+    /**
+     * 리뷰 삭제하는 API
+     * @param reviewId  리뷰ID
+     * @param user      유저
+     */
     @Operation(
             summary = "리뷰 삭제",
             description = "JWT를 기반으로 리뷰를 삭제합니다."
     )
     @DeleteMapping("/{reviewId}")
     ApiResponse<Void> deleteReview(
+
+            @Parameter(description = "삭제할 리뷰ID", example = "1")
             @PathVariable Long reviewId,
             @Parameter(hidden = true) @AuthenticationPrincipal User user);
 }

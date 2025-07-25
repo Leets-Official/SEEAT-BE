@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "북마크 API", description = "북마크를 설정/해제하는 API 입니다.")
 public interface BookmarkControllerSpec {
@@ -24,7 +25,7 @@ public interface BookmarkControllerSpec {
     ApiResponse<Void> saveBookmark(
             @AuthenticationPrincipal User user,
             @Parameter(description = "북마크할 리뷰ID", example = "1")
-            @PathVariable Long reviewId);
+            @RequestParam Long reviewId);
 
 
     /**

@@ -42,6 +42,7 @@ public class ReviewController implements ReviewControllerSpec {
         // 서비스 호출
         reviewService.createReview(request, user.getId());
 
+        // 결과 리턴
         return ApiResponse.created();
     }
 
@@ -74,7 +75,7 @@ public class ReviewController implements ReviewControllerSpec {
         // 서비스 호출
         SliceResponse<ReviewListResponse> response = reviewService.loadReviewsByAuditoriumId(auditoriumId, pageRequest);
 
-        // 응답
+        // 결과 리턴
         return ApiResponse.ok(response);
     }
 
@@ -92,26 +93,33 @@ public class ReviewController implements ReviewControllerSpec {
         // 서비스 호출
         SliceResponse<ReviewListResponse> response = reviewService.loadReviewsBySeatId(seatId, pageRequest);
 
+        // 결과 리턴
         return ApiResponse.ok(response);
     }
 
     /**
      * 리뷰 수정
-     * @param request       수정 DTO
-     * @param user          유저
+     *
+     * @param request 수정 DTO
+     * @param user    유저
      */
-    @PatchMapping("/{reviewId}")
+    @PatchMapping(path = "/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Void> updateReview(
             @PathVariable Long reviewId,
             @ModelAttribute @Valid ReviewUpdateRequest request,
             @AuthenticationPrincipal User user) throws IOException {
 
         /// 서비스 호출
-        reviewService.updateReview(reviewId,request, user.getId());
+        reviewService.updateReview(reviewId, request, user.getId());
 
         return ApiResponse.updated();
     }
 
+    /**
+     * 리뷰 삭제
+     * @param reviewId  리뷰ID
+     * @param user      유저
+     */
     @DeleteMapping("/{reviewId}")
     public ApiResponse<Void> deleteReview(
             @PathVariable Long reviewId,
@@ -120,6 +128,7 @@ public class ReviewController implements ReviewControllerSpec {
         /// 서비스 호출
         reviewService.deleteReview(reviewId, user.getId());
 
+        // 결과 리턴
         return ApiResponse.deleted();
     }
 

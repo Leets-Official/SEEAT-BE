@@ -10,6 +10,9 @@ import java.util.List;
 @Tag(name = "해시태그 API", description = "해시태그 목록을 가져오는 API 입니다.")
 public interface HashTagControllerSpec {
 
+    /**
+     * 해시태그 조회 API
+     */
     @Operation(
             summary = "해시태그 목록 API",
             description = "해시태그 목록을 가져오는 API입니다."
