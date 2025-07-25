@@ -80,6 +80,10 @@ public class UserProfileService implements UserProfileUseCase {
 
         /// 존재한다면 이미지 추가
         if (request.getImage() != null) {
+
+            /// 기존 사진 사진
+            imageService.deleteFile(thumbnailImage);
+
             thumbnailImage = imageService.uploadFile(request.getImage());
         }
 
