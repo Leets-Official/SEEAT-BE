@@ -28,7 +28,7 @@ import java.util.List;
  * @param createdAt         스냅샷 시간
  */
 @Builder
-@Schema(name = "[응답] 인기 리뷰 리스트 Response", description = "인기 리뷰 리스트 조회를 위한 DTO입니다.")
+@Schema(name = "[응답][베스트] 인기 리뷰 리스트 Response", description = "인기 리뷰 리스트 조회를 위한 DTO입니다.")
 public record BestReviewListResponse(
         @Schema(description = "리뷰 아이디", example = "101")
         Long reviewId,

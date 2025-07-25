@@ -22,7 +22,7 @@ import java.util.List;
  */
 
 @Builder
-@Schema(name = "[응답] 리뷰 목록 조회 Response",description = "리뷰 목록 조회에 대한 DTO 입니다.")
+@Schema(name = "[응답][리뷰] 리뷰 목록 조회 Response",description = "리뷰 목록 조회에 대한 DTO 입니다.")
 public record ReviewListResponse(
 
         @Schema(description = "리뷰 아이디", example = "1")

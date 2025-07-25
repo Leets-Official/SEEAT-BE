@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Data
 @Builder
-@Schema(name = "[요청] 리뷰 작성 Request",description = "리뷰 작성에 대한 DTO 입니다.")
+@Schema(name = "[요청][리뷰] 리뷰 작성 Request",description = "리뷰 작성에 대한 DTO 입니다.")
 public class ReviewRequest {
 
     /**

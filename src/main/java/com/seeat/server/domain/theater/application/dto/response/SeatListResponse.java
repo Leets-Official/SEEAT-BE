@@ -12,7 +12,7 @@ import java.util.List;
  * @param column        열
  */
 @Builder
-@Schema(name = "[응답] 좌석 배치도 Response", description = "좌석 배치도를 위한 응답 DTO")
+@Schema(name = "[응답][영화관] 좌석 배치도 Response", description = "좌석 배치도를 위한 응답 DTO")
 public record SeatListResponse(
 
         @Schema(description = "좌석 ID", example = "13018A4")

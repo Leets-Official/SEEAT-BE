@@ -25,7 +25,7 @@ import java.util.List;
  */
 
 @Builder
-@Schema(name = "[응답] 리뷰 상세 조회 Response",description = "리뷰 상세 조회에 대한 DTO 입니다.")
+@Schema(name = "[응답][리뷰] 리뷰 상세 조회 Response",description = "리뷰 상세 조회에 대한 DTO 입니다.")
 public record ReviewDetailResponse(
         ReviewSeatInfoResponse movieSeatInfo,
 

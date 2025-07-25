@@ -21,7 +21,7 @@ import java.util.List;
  */
 
 @Builder
-@Schema(name = "[응답] 인기 상영관 리스트 Response", description = "베스트 상영관 리스트 조회를 위한 DTO입니다.")
+@Schema(name = "[응답][베스트] 인기 상영관 리스트 Response", description = "베스트 상영관 리스트 조회를 위한 DTO입니다.")
 public record BestAuditoriumListResponse(
         @Schema(description = "상영관 ID", example = "13018")
         String auditoriumId,

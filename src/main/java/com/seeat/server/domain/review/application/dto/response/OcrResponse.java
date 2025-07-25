@@ -15,7 +15,7 @@ import java.util.List;
  * @param hall       상영관(예: 2관 (Laser))
  */
 @Builder
-@Schema(name = "[응답] 티켓 OCR Response",description = "티켓 OCR에 대한 DTO 입니다.")
+@Schema(name = "[응답][리뷰] 티켓 OCR Response",description = "티켓 OCR에 대한 DTO 입니다.")
 public record OcrResponse(
         @Schema(description = "극장명", example = "CGV 야탑")
         String theater,

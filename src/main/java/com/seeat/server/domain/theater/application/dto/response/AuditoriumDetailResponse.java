@@ -15,7 +15,7 @@ import lombok.Builder;
  * @param averageReview     평균 평점
  */
 @Builder
-@Schema(name = "[응답] 상영관 상세 조회 Response",description = "상영관 상세 조회에 대한 DTO 입니다.")
+@Schema(name = "[응답][영화관] 상영관 상세 조회 Response",description = "상영관 상세 조회에 대한 DTO 입니다.")
 public record AuditoriumDetailResponse(
 
         @Schema(description = "영화관 이름", example = "메가박스 강남")

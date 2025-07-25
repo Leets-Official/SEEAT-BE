@@ -12,7 +12,7 @@ import java.util.List;
  * @param hashTagType   해시태그 타입
  */
 @Builder
-@Schema(name = "[응답] 해시태그 Response",description = "해시태그 목록에 대한 DTO 입니다.")
+@Schema(name = "[응답][해시태그] 해시태그 Response",description = "해시태그 목록에 대한 DTO 입니다.")
 public record HashTagResponse(
 
         @Schema(description = "해시태그 ID", example = "1")

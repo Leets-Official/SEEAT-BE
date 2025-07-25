@@ -15,7 +15,7 @@ import com.seeat.server.domain.theater.domain.entity.Seat;
  * @param isWheelchair      휠체어 좌석인지
  */
 @Builder
-@Schema(name = "[응답] 평점/개수 포함 좌석 배치도 Response", description = "상영관 내 좌석의 평점 요약을 제공하는 응답 DTO")
+@Schema(name = "[응답][영화관] 평점/개수 포함 좌석 배치도 Response", description = "상영관 내 좌석의 평점 요약을 제공하는 응답 DTO")
 public record SeatRatingSummaryResponse(
 
         @Schema(description = "좌석 ID", example = "13018A4")
