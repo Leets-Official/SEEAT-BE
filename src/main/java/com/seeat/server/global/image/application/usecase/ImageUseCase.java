@@ -19,5 +19,9 @@ public interface ImageUseCase {
     List<String> uploadFiles(List<MultipartFile> files) throws IOException;
 
     /// 삭제
+    // 한 장 삭제하기
     void deleteFile(String fileName);
+
+    // 여러 장 삭제하기
+    void deleteFile(List<String> fileNames);
 }

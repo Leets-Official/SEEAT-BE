@@ -27,6 +27,11 @@ public class ReviewImageService implements ReviewImageUseCase {
     private final ImageUseCase imageService;
 
     /// 저장하기
+    /**
+     * 이미지 한 장 저장하기
+     * @param review    리뷰
+     * @param photo     저장할 이미지 한 장
+     */
     @Override
     public String saveReviewImage(Review review, MultipartFile photo) throws IOException {
 
@@ -41,6 +46,11 @@ public class ReviewImageService implements ReviewImageUseCase {
                 .getImageUrl();
     }
 
+    /**
+     * 이미지 여러 장 저장하기
+     * @param review        리뷰
+     * @param photos        저장할 이미지 여러 장
+     */
     @Override
     public List<String> saveReviewImage(Review review, List<MultipartFile> photos) throws IOException {
 
@@ -68,6 +78,10 @@ public class ReviewImageService implements ReviewImageUseCase {
     }
 
     /// 조회하기
+    /**
+     * 리뷰에 존재하는 이미지 순서대로 조회
+     * @param review    리뷰
+     */
     @Override
     public List<ReviewImage> getReviewImagesByReview(Review review) {
 
@@ -82,14 +96,26 @@ public class ReviewImageService implements ReviewImageUseCase {
     }
 
     /// 삭제하기
+    /**
+     * 리뷰에 존재하는 모든 이미지 삭제
+     * @param review    리뷰
+     */
     @Override
-    public void deleteReviewImage(String fileName) {
+    public void deleteReviewImage(Review review) {
+
+        /// 리뷰에 해당하는 파일 이름 다 가져오기
+        List<ReviewImage> images = repository.findByReview(review);
+
+        /// 파일 이름만 추출하기
+        List<String> imagesList = images.stream()
+                .map(ReviewImage::getImageUrl)
+                .toList();
 
         /// 클라우드에서 삭제하기
-        imageService.deleteFile(fileName);
+        imageService.deleteFile(imagesList);
 
         /// DB에서도 삭제하기
-        repository.deleteByImageUrl(fileName);
+        repository.deleteAllByImageUrlIn(imagesList);
 
     }
 
