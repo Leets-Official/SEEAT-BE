@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -56,40 +57,46 @@ public class ReviewService implements ReviewUseCase {
     // ========================
     /**
      * 리뷰 저장을 위한 로직
+     * 테스트를 위해서 반환값이 존재하는 것입니다.
      * @param request 리뷰를 위한 DTO
      * @param userId  리뷰를 작성할 유저 id (@AuthenticationPrincipal)
      */
     @Override
-    public Review createReview(ReviewRequest request, Long userId) throws IOException {
+    public List<Review> createReview(ReviewRequest request, Long userId) throws IOException {
+
+        /// 여러 개의 좌석도 동시 기입
 
         // 좌석 예외 처리
-        Seat seat = theaterService.getSeat(request.getSeatId());
+        List<Seat> seats = theaterService.getSeat(request.getSeatIds());
 
         // 유저 예외처리
         User user = userService.getUser(userId);
 
-        // 객체 생성
-        Review requestReview = Review.of(user, seat, request.getMovieTitle(), request.getRating(), request.getContent());
+        List<Review> savedReviews = new ArrayList<>();
 
-        // DB 내 저장
-        Review review = repository.save(requestReview);
+        for (Seat seat : seats) {
+            // 리뷰 객체 생성
+            Review review = Review.of(user, seat, request.getMovieTitle(), request.getRating(), request.getContent());
 
-        // 이미지가 존재하는 경우
-        if (request.getPhotos()!=null) {
+            // DB 저장
+            Review savedReview = repository.save(review);
+
             // 이미지 저장
-            String thumbnail = imageService.saveReviewImage(review, request.getPhotos()).get(0);
+            if (request.getPhotos() != null && !request.getPhotos().isEmpty()) {
+                String thumbnail = imageService.saveReviewImage(savedReview, request.getPhotos()).get(0);
+                savedReview.changeThumbnailUrl(thumbnail);
+            }
 
-            // 현재 이미지를 저장할 때 더티 체킹으로 진행
-            review.changeThumbnailUrl(thumbnail);
+            // 해시태그 저장
+            hashTagService.createReviewHashTag(savedReview, request.getHashtags());
+
+            // 좌석 평점 업데이트
+            seatRatingService.saveSeatRating(savedReview, seat);
+
+            savedReviews.add(savedReview);
         }
 
-        // 리뷰 내 해시태그 생성
-        hashTagService.createReviewHashTag(review, request.getHashtags());
-
-        // 좌석 배치도 업데이트
-        seatRatingService.saveSeatRating(review, seat);
-
-        return review;
+        return savedReviews;
     }
 
     // ========================
@@ -202,6 +209,33 @@ public class ReviewService implements ReviewUseCase {
         /// Slice 객체 처리
         SliceImpl<ReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
         return SliceResponse.from(slice);
+    }
+
+    /**
+     * 내가 작성한 리뷰 확인하기
+     * @param userId        로그인한 유저 ID
+     * @param pageRequest   페이지 요청
+     */
+    @Override
+    public SliceResponse<ReviewListResponse> loadMyReviews(Long userId, PageRequest pageRequest) {
+
+        /// Pageable 처리
+        Pageable pageable = getPageable(pageRequest);
+
+        /// 나의 리뷰 조회하기
+        Slice<ReviewWithLikeCount> reviews = repository.findMyReviews(userId, pageable);
+
+        /// DTO 변환
+        // 리뷰 ID 목록 추출
+        List<Long> reviewIds = getLongs(reviews);
+
+        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
+
+        /// Slice 객체 처리
+        SliceImpl<ReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
+        return SliceResponse.from(slice);
+
     }
 
 

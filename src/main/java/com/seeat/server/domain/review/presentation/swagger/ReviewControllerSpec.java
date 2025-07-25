@@ -54,7 +54,7 @@ public interface ReviewControllerSpec {
      * 상영관별 리뷰 목록 조회 API
      *
      * @param auditoriumId 영화관 ID
-     * @param pageRequest 페이지 요청 정보
+     * @param pageRequest  페이지 요청 정보
      */
     @Operation(
             summary = "상영관별 리뷰 목록 조회",
@@ -70,7 +70,7 @@ public interface ReviewControllerSpec {
     /**
      * 좌석별 리뷰 목록 조회 API
      *
-     * @param seatId 좌석 ID
+     * @param seatId      좌석 ID
      * @param pageRequest 페이지 요청 정보
      * @return 리뷰 목록 페이지
      */

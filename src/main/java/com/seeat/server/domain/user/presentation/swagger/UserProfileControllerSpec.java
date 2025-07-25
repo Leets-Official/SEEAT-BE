@@ -1,11 +1,14 @@
 package com.seeat.server.domain.user.presentation.swagger;
 
+import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
 import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoUpdateResponse;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.global.response.pageable.PageRequest;
+import com.seeat.server.global.response.pageable.SliceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -53,4 +56,32 @@ public interface UserProfileControllerSpec {
             description = "사용자 등급 목록을 조회합니다.")
     ApiResponse<List<UserGradeResponse>> getUserGradeList();
 
+
+    /**
+     * 내가 작성한 리뷰 조회
+     *
+     * @param user        유저
+     * @param pageRequest 페이지
+     */
+    @Operation(
+            summary = "내가 작성한 리뷰 조회",
+            description = "JWT 기반으로 리뷰 목록을 조회합니다."
+    )
+    @GetMapping("/my")
+    ApiResponse<SliceResponse<ReviewListResponse>> getMyReviews(
+            @AuthenticationPrincipal User user,
+            PageRequest pageRequest);
+
+    /**
+     * 내가 북마크한 리뷰 조회
+     * @param user          유저
+     * @param pageRequest   페이지
+     */
+    @Operation(
+            description = "북마크 조회 API",
+            summary = "북마크 조회 API 입니다."
+    )
+    ApiResponse<SliceResponse<ReviewListResponse>> getBookmarksByUser(
+            @AuthenticationPrincipal User user,
+            PageRequest pageRequest);
 }

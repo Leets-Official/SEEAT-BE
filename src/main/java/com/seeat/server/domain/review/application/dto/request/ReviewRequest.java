@@ -19,8 +19,8 @@ public class ReviewRequest {
      * 좌석 ID (예: 특정 영화관의 F12 아이디)
      */
     @NotNull(message = "좌석 ID는 필수입니다.")
-    @Schema(example = "13018A4")
-    private String seatId;
+    @Schema(example = "[\"13018A4\", \"13018A5\"]")
+    private List<String> seatIds;
 
     /**
      * 영화 제목 또는 영화 ID
@@ -51,6 +51,7 @@ public class ReviewRequest {
      */
     @NotNull(message = "해시태그 목록은 필수입니다.")
     @Size(min = 1, message = "최소 하나 이상의 해시태그가 필요합니다.")
+    @Schema(example = "[\"1\", \"2\",\"3\"]")
     private List<Long> hashtags;
 
     /**
