@@ -14,14 +14,14 @@ import lombok.Builder;
  * @param reviewCount       후기 개수
  * @param averageReview     평균 평점
  */
-@Schema(name = "상영관 DTO", description = "상영관 상세 정보 응답 DTO")
 @Builder
+@Schema(name = "[응답] 상영관 상세 조회 Response",description = "상영관 상세 조회에 대한 DTO 입니다.")
 public record AuditoriumDetailResponse(
 
         @Schema(description = "영화관 이름", example = "메가박스 강남")
         String theaterName,
 
-        @Schema(description = "상영관 ID", example = "AUD123")
+        @Schema(description = "상영관 ID", example = "13018")
         String auditoriumId,
 
         @Schema(description = "상영관 이름", example = "1관 IMAX")

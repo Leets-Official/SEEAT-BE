@@ -1,5 +1,6 @@
 package com.seeat.server.domain.review.application.service;
 
+import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.review.domain.HashTagFixtures;
 import com.seeat.server.domain.review.domain.ReviewFixtures;
@@ -42,7 +43,7 @@ import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * [리뷰 서비스의 통합 테스트 클래스]입니다.
@@ -589,6 +590,232 @@ class ReviewServiceIntTest {
             Assertions.assertThat(response.content().get(1).heartCount()).isEqualTo(0);
 
         }
+    }
+
+    @Nested
+    @DisplayName("수정 테스트")
+    class UpdateReviewTest {
+
+        @Test
+        @DisplayName("[happy] 사진 제외, 리뷰의 작성자는 정상적으로 수정할 수 있습니다.")
+        void update_happy() throws IOException {
+
+            // given
+            /// 요청
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            /// 수정용 요청
+            var newRequest = ReviewUpdateRequest.
+                    builder()
+                    .content("수정")
+                    .rating(1)
+                    .build();
+
+            // when
+            sut.updateReview(review.getId(), newRequest, user1.getId());
+
+            // then
+            var savedReview = repository.findById(review.getId()).get();
+
+            Assertions.assertThat(savedReview).isNotNull();
+            /// 새로운 값 적용 여부
+            Assertions.assertThat(savedReview.getRating()).isEqualTo(1);
+            Assertions.assertThat(savedReview.getContent()).isEqualTo("수정");
+
+            /// 기존내용 변경 여부
+            Assertions.assertThat(savedReview.getMovieTitle()).isEqualTo(request.getMovieTitle());
+            Assertions.assertThat(savedReview.getSeat()).isEqualTo(seat1);
+
+        }
+
+        @Test
+        @DisplayName("[happy] 사진 포함, 리뷰의 작성자는 정상적으로 수정할 수 있습니다.")
+        void update_happy_photos() throws IOException {
+
+            // given
+            /// 요청
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            /// 새롭게 사진
+            InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
+            MockMultipartFile file1 = new MockMultipartFile("photos", "sample1.png", MediaType.IMAGE_PNG_VALUE, inputStream1);
+
+
+            /// 수정용 요청
+            var newRequest = ReviewUpdateRequest.
+                    builder()
+                    .content("수정")
+                    .photos(List.of(file1))
+                    .rating(1)
+                    .build();
+
+            Assertions.assertThat(review.getThumbnailUrl()).isEqualTo("thumbnailUrl");
+
+            // when
+            sut.updateReview(review.getId(), newRequest, user1.getId());
+
+            // then
+            var savedReview = repository.findById(review.getId()).get();
+
+            Assertions.assertThat(savedReview).isNotNull();
+            /// 새로운 값 적용 여부
+            Assertions.assertThat(savedReview.getRating()).isEqualTo(1);
+            Assertions.assertThat(savedReview.getContent()).isEqualTo("수정");
+
+            // thumbnailUrl 검증: 빈 문자열이 아니고 .png 확장자 포함 확인
+            Assertions.assertThat(savedReview.getThumbnailUrl()).isNotBlank();
+            Assertions.assertThat(savedReview.getThumbnailUrl()).contains(".png");
+
+
+            /// 기존내용 변경 여부
+            Assertions.assertThat(savedReview.getMovieTitle()).isEqualTo(request.getMovieTitle());
+            Assertions.assertThat(savedReview.getSeat()).isEqualTo(seat1);
+
+        }
+
+        @Test
+        @DisplayName("[unhappy] 존재하지 않는 사용자는 수정할 수 없습니다.")
+        void update_throws_not_users() throws IOException {
+
+            // given
+            Long attackedUserId = 99999999L;
+
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            /// 수정용 요청
+            var newRequest = ReviewUpdateRequest.
+                    builder()
+                    .content("수정")
+                    .rating(1)
+                    .build();
+
+            // when & then
+            assertThatThrownBy(() -> sut.updateReview(review.getId(), newRequest, attackedUserId))
+                    .isInstanceOf(NoSuchElementException.class)
+                    .hasMessage(ErrorCode.NOT_USER.getMessage());
+        }
+
+        @Test
+        @DisplayName("[unhappy] 리뷰의 작성자가 아닌 사용자는 수정할 수 없습니다.")
+        void update_throws_not_my_reviews() throws IOException {
+
+            // given
+            Long attackedUserId = user2.getId();
+
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            /// 수정용 요청
+            var newRequest = ReviewUpdateRequest.
+                    builder()
+                    .content("수정")
+                    .rating(1)
+                    .build();
+
+            // when & then
+            assertThatThrownBy(() -> sut.updateReview(review.getId(), newRequest, attackedUserId))
+                    .isInstanceOf(NoSuchElementException.class)
+                    .hasMessage(ErrorCode.NOT_OWN_USER_REVIEW.getMessage());
+        }
+    }
+
+    @Nested
+    @DisplayName("삭제 테스트")
+    class DeleteReview {
+
+        @Test
+        @DisplayName("[happy] 리뷰의 작성자는 정상적으로 삭제할 수 있습니다.")
+        void happyDelete() throws IOException {
+
+            /// 요청
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            // when
+            sut.deleteReview(review.getId(), user1.getId());
+
+            // then
+            /// DB에 존재하는지 체크
+            assertTrue(repository.findById(review.getId()).isEmpty());
+
+            /// 해시태그 존재하는지 체크
+            List<ReviewHashTag> hashTags = reviewHashTagRepository.findByReview_Id(review.getId());
+            Assertions.assertThat(hashTags).isEmpty();
+
+            /// 이미지 존재하는지 체크
+            List<ReviewImage> images = imageRepository.findByReview(review);
+            Assertions.assertThat(images).isEmpty();
+        }
+
+        @Test
+        @DisplayName("[unhappy] 존재하지 않는 사용자는 삭제할 수 없습니다.")
+        void delete_throws_not_users() throws IOException {
+
+            // given
+            Long attackedUserId = 99999999L;
+
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            // when & then
+            assertThatThrownBy(() -> sut.deleteReview(review.getId(), attackedUserId))
+                    .isInstanceOf(NoSuchElementException.class)
+                    .hasMessage(ErrorCode.NOT_USER.getMessage());
+
+        }
+
+        @Test
+        @DisplayName("[unhappy] 리뷰의 작성자가 아닌 사용자는 삭제할 수 없습니다.")
+        void delete_throws_not_my_reviews() throws IOException {
+
+            // given
+            Long attackedUserId = user2.getId();
+
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            // when & then
+            assertThatThrownBy(() -> sut.deleteReview(review.getId(), attackedUserId))
+                    .isInstanceOf(NoSuchElementException.class)
+                    .hasMessage(ErrorCode.NOT_OWN_USER_REVIEW.getMessage());
+
+        }
+    }
+
+
+    private ReviewRequest getReviewRequest(Seat seat, double rating) {
+        return ReviewRequest.builder()
+                .seatIds(List.of(seat.getId()))
+                .content("test1")
+                .movieTitle("ReviewTestTitle1")
+                .photos(null)
+                .rating(rating)
+                .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                .build();
     }
 
 }

@@ -11,7 +11,7 @@ import java.util.List;
  * @param theaterName   영화관 이름
  */
 
-@Schema(name = "영화관 목록 DTO", description = "카테고리로 필터링한 영화관/상영관 목록 응답 DTO")
+@Schema(name = "[응답] 영화관 목록 Response", description = "카테고리로 필터링한 영화관/상영관 목록 응답 DTO")
 @Builder
 public record TheaterListResponse(
 

@@ -11,17 +11,17 @@ import java.util.List;
  * @param row           행
  * @param column        열
  */
-@Schema(name = "좌석 배치도 DTO", description = "좌석 배치도를 위한 응답 DTO")
 @Builder
+@Schema(name = "[응답] 좌석 배치도 Response", description = "좌석 배치도를 위한 응답 DTO")
 public record SeatListResponse(
 
-        @Schema(description = "좌석 ID", example = "SEAT123")
+        @Schema(description = "좌석 ID", example = "13018A4")
         String seatId,
 
-        @Schema(description = "좌석 행(Row)", example = "C")
+        @Schema(description = "좌석 행(Row)", example = "A")
         String row,
 
-        @Schema(description = "좌석 열(Column)", example = "12")
+        @Schema(description = "좌석 열(Column)", example = "4")
         String column){
 
     /// 정적 팩토리 메서드

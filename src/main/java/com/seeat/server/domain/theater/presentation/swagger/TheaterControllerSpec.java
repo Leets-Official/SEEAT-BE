@@ -19,6 +19,11 @@ import java.util.List;
 @Tag(name = "영화관 API", description = "영화관/상영관/좌석배치도를 호출하는 API 입니다.")
 public interface TheaterControllerSpec {
 
+    /**
+     * 영화관 목록 조회 API
+     * @param auditoriumType    영화관 타입
+     * @param pageRequest       페이징
+     */
     @Operation(
             summary = "영화관 목록 조회 API",
             description = "해당하는 타입을 가진 영화관 조회"
@@ -30,6 +35,10 @@ public interface TheaterControllerSpec {
             @RequestParam AuditoriumType auditoriumType,
             PageRequest pageRequest);
 
+    /**
+     * 상영관 상세 조회 API
+     * @param auditoriumId  상영관 ID
+     */
     @Operation(
             summary = "상영관 상세 조회 API",
             description = "상영관 ID를 바탕으로 상영관 조회"
@@ -40,6 +49,10 @@ public interface TheaterControllerSpec {
                     example = "13018")
             @PathVariable String auditoriumId);
 
+    /**
+     * 좌석 배치도 조회 API
+     * @param auditoriumId  상영관 ID
+     */
     @Operation(
             summary = "좌석 배치도 조회 API",
             description = "상영관 ID를 바탕으로 좌석배치도 조회"
@@ -50,6 +63,10 @@ public interface TheaterControllerSpec {
                     example = "13018")
             @PathVariable String auditoriumId);
 
+    /**
+     * 평점 포함 좌석배치도 조회 API
+     * @param auditoriumId  상영관 ID
+     */
     @Operation(
             summary = "평점/개수 포함된 좌석 배치도 조회 API",
             description = "상영관 ID를 바탕으로 평점/개수 포함된 좌석배치도 조회"
