@@ -5,6 +5,7 @@ import com.seeat.server.domain.review.domain.entity.HashTag;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.user.domain.entity.User;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -26,20 +27,43 @@ import java.util.List;
  * @param originalCreatedAt 원본 게시글의 작성시간
  * @param createdAt         스냅샷 시간
  */
-
 @Builder
+@Schema(name = "[응답] 인기 리뷰 리스트 Response", description = "인기 리뷰 리스트 조회를 위한 DTO입니다.")
 public record BestReviewListResponse(
+        @Schema(description = "리뷰 아이디", example = "101")
         Long reviewId,
+
+        @Schema(description = "썸네일 이미지 URL", example = "https://example.com/thumbnails/review101.jpg")
         String thumbnailUrl,
+
+        @Schema(description = "해시태그 목록", example = "[\"감동\", \"추천\", \"액션\"]")
         List<String> hashtags,
+
+        @Schema(description = "영화 제목", example = "어벤져스: 엔드게임")
         String movieTitle,
+
+        @Schema(description = "영화관 이름", example = "CGV 용산아이파크몰")
         String theaterName,
+
+        @Schema(description = "리뷰 내용", example = "스토리가 아주 감동적이었어요!")
         String content,
+
+        @Schema(description = "유저 ID", example = "12345")
         Long userId,
+
+        @Schema(description = "닉네임", example = "happyUser")
         String nickname,
+
+        @Schema(description = "프로필 이미지 URL", example = "https://example.com/profiles/happyUser.jpg")
         String profileImageUrl,
+
+        @Schema(description = "좋아요(하트) 수", example = "350")
         Long heartCount,
+
+        @Schema(description = "원본 게시글의 작성 시간", example = "2025-07-23T10:15:30")
         LocalDateTime originalCreatedAt,
+
+        @Schema(description = "스냅샷 시간", example = "2025-07-24T08:00:00")
         LocalDateTime createdAt
 ) {
 

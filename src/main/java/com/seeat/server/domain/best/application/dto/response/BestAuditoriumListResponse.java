@@ -4,6 +4,7 @@ import com.seeat.server.domain.best.domain.entity.BestAuditoriumSnapshot;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.Theater;
 import com.seeat.server.domain.theater.domain.repository.dto.AuditoriumWithScore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -20,11 +21,21 @@ import java.util.List;
  */
 
 @Builder
+@Schema(name = "[응답] 인기 상영관 리스트 Response", description = "베스트 상영관 리스트 조회를 위한 DTO입니다.")
 public record BestAuditoriumListResponse(
+        @Schema(description = "상영관 ID", example = "13018")
         String auditoriumId,
+
+        @Schema(description = "상영관 이름", example = "IMAX관")
         String auditoriumName,
+
+        @Schema(description = "평균 평점", example = "4.7")
         Double avgRating,
+
+        @Schema(description = "총 리뷰 수", example = "324")
         Long reviewCount,
+
+        @Schema(description = "점수", example = "95.5")
         Double score
 ) {
     /// 정적 팩토리 메서드
