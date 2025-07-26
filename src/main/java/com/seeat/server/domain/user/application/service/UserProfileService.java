@@ -12,11 +12,13 @@ import com.seeat.server.domain.user.domain.entity.UserAuditorium;
 import com.seeat.server.domain.user.domain.entity.UserGrade;
 import com.seeat.server.domain.user.domain.repository.UserAuditoriumRepository;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
+import com.seeat.server.global.image.application.usecase.ImageUseCase;
 import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -33,8 +35,10 @@ public class UserProfileService implements UserProfileUseCase {
 
     // 외부 의존성
     private final UserAuditoriumRepository userAuditoriumRepository;
-
     private final TheaterUseCase theaterService;
+
+    /// 이미지 서비스 추가
+    private final ImageUseCase imageService;
 
     /**
      * 마이페이지 사용자 정보 조회를 위한 로직
@@ -61,7 +65,7 @@ public class UserProfileService implements UserProfileUseCase {
      * @return 수정된 정보 DTO
      */
     @Override
-    public UserInfoUpdateResponse updateUserInfo(Long userId, UserInfoUpdateRequest request){
+    public UserInfoUpdateResponse updateUserInfo(Long userId, UserInfoUpdateRequest request) throws IOException {
 
         // 사용자 예외 처리
         User user = service.getUser(userId);
@@ -71,8 +75,20 @@ public class UserProfileService implements UserProfileUseCase {
                 .map(theaterService::getAuditorium)
                 .collect(Collectors.toList());
 
+        /// 기존 이미지 사진이 기본 값
+        String thumbnailImage = user.getImageUrl();
+
+        /// 존재한다면 이미지 추가
+        if (request.getImage() != null) {
+
+            /// 기존 사진 사진
+            imageService.deleteFile(thumbnailImage);
+
+            thumbnailImage = imageService.uploadFile(request.getImage());
+        }
+
         // 사용자 정보 수정
-        user.updateUser(request.getNickname(), request.getImageUrl(), request.getGenres());
+        user.updateUser(request.getNickname(), thumbnailImage, request.getGenres());
 
         // 기존 userAuditorium 삭제
         userAuditoriumRepository.deleteByUserId(userId);

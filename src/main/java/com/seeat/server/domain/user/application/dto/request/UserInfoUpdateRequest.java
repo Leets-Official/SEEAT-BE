@@ -3,6 +3,7 @@ package com.seeat.server.domain.user.application.dto.request;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class UserInfoUpdateRequest {
     /**
      * 프로필 이미지
      */
-    String imageUrl;
+    MultipartFile image;
 
     /**
      * 선호하는 영화 장르

@@ -7,6 +7,7 @@ import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoUpdateResponse;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface UserProfileUseCase {
@@ -15,7 +16,7 @@ public interface UserProfileUseCase {
     UserInfoResponse getUserInfo(Long userId);
 
     // 사용자 정보 수정
-    UserInfoUpdateResponse updateUserInfo(Long userId, UserInfoUpdateRequest request);
+    UserInfoUpdateResponse updateUserInfo(Long userId, UserInfoUpdateRequest request) throws IOException;
 
     // 등급 목록 조회
     List<UserGradeResponse> getUserGradeList();
