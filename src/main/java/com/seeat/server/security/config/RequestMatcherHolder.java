@@ -42,6 +42,9 @@ public class RequestMatcherHolder {
             new RequestInfo(POST, "/api/v1/reviews/**", USER),
             new RequestInfo(GET, "/api/v1/reviews/**", null),
 
+            // 마이페이지 관련
+            new RequestInfo(POST, "/api/v1/profile/**", USER),
+
             // 영화관 관련
             new RequestInfo(GET, "/api/v1/theaters/**", null),
 

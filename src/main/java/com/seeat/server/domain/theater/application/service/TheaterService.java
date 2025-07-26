@@ -111,4 +111,23 @@ public class TheaterService implements TheaterUseCase {
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_SEAT.getMessage()));
     }
 
+    /**
+     * 공통 응답 함수
+     * @param seatIds  좌석 IDs
+     */
+    @Override
+    public List<Seat> getSeat(List<String> seatIds) {
+
+        /// 가져오기
+        List<Seat> seats = seatRepository.findByIdIn(seatIds);
+
+        /// 예외처리
+        if (seats.size() != seatIds.size()) {
+            throw new NoSuchElementException(ErrorCode.NOT_SEAT.getMessage());
+        }
+
+        return seats;
+    }
+
+
 }

@@ -30,13 +30,11 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -46,6 +44,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertFalse;
 
+import java.util.List;
 /**
  * [리뷰 서비스의 통합 테스트 클래스]입니다.
  * 리뷰 생성, 조회에 대한 happy/unhappy 테스트를 수행합니다.
@@ -127,7 +126,7 @@ class ReviewServiceIntTest {
         void createReviewByUser_happy() throws IOException {
             //given
             var request = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
@@ -165,6 +164,46 @@ class ReviewServiceIntTest {
                     .containsExactlyInAnyOrderElementsOf(request.getHashtags());
         }
 
+        @Test
+        @DisplayName("[happy] 이미지 없이 로그인한 유저 리뷰 좌석 2개에 동시 생성 정상 생성")
+        void createReviewByUser_happy_multiple_seat() throws IOException {
+            // given
+            var request = ReviewRequest.builder()
+                    .seatIds(List.of(seat1.getId(), seat2.getId()))
+                    .content("test")
+                    .movieTitle("ReviewTestTitle")
+                    .photos(null)
+                    .rating(5)
+                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                    .build();
+
+            // when
+            sut.createReview(request, user1.getId());
+
+            // then
+            List<Review> reviews = repository.findAll();
+            Assertions.assertThat(reviews).hasSize(2);
+
+            for (Review review : reviews) {
+                Assertions.assertThat(review.getContent()).isEqualTo(request.getContent());
+                Assertions.assertThat(review.getRating()).isEqualTo(request.getRating());
+                Assertions.assertThat(List.of(seat1.getId(), seat2.getId())).contains(review.getSeat().getId());
+                Assertions.assertThat(review.getSeat().getAuditorium().getTheater().getName())
+                        .isEqualTo("Test Theater");
+
+                List<ReviewHashTag> reviewHashTags = reviewHashTagRepository.findByReview(review);
+                Assertions.assertThat(reviewHashTags).hasSize(3);
+
+                List<Long> actualHashTagIds = reviewHashTags.stream()
+                        .map(rht -> rht.getHashTag().getId())
+                        .toList();
+
+                Assertions.assertThat(actualHashTagIds)
+                        .containsExactlyInAnyOrderElementsOf(request.getHashtags());
+            }
+        }
+
+
         /**
          * 정상적인 유저가 이미지 한 장을 통해 리뷰를 생성하는 경우를 검증합니다.
          */
@@ -177,7 +216,7 @@ class ReviewServiceIntTest {
             MockMultipartFile file1 = new MockMultipartFile("photos", "sample1.png", MediaType.IMAGE_PNG_VALUE, inputStream1);
 
             var request = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(5)
@@ -237,7 +276,7 @@ class ReviewServiceIntTest {
 
 
             var request = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(3)
@@ -315,7 +354,7 @@ class ReviewServiceIntTest {
             MockMultipartFile file6 = new MockMultipartFile("photos", "sample6.png", MediaType.IMAGE_PNG_VALUE, inputStream6);
 
             var request = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(3)
@@ -341,7 +380,7 @@ class ReviewServiceIntTest {
             //given
             User fakeUser = UserFixtures.fakeUser();
             var request = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
@@ -363,7 +402,7 @@ class ReviewServiceIntTest {
         void createReviewByUser_unhappy_throw_IllegalArgumentException() {
             //given
             var request = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
@@ -584,7 +623,7 @@ class ReviewServiceIntTest {
 
             //given
             var request = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
@@ -593,13 +632,13 @@ class ReviewServiceIntTest {
                     .build();
 
             //when
-            Review sutReview = sut.createReview(request, user1.getId());
+            List<Review> sutReview = sut.createReview(request, user1.getId());
 
-            likeService.reviewLike(user1.getId(), sutReview.getId());
-            likeService.reviewLike(user2.getId(), sutReview.getId());
+            likeService.reviewLike(user1.getId(), sutReview.get(0).getId());
+            likeService.reviewLike(user2.getId(), sutReview.get(0).getId());
 
             //when
-            ReviewDetailResponse response = sut.loadReview(sutReview.getId());
+            ReviewDetailResponse response = sut.loadReview(sutReview.get(0).getId());
 
             //then
             Assertions.assertThat(response).isNotNull();
@@ -615,7 +654,7 @@ class ReviewServiceIntTest {
             PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();
 
             var request1 = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test1")
                     .movieTitle("ReviewTestTitle1")
                     .photos(null)
@@ -624,7 +663,7 @@ class ReviewServiceIntTest {
                     .build();
 
             var request2 = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test2")
                     .movieTitle("ReviewTestTitle2")
                     .photos(null)
@@ -632,12 +671,12 @@ class ReviewServiceIntTest {
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
 
-            Review sutReview1 = sut.createReview(request1, user1.getId());
-            Review sutReview2 = sut.createReview(request2, user1.getId());
+            List<Review> sutReview1 = sut.createReview(request1, user1.getId());
+            List<Review> sutReview2 = sut.createReview(request2, user1.getId());
 
             // 1에게만 좋아요 누르기
-            likeService.reviewLike(user1.getId(), sutReview1.getId());
-            likeService.reviewLike(user2.getId(), sutReview1.getId());
+            likeService.reviewLike(user1.getId(), sutReview1.get(0).getId());
+            likeService.reviewLike(user2.getId(), sutReview1.get(0).getId());
 
             // when
             SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest);
