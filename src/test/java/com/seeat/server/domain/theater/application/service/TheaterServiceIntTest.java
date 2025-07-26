@@ -3,12 +3,10 @@ package com.seeat.server.domain.theater.application.service;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.HashTagFixtures;
-import com.seeat.server.domain.review.domain.ReviewFixtures;
 import com.seeat.server.domain.review.domain.entity.HashTag;
 import com.seeat.server.domain.review.domain.entity.HashTagType;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.repository.HashTagRepository;
-import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.seat.domain.AuditoriumFixtures;
 import com.seeat.server.domain.seat.domain.SeatFixtures;
 import com.seeat.server.domain.seat.domain.TheaterFixtures;
@@ -141,7 +139,7 @@ class TheaterServiceIntTest {
             // given
             /// 리뷰 저장
             var request = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
