@@ -35,6 +35,17 @@ public class AuditoriumFixtures {
                 .build();
     }
 
+    public static Auditorium createAuditorium(Theater theater,AuditoriumType type) {
+        return Auditorium.builder()
+                .id("auditorium-id" + UUID.randomUUID())
+                .name("Test Auditorium")
+                .screenSize("testScreenSize")
+                .soundType("testSoundType")
+                .type(type)
+                .theater(theater)
+                .build();
+    }
+
 
 
 }

@@ -33,4 +33,6 @@ public interface TheaterUseCase {
     Auditorium getAuditorium(String auditoriumId);
 
     Seat getSeat(String seatId);
+
+    List<Seat> getSeat(List<String> seatIds);
 }

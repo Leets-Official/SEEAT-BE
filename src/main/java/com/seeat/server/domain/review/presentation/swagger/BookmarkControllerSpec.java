@@ -25,14 +25,6 @@ public interface BookmarkControllerSpec {
             @RequestBody @Valid BookmarkRequest request);
 
     @Operation(
-            description = "북마크 조회 API",
-            summary = "북마크 조회 API 입니다."
-    )
-    ApiResponse<SliceResponse<ReviewListResponse>> getBookmarksByUser(
-            @AuthenticationPrincipal User user,
-            PageRequest pageRequest);
-
-    @Operation(
             description = "북마크 삭제 API",
             summary = "북마크 삭제 API 입니다."
     )

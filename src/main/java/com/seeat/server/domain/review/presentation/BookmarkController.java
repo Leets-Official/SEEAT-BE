@@ -21,6 +21,10 @@ public class BookmarkController implements BookmarkControllerSpec {
 
     private final BookmarkUseCase bookmarkService;
 
+    /**
+     * 북마크 생성
+     * @param request   요청DTO
+     */
     @PostMapping
     public ApiResponse<Void> saveBookmark(@RequestBody @Valid BookmarkRequest request) {
 
@@ -31,20 +35,11 @@ public class BookmarkController implements BookmarkControllerSpec {
         return ApiResponse.created();
     }
 
-    @GetMapping()
-    public ApiResponse<SliceResponse<ReviewListResponse>> getBookmarksByUser(
-            @AuthenticationPrincipal User user,
-            PageRequest pageRequest) {
-
-        /// 서비스 호출
-        Slice<ReviewListResponse> responses = bookmarkService.loadMyBookmarks(user.getId(), pageRequest);
-
-        /// DTO 변환
-        SliceResponse<ReviewListResponse> response = SliceResponse.from(responses);
-
-        return ApiResponse.ok(response);
-    }
-
+    /**
+     * 북마크 삭제
+     * @param user          삭제할 유저
+     * @param bookmarkId    삭제할 ID
+     */
     @DeleteMapping("/{bookmarkId}")
     public ApiResponse<Void> deleteBookmark(
             @AuthenticationPrincipal User user,

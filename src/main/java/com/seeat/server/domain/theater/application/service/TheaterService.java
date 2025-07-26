@@ -7,6 +7,7 @@ import com.seeat.server.domain.theater.domain.entity.AuditoriumType;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
 import com.seeat.server.domain.theater.domain.repository.SeatRepository;
+import com.seeat.server.domain.theater.domain.repository.dto.AuditoriumWithRating;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.PageUtil;
@@ -62,8 +63,9 @@ public class TheaterService implements TheaterUseCase {
     @Override
     public AuditoriumDetailResponse loadAuditorium(String auditoriumId) {
 
-        /// 상영관 예외처리
-        Auditorium auditorium = getAuditorium(auditoriumId);
+        /// 상영관 예외처리 및 개수 및 평균 평점 가져오기
+        AuditoriumWithRating auditorium = auditoriumRepository.findAuditoriumWithRating(auditoriumId)
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_AUDITORIUM.getMessage()));
 
         /// DTO 변환
         return AuditoriumDetailResponse.from(auditorium);
@@ -108,5 +110,24 @@ public class TheaterService implements TheaterUseCase {
         return seatRepository.findById(seatId)
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_SEAT.getMessage()));
     }
+
+    /**
+     * 공통 응답 함수
+     * @param seatIds  좌석 IDs
+     */
+    @Override
+    public List<Seat> getSeat(List<String> seatIds) {
+
+        /// 가져오기
+        List<Seat> seats = seatRepository.findByIdIn(seatIds);
+
+        /// 예외처리
+        if (seats.size() != seatIds.size()) {
+            throw new NoSuchElementException(ErrorCode.NOT_SEAT.getMessage());
+        }
+
+        return seats;
+    }
+
 
 }

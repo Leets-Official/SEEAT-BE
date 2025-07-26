@@ -10,7 +10,7 @@ import com.seeat.server.global.response.pageable.SliceResponse;
 import org.springframework.data.domain.Slice;
 
 import java.io.IOException;
-
+import java.util.List;
 /**
  * [리뷰 인터페이스]
  * - 로그인한 유저만 좌석 후기를 작성 및 열람할 수 있습니다.
@@ -20,7 +20,7 @@ import java.io.IOException;
 public interface ReviewUseCase {
 
     /// 리뷰 작성
-    Review createReview(ReviewRequest request, Long userId) throws IOException;
+    List<Review> createReview(ReviewRequest request, Long userId) throws IOException;
 
     /// 리뷰 조회
     // 리뷰 상세 조회
@@ -32,6 +32,9 @@ public interface ReviewUseCase {
     SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(String seatId, PageRequest pageRequest);
 
     SliceResponse<ReviewListResponse> loadFavoriteReviews(PageRequest pageRequest);
+
+    // 나의 후기 목록 조회하기
+    SliceResponse<ReviewListResponse> loadMyReviews(Long userId, PageRequest pageRequest);
 
     /// 리뷰 수정
     void updateReview(ReviewUpdateRequest request, Long userId);

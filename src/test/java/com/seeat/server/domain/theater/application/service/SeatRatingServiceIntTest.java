@@ -123,7 +123,7 @@ class SeatRatingServiceIntTest {
 
             /// 리뷰 작성
             var request = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
@@ -157,7 +157,7 @@ class SeatRatingServiceIntTest {
 
             /// 리뷰 작성
             var request = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
@@ -190,7 +190,7 @@ class SeatRatingServiceIntTest {
         public void multiple_Review_calculate() throws Exception {
             //given
             var request1 = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("review1")
                     .movieTitle("title1")
                     .photos(null)
@@ -199,7 +199,7 @@ class SeatRatingServiceIntTest {
                     .build();
 
             var request2 = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("review2")
                     .movieTitle("title2")
                     .photos(null)
@@ -231,7 +231,7 @@ class SeatRatingServiceIntTest {
         public void badReview() throws Exception {
             /// 리뷰 작성
             var request = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
@@ -266,7 +266,7 @@ class SeatRatingServiceIntTest {
 
             /// 리뷰 작성
             var request = ReviewRequest.builder()
-                    .seatId(seat1.getId())
+                    .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .photos(null)
