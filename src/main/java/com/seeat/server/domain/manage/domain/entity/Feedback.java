@@ -1,8 +1,6 @@
 package com.seeat.server.domain.manage.domain.entity;
 
 import com.seeat.server.domain.BaseEntity;
-import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.user.domain.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

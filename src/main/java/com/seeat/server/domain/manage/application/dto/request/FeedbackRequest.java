@@ -1,4 +1,4 @@
-package com.seeat.server.domain.manage.application.dto;
+package com.seeat.server.domain.manage.application.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;

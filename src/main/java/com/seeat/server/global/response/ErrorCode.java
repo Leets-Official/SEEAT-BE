@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-import java.util.Arrays;
-
 /**
  * 애플리케이션 전역에서 사용하는 에러 코드 Enum입니다.
  * 각 에러는 고유 코드, HTTP 상태, 메시지를 포함합니다.
@@ -33,9 +31,6 @@ public enum ErrorCode {
     INVALID_FILE_FORMAT(400_001, HttpStatus.BAD_REQUEST, "업로드된 파일 형식이 올바르지 않습니다."),
     INVALID_INPUT(400_002, HttpStatus.BAD_REQUEST, "입력값이 올바르지 않습니다."),
     NULL_VALUE(400_003, HttpStatus.BAD_REQUEST, "Null 값이 들어왔습니다."),
-    BAD_TYPE_REQUEST(400_004, HttpStatus.BAD_REQUEST, "해당 Content-Type은 지원하지 않습니다."),
-    NOT_IMAGE(404_002, HttpStatus.BAD_REQUEST, "저장할 이미지가 없습니다."),
-
 
     // 401 Unauthorized
     TOKEN_EXPIRED(401_000, HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
@@ -63,8 +58,6 @@ public enum ErrorCode {
 
     /** 서버 내부 오류  */
     INTERNAL_SERVER_ERROR(500, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
-    INTERNAL_S3_ERROR(500_001, HttpStatus.INTERNAL_SERVER_ERROR, "AWS S3 설정이 잘못되었습니다. 속성을 확인하세요."),
-    INTERNAL_FILE_ERROR(500_002, HttpStatus.INTERNAL_SERVER_ERROR, "이미지 등록 하는 과정에서 에러가 발생했습니다."),
 
     /** 요청 파라미터 오류 */
     BAD_PARAMETER(999, HttpStatus.BAD_REQUEST, "요청 파라미터에 문제가 존재합니다."),
@@ -86,18 +79,14 @@ public enum ErrorCode {
     NOT_THEATER(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 영화관이 존재하지 않습니다."),
     NOT_AUDITORIUM(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 상영관이 존재하지 않습니다."),
     NOT_SEAT(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 좌석이 존재하지 않습니다."),
-    TRANSACTION_ERROR(2999, HttpStatus.CONFLICT, "동시성 문제가 발생했습니다."),
+    NOT_FEEDBACK(2001, HttpStatus.NOT_FOUND, "해당 ID를 가진 피드백이 존재하지 않습니다."),
+
     // ========================
     // 3000~3999 : 리뷰 관련 에러
     // ========================
     NOT_REVIEW(3000, HttpStatus.NOT_FOUND, "해당하는 리뷰가 존재하지 않습니다."),
-    INVALID_HASHTAG(3001, HttpStatus.BAD_REQUEST, "모든 해시태그 항목(음향, 동반인, 관람환경)을 최소 1개 이상 작성해야 합니다."),
-    DUPLICATE_BOOKMARK(3002, HttpStatus.CONFLICT, "해당하는 리뷰를 이미 북마크 했습니다"),
-    DUPLICATE_REVIEW(3003, HttpStatus.CONFLICT, "해당하는 리뷰를 이미 좋아요 했습니다"),
-    NOT_OWN_BOOKMARK(3004, HttpStatus.CONFLICT, "추가되어있지 않은 북마크를 삭제할 수 없습니다."),
-    NOT_OWN_REVIEW(3005, HttpStatus.CONFLICT, "추가되어있지 않은 리뷰를 삭제할 수 없습니다."),
-    NO_IMAGE_REVIEW(3006, HttpStatus.BAD_REQUEST, "등록할 이미지가 없음에도 추가하고자 합니다."),
-    TOO_MANY_IMAGES(3007, HttpStatus.BAD_REQUEST, "등록할 이미지가 5개 초과입니다.");
+    INVALID_HASHTAG(3001, HttpStatus.BAD_REQUEST, "모든 해시태그 항목(음향, 동반인, 관람환경)을 최소 1개 이상 작성해야 합니다.");
+
 
 
     /** 에러 코드 (고유값) */
@@ -110,17 +99,21 @@ public enum ErrorCode {
     private final String message;
 
 
+
     /**
      * 메시지를 바탕으로 ErrorCode를 반환합니다.
      * 동일한 메시지가 여러 ErrorCode에 할당된 경우, 첫 번째로 일치하는 ErrorCode를 반환합니다.
      *
      * @param message 에러 메시지
      * @return 일치하는 ErrorCode
+     * @throws IllegalArgumentException 메시지에 해당하는 ErrorCode가 없을 때
      */
     public static ErrorCode fromMessage(String message) {
-        return Arrays.stream(values())
-                .filter(code -> code.message.equalsIgnoreCase(message))
-                .findFirst()
-                .orElse(ErrorCode.INTERNAL_SERVER_ERROR); // 기본 에러 처리
+        for (ErrorCode errorCode : ErrorCode.values()) {
+            if (errorCode.getMessage().equals(message)) {
+                return errorCode;
+            }
+        }
+        throw new IllegalArgumentException("해당 message를 가진 ErrorCode가 존재하지 않습니다: " + message);
     }
 }
