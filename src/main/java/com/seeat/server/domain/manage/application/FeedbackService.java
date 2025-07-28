@@ -4,7 +4,7 @@ import com.seeat.server.domain.manage.application.dto.request.FeedbackRequest;
 import com.seeat.server.domain.manage.application.dto.response.FeedbackDetailResponse;
 import com.seeat.server.domain.manage.domain.entity.Feedback;
 import com.seeat.server.domain.manage.domain.repository.FeedbackRepository;
-import com.seeat.server.domain.user.application.UserUseCase;
+import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +24,7 @@ public class FeedbackService implements FeedbackUseCase{
     @Override
     public void createFeedback(FeedbackRequest request, Long userId) {
         // 유저 예외처리
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_USER.getMessage()));
+        User user = userRepository.getUser(userId);
 
         // 객체 생성
         Feedback requestFeedback = Feedback.of(user, request.getFeedbackContent());
