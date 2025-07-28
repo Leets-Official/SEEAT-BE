@@ -1,8 +1,8 @@
 package com.seeat.server.domain.user.presentation;
 
 
-import com.seeat.server.domain.user.application.UserUseCase;
-import com.seeat.server.domain.user.application.dto.UserSignUpRequest;
+import com.seeat.server.domain.user.application.usecase.UserUseCase;
+import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
 import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.domain.user.presentation.swagger.UserControllerSpec;
 import com.seeat.server.global.response.ApiResponse;
@@ -15,8 +15,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,14 +33,16 @@ public class UserController implements UserControllerSpec {
     /**
      * 최초 로그인시 추가 회원가입을 진행합니다.
      *
-     * @param request     추가 정보 요청값 (닉네임, 유저프로필, 선호 장르, 선호 극장)
+     * @param request 추가 정보 요청값 (닉네임, 유저프로필, 선호 장르, 선호 상영관)
      * @param tempUserKey 임시유저정보 담긴 RedisKey
      * @return 회원가입 완료 응답
      */
-    @PostMapping
+    @PostMapping(
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ApiResponse<Void> userSignUp(
-            @Valid @RequestBody UserSignUpRequest request,
-            @RequestHeader("Temp-User-Key") String tempUserKey) {
+            @ModelAttribute @Valid UserSignUpRequest request,
+            @RequestHeader("Temp-User-Key") String tempUserKey) throws IOException {
 
         TempUserInfo tempUserInfo = redisService.getValues(tempUserKey, TempUserInfo.class);
 

@@ -1,6 +1,6 @@
 package com.seeat.server.security.oauth2.application;
 
-import com.seeat.server.domain.user.application.UserService;
+import com.seeat.server.domain.user.application.service.UserService;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
 import com.seeat.server.global.response.CustomException;
@@ -61,7 +61,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             case "kakao" -> new KakaoUserInfo(attributes);
             case "naver" -> new NaverUserInfo(attributes);
 
-            default -> throw new CustomException(ErrorCode.UNSUPPORTED_SOCIAL_LOGIN, null);
+            default -> throw new IllegalArgumentException(ErrorCode.UNSUPPORTED_SOCIAL_LOGIN.getMessage());
         };
     }
 }

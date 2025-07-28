@@ -29,4 +29,13 @@ public class ReviewLike extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Review review;
+
+    /// 정적 팩토리 메서드
+    public static ReviewLike of(User user, Review review) {
+        return ReviewLike.builder()
+                .user(user)
+                .review(review)
+                .build();
+    }
+
 }

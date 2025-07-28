@@ -1,10 +1,7 @@
 package com.seeat.server.domain.review.domain.entity;
 
 import com.seeat.server.domain.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,6 +25,7 @@ public class HashTag extends BaseEntity {
 
     private String name;
 
+    @Enumerated(EnumType.STRING)
     private HashTagType type;
 
 }

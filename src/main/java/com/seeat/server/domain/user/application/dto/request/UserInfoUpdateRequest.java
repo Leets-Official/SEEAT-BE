@@ -1,0 +1,32 @@
+package com.seeat.server.domain.user.application.dto.request;
+
+import com.seeat.server.domain.theater.domain.entity.MovieGenre;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
+@Data
+@AllArgsConstructor
+public class UserInfoUpdateRequest {
+    /**
+     * 닉네임
+     */
+    String nickname;
+
+    /**
+     * 프로필 이미지
+     */
+    MultipartFile image;
+
+    /**
+     * 선호하는 영화 장르
+     */
+    List<MovieGenre> genres;
+
+    /**
+     * 선호하는 상영관
+     */
+    List<String> auditoriumIds;
+}

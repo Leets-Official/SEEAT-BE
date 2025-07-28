@@ -1,6 +1,8 @@
 package com.seeat.server.security.config;
 
 import com.seeat.server.security.handler.CustomOAuth2SuccessHandler;
+import com.seeat.server.security.handler.JwtDeniedHandler;
+import com.seeat.server.security.handler.JwtFailureHandler;
 import com.seeat.server.security.jwt.JwtFilter;
 import com.seeat.server.security.oauth2.application.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
@@ -8,9 +10,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import static com.seeat.server.domain.user.domain.entity.UserRole.ADMIN;
+import static com.seeat.server.domain.user.domain.entity.UserRole.USER;
 
 /**
  * Spring Security 설정 클래스
@@ -25,19 +30,22 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
     private final JwtFilter jwtFilter;
+    private final JwtFailureHandler jwtFailureHandler;
+    private final JwtDeniedHandler jwtDeniedHandler;
+    private final RequestMatcherHolder requestMatcherHolder;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/",
-                                "/login/**",
-                                "/oauth2/**",
-                                "/api/v1/users",
-                                "/api/v1/users/dev/long-token"
-                        ).permitAll()
+                        .requestMatchers(requestMatcherHolder.getRequestMatchersByMinRole(null))
+                        .permitAll()
+                        .requestMatchers(requestMatcherHolder.getRequestMatchersByMinRole(USER))
+                        .hasAnyAuthority(ADMIN.getRole(), USER.getRole())
+                        .requestMatchers(requestMatcherHolder.getRequestMatchersByMinRole(ADMIN))
+                        .hasAnyAuthority(ADMIN.getRole())
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -49,26 +57,13 @@ public class SecurityConfig {
                             response.sendRedirect("/login?error");
                         })
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception -> {
+                    exception.authenticationEntryPoint(jwtFailureHandler)
+                            .accessDeniedHandler(jwtDeniedHandler);
+                });
+
 
         return http.build();
     }
-
-    /**
-     * 스웨거 및 홈화면 필터 ignore
-     */
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers(
-                "/favicon.ico",
-                "/swagger-ui/**",
-                "/v3/api-docs/**",
-                "/swagger-resources/**",
-                "/webjars/**",
-                "/index.html",
-                "**.css",
-                "/home"
-        );
-    }
-
 }
