@@ -12,7 +12,6 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserAuditorium;
 import com.seeat.server.domain.user.domain.entity.UserGrade;
 import com.seeat.server.domain.user.domain.repository.UserAuditoriumRepository;
-import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.image.application.usecase.ImageUseCase;
 import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -120,7 +119,7 @@ public class UserProfileService implements UserProfileUseCase {
 
     /// 공통 함수
     private List<Auditorium> getAuditoriums(Long userId) {
-        List<Auditorium> auditoriums = userAuditoriumRepository.findDistinctAuditoriumsByUserId(userId);
+        List<Auditorium> auditoriums = userAuditoriumRepository.findAuditoriumsByUserId(userId);
 
         if (auditoriums.isEmpty()) {
             throw new NoSuchElementException(ErrorCode.NOT_AUDITORIUM.getMessage());

@@ -11,11 +11,11 @@ import java.util.List;
 public interface UserAuditoriumRepository extends JpaRepository<UserAuditorium, Long> {
 
     @Query("""
-    SELECT DISTINCT ua.auditorium
+    SELECT ua.auditorium
     FROM UserAuditorium ua
     WHERE ua.user.id = :userId
     """)
-    List<Auditorium> findDistinctAuditoriumsByUserId(@Param("userId") Long userId);
+    List<Auditorium> findAuditoriumsByUserId(@Param("userId") Long userId);
 
     void deleteByUserId(Long userId);
 }
