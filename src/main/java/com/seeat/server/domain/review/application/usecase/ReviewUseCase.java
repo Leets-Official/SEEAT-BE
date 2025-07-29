@@ -1,5 +1,6 @@
 package com.seeat.server.domain.review.application.usecase;
 
+import com.seeat.server.domain.best.application.dto.response.BestReviewListResponse;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
@@ -31,21 +32,19 @@ public interface ReviewUseCase {
 
     SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(String seatId, PageRequest pageRequest);
 
-    SliceResponse<ReviewListResponse> loadFavoriteReviews(PageRequest pageRequest);
-
     // 나의 후기 목록 조회하기
     SliceResponse<ReviewListResponse> loadMyReviews(Long userId, PageRequest pageRequest);
 
     /// 리뷰 수정
-    void updateReview(ReviewUpdateRequest request, Long userId);
+    void updateReview(Long reviewId, ReviewUpdateRequest request, Long userId) throws IOException;
 
     /// 리뷰 삭제
     void deleteReview(Long reviewId, Long userId);
-
 
     /// 외부 의존성을 위한 유즈 케이스
     Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Long> reviews);
 
     Review getReview(Long reviewId);
+
 }
 

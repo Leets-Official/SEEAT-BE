@@ -2,6 +2,7 @@ package com.seeat.server.domain.review.application.dto.response;
 
 
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.util.List;
@@ -9,23 +10,21 @@ import java.util.List;
 /**
  * 리뷰-해시태그 매핑 정보 응답 DTO
  *
- * @param id           리뷰-해시태그 매핑 고유 ID
- * @param reviewId     리뷰 ID
  * @param hashTagId    해시태그 ID
  * @param hashTagName  해시태그 이름
  */
 
 @Builder
+@Schema(name = "[응답][리뷰] 해시태그 매핑 정보 Response", description = "리뷰에 연결된 해시태그 정보를 담고 있는 DTO입니다.")
 public record ReviewHashTagResponse(
-        Long id,
-        Long reviewId,
+        @Schema(description = "해시태그 ID", example = "1")
         Long hashTagId,
+
+        @Schema(description = "해시태그 이름", example = "감동")
         String hashTagName
 ) {
     public static ReviewHashTagResponse from(ReviewHashTag reviewHashTag) {
         return ReviewHashTagResponse.builder()
-                .id(reviewHashTag.getId())
-                .reviewId(reviewHashTag.getReview().getId())
                 .hashTagId(reviewHashTag.getHashTag().getId())
                 .hashTagName(reviewHashTag.getHashTag().getName())
                 .build();

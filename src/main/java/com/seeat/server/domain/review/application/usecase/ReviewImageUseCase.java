@@ -22,7 +22,7 @@ public interface ReviewImageUseCase {
     List<ReviewImage> getReviewImagesByReview(Review review);
 
     /// 삭제
-    void deleteReviewImage(String fileName);
+    void deleteReviewImage(Review review);
 
 
 

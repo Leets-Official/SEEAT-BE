@@ -1,5 +1,6 @@
 package com.seeat.server.domain.theater.application.usecase;
 
+import com.seeat.server.domain.best.application.dto.response.BestAuditoriumListResponse;
 import com.seeat.server.domain.theater.application.dto.response.*;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.AuditoriumType;
@@ -33,6 +34,11 @@ public interface TheaterUseCase {
     Auditorium getAuditorium(String auditoriumId);
 
     Seat getSeat(String seatId);
+    /// 외부 의존성
+    // 베스트 상영관 가져오기
+    SliceResponse<BestAuditoriumListResponse> loadBestAuditoriums(PageRequest pageRequest);
+
+
 
     List<Seat> getSeat(List<String> seatIds);
 }

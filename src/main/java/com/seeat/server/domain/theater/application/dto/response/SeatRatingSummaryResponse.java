@@ -15,25 +15,25 @@ import com.seeat.server.domain.theater.domain.entity.Seat;
  * @param isWheelchair      휠체어 좌석인지
  */
 @Builder
-@Schema(name = "평점/개수 포함 좌석 배치도 DTO", description = "상영관 내 좌석의 평점 요약을 제공하는 응답 DTO")
+@Schema(name = "[응답][영화관] 평점/개수 포함 좌석 배치도 Response", description = "상영관 내 좌석의 평점 요약을 제공하는 응답 DTO")
 public record SeatRatingSummaryResponse(
 
-        @Schema(description = "좌석ID")
+        @Schema(description = "좌석 ID", example = "13018A4")
         String seatId,
 
-        @Schema(description = "행")
+        @Schema(description = "좌석 행(Row)", example = "A")
         String row,
 
-        @Schema(description = "열")
+        @Schema(description = "좌석 열(Column)", example = "4")
         int column,
 
-        @Schema(description = "리뷰 개수")
+        @Schema(description = "리뷰 개수", example = "100")
         int totalReviews,
 
-        @Schema(description = "평균 점수")
+        @Schema(description = "평균 점수", example = "3.5")
         double averageRating,
 
-        @Schema(description = "휠체어 좌석 여부")
+        @Schema(description = "휠체어 좌석 여부", example = "false")
         boolean isWheelchair,
 
         @Schema(description = "좌석의 상태")

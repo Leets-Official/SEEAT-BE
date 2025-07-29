@@ -1,6 +1,6 @@
-package com.seeat.server.domain.review.domain.repository;
+package com.seeat.server.domain.bookmark.domain.repository;
 
-import com.seeat.server.domain.review.domain.entity.Bookmark;
+import com.seeat.server.domain.bookmark.domain.entity.Bookmark;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.user.domain.entity.User;
 import org.springframework.data.domain.Pageable;

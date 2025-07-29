@@ -1,7 +1,7 @@
 package com.seeat.server.domain.user.application.service;
 
-import com.seeat.server.domain.seat.domain.AuditoriumFixtures;
-import com.seeat.server.domain.seat.domain.TheaterFixtures;
+import com.seeat.server.domain.theater.domain.AuditoriumFixtures;
+import com.seeat.server.domain.theater.domain.TheaterFixtures;
 import com.seeat.server.domain.theater.application.dto.response.AuditoriumResponse;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;

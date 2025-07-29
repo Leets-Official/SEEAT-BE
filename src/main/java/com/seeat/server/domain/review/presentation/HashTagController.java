@@ -17,6 +17,9 @@ public class HashTagController implements HashTagControllerSpec {
 
     private final HashTagUseCase hashTagService;
 
+    /**
+     * 해시태그 조회 API
+     */
     @GetMapping()
     public ApiResponse<List<HashTagResponse>> getAll(){
 

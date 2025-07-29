@@ -41,6 +41,7 @@ public class S3Service implements ImageUseCase {
      * 하나의 파일 저장
      * @param file  저장할 이미지 파일
      */
+    @Override
     public String uploadFile(MultipartFile file) throws IOException {
 
         /// 예외처리
@@ -63,8 +64,9 @@ public class S3Service implements ImageUseCase {
 
     /**
      * 한번에 여러 파일 저장하기
-     * @param files 이미지들
+     * @param files 저장할 이미지 파일들
      */
+    @Override
     public List<String> uploadFiles(List<MultipartFile> files) throws IOException {
 
         /// files 갯수 0 이면 반환 ""
@@ -88,8 +90,22 @@ public class S3Service implements ImageUseCase {
      * 이미지 삭제하기
      * @param fileName  S3에서 삭제할 이미지 이름
      */
+    @Override
     public void deleteFile(String fileName) {
         s3Client.deleteObject(bucketName, fileName);
+    }
+
+    /**
+     * 이미지 삭제하기
+     * @param fileNames  S3에서 삭제할 이미지 여러 개
+     */
+    @Override
+    public void deleteFile(List<String> fileNames) {
+
+        /// 반복해서 삭제
+        for (String fileName : fileNames) {
+            deleteFile(fileName);
+        }
     }
 
     // 쓰지 말자! File 객체 생성됨!

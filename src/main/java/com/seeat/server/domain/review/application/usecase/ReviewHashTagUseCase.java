@@ -22,7 +22,8 @@ public interface ReviewHashTagUseCase {
     // 리뷰 ID 목록에 따른 해시태그 목록 조회
     List<ReviewHashTag> getReviewHashTagByReviews(List<Long> reviewIds);
 
+    /// 외부 의존성
     /// 리뷰 해시태그 삭제
-    void deleteReviewHashTag(Long reviewHashTagId);
+    void deleteReviewHashTagByReviewId(Long reviewId);
 
 }

@@ -1,12 +1,11 @@
-package com.seeat.server.domain.review.application.service;
+package com.seeat.server.domain.bookmark.application.service;
 
-import com.seeat.server.domain.review.application.dto.request.BookmarkRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
-import com.seeat.server.domain.review.application.usecase.BookmarkUseCase;
+import com.seeat.server.domain.bookmark.application.usecase.BookmarkUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
-import com.seeat.server.domain.review.domain.entity.Bookmark;
+import com.seeat.server.domain.bookmark.domain.entity.Bookmark;
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.repository.BookmarkRepository;
+import com.seeat.server.domain.bookmark.domain.repository.BookmarkRepository;
 import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ErrorCode;
@@ -38,16 +37,17 @@ public class BookmarkService implements BookmarkUseCase {
 
     /**
      * 북마크를 생성하는 함수
-     * @param request   생성 DTO
+     * @param reviewId  리뷰
+     * @param userId    유저
      */
     @Override
-    public Bookmark createBookmark(BookmarkRequest request) {
+    public Bookmark createBookmark(Long reviewId, Long userId) {
 
         /// 유저 예외 처리
-        User user = userService.getUser(request.getUserId());
+        User user = userService.getUser(userId);
 
         /// 리뷰 예외 처리
-        Review review = reviewService.getReview(request.getReviewId());
+        Review review = reviewService.getReview(reviewId);
 
         /// 동일한 북마크 처리 예외처리
         boolean checked = repository.existsByUserAndReview(user, review);

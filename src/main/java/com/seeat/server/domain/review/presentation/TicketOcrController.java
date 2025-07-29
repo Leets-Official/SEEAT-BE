@@ -16,6 +16,10 @@ public class TicketOcrController implements TicketOcrControllerSpec {
 
     private final TicketOcrUseCase ocrService;
 
+    /**
+     * 티켓 OCR 조회
+     * @param file  조회할 파일
+     */
     @PostMapping(
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
