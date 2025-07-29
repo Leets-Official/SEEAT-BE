@@ -72,7 +72,7 @@ public class UserProfileService implements UserProfileUseCase {
         // request 상영관 예외 처리
         List<Auditorium> auditoriums = request.getAuditoriumIds().stream()
                 .map(theaterService::getAuditorium)
-                .collect(Collectors.toList());
+                .toList();
 
         /// 기존 이미지 사진이 기본 값
         String thumbnailImage = user.getImageUrl();
