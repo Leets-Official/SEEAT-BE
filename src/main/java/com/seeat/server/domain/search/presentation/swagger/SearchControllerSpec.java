@@ -7,7 +7,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -26,6 +28,23 @@ public interface SearchControllerSpec {
     )
     @GetMapping
     ApiResponse<List<SearchResponse>> getSearchList(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal User user);
+
+    /**
+     * 최근 검색어 하나 삭제 API
+     *
+     * @param searchId 검색어 ID
+     * @param user 유저
+     * @return ok 응답값
+     */
+    @Operation(
+            summary = "검색어 기록 삭제",
+            description = "검색어 하나의 기록을 삭제합니다."
+    )
+    @DeleteMapping("/{searchId}")
+    ApiResponse<Void> deleteSearch(
+            @PathVariable Long searchId,
             @Parameter(hidden = true)
             @AuthenticationPrincipal User user);
 

@@ -1,6 +1,7 @@
 package com.seeat.server.domain.user.domain.repository;
 
 import com.seeat.server.domain.search.domain.entity.Search;
+import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserSearch;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,5 +17,7 @@ public interface UserSearchRepository extends JpaRepository<UserSearch, Long> {
     ORDER BY us.createdAt DESC
     """)
     List<Search> findSearchListByUserId(@Param("userId") Long userId);
+
+    void deleteByUserAndSearch(User user, Search search);
 
 }
