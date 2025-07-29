@@ -1,6 +1,6 @@
 package com.seeat.server.domain.image.application.usecase;
 
-import org.springframework.web.multipart.MultipartFile;
+import com.seeat.server.domain.image.application.dto.response.S3ImageResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,17 +13,18 @@ import java.util.List;
  */
 public interface ImageUseCase {
 
-    /// 저장
-    // 한 장 저장하기
-    String uploadFile(MultipartFile file) throws IOException;
+    /// 파일 저장을 위한 presignedURL 제공
+    S3ImageResponse getUploadPresignedURL(String file) throws IOException;
 
-    // 여러 장 저장하기
-    List<String> uploadFiles(List<MultipartFile> files) throws IOException;
+    /// 파일 저장을 위한 presignedURL 제공
+    List<S3ImageResponse> getUploadPresignedURL(List<String> files) throws IOException;
 
-    /// 삭제
-    // 한 장 삭제하기
-    void deleteFile(String fileName);
+    /// 검증
+    boolean isValidImageUrl(String url);
 
-    // 여러 장 삭제하기
-    void deleteFile(List<String> fileNames);
+    /// 파일 삭제
+    void deleteFile(String file) throws IOException;
+
+    void deleteFile(List<String> files) throws IOException;
+
 }
