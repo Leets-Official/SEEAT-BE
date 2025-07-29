@@ -42,6 +42,8 @@ public interface FeedbackControllerSpec {
     @GetMapping("/{feedbackId}")
     ApiResponse<FeedbackDetailResponse> getReview(
             @Parameter(example = "1")
-            @PathVariable Long feedbackId
+            @PathVariable Long feedbackId,
+
+            @Parameter(hidden = true) @AuthenticationPrincipal User user
     );
 }

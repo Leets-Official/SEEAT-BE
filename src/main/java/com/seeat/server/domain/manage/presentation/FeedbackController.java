@@ -42,10 +42,11 @@ public class FeedbackController implements FeedbackControllerSpec {
      */
     @GetMapping("/{feedbackId}")
     public ApiResponse<FeedbackDetailResponse> getReview(
-            @PathVariable Long feedbackId) {
+            @PathVariable Long feedbackId,
+            @AuthenticationPrincipal User user) {
 
         // 서비스 호출
-        var response = feedbackService.loadFeedback(feedbackId);
+        var response = feedbackService.loadFeedback(feedbackId, user.getId());
 
         // 결과 리턴
         return ApiResponse.ok(response);

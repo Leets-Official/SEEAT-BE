@@ -19,12 +19,12 @@ import java.util.NoSuchElementException;
 public class FeedbackService implements FeedbackUseCase{
 
     private final FeedbackRepository repository;
-    private final UserUseCase userRepository;
+    private final UserUseCase userService;
 
     @Override
     public void createFeedback(FeedbackRequest request, Long userId) {
         // 유저 예외처리
-        User user = userRepository.getUser(userId);
+        User user = userService.getUser(userId);
 
         // 객체 생성
         Feedback requestFeedback = Feedback.of(user, request.getFeedbackContent());
@@ -37,11 +37,12 @@ public class FeedbackService implements FeedbackUseCase{
      * 피드백 ID 조회
      */
     @Override
-    public FeedbackDetailResponse loadFeedback(Long feedbackId) {
+    public FeedbackDetailResponse loadFeedback(Long feedbackId, Long userId) {
 
         // FeedbackId를 바탕으로 조회
         Feedback feedback = repository.findById(feedbackId)
-            .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_FEEDBACK.getMessage()));
+                .filter(f -> f.getUser().getId().equals(userId))
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_FEEDBACK.getMessage()));
 
         return FeedbackDetailResponse.from(feedback);
     }

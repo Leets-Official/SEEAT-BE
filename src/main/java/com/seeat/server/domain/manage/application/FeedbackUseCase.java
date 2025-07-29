@@ -8,5 +8,5 @@ public interface FeedbackUseCase {
     /// 피드백 작성
     void createFeedback(FeedbackRequest request, Long userId);
 
-    FeedbackDetailResponse loadFeedback(Long feedbackId);
+    FeedbackDetailResponse loadFeedback(Long feedbackId, Long userId);
 }
