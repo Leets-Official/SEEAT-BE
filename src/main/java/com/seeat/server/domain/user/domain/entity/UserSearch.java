@@ -31,4 +31,12 @@ public class UserSearch extends BaseEntity {
     @JoinColumn(name = "search_id")
     private Search search;
 
+    // 검색어 생성 정적 메소드
+    public static UserSearch of(User user, Search search){
+        return UserSearch.builder()
+                .user(user)
+                .search(search)
+                .build();
+    }
+
 }
