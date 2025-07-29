@@ -1,6 +1,7 @@
 package com.seeat.server.domain.search.domain.entity;
 
 import com.seeat.server.domain.BaseEntity;
+import com.seeat.server.domain.user.domain.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,5 +25,12 @@ public class Search extends BaseEntity {
     private Long id;
 
     private String content;
+
+    // 정적 메소드
+    public static Search of(String content){
+        return Search.builder()
+                .content(content)
+                .build();
+    }
 
 }

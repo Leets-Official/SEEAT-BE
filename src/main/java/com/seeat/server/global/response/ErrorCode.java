@@ -102,7 +102,8 @@ public enum ErrorCode {
     // ========================
     // 4000~4999 : 검색어 관련 에러
     // ========================
-    NOT_SEARCH(4000, HttpStatus.NOT_FOUND, "해당하는 검색 정보가 존재하지 않습니다.");
+    NOT_SEARCH(4000, HttpStatus.NOT_FOUND, "해당하는 검색 정보가 존재하지 않습니다."),
+    INVALID_SORT_TYPE(4001, HttpStatus.BAD_REQUEST, "잘못된 정렬 방식입니다.");
 
     /** 에러 코드 (고유값) */
     private final Integer code;

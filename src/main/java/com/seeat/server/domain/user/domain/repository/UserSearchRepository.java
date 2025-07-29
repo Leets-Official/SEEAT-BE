@@ -20,4 +20,6 @@ public interface UserSearchRepository extends JpaRepository<UserSearch, Long> {
 
     void deleteByUserAndSearch(User user, Search search);
 
+    boolean existsByUserAndSearch(User user, Search search);
+
 }

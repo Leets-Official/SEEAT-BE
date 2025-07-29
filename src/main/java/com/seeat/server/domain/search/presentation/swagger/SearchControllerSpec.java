@@ -1,8 +1,12 @@
 package com.seeat.server.domain.search.presentation.swagger;
 
+import com.seeat.server.domain.search.application.dto.response.ReviewSearchResponse;
 import com.seeat.server.domain.search.application.dto.response.SearchResponse;
+import com.seeat.server.domain.search.domain.entity.SortType;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.global.response.pageable.PageRequest;
+import com.seeat.server.global.response.pageable.SliceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -48,4 +53,25 @@ public interface SearchControllerSpec {
             @Parameter(hidden = true)
             @AuthenticationPrincipal User user);
 
+
+    /**
+     * 검색어 인기순, 평점순, 최신순 API
+     *
+     * @param keyword 검색어
+     * @param sort 정렬기준
+     * @param user 유저
+     * @param pageRequest 페이징
+     * @return SliceResponse<ReviewSearchResponse>
+     */
+    @Operation(
+            summary = "검색어 인기순, 평점순, 최신순 상영관 리뷰 조회",
+            description = "검색어를 인기순, 평점순, 최신순으로 검색하여 상영관 리뷰를 조회합니다."
+    )
+    @GetMapping("/reviews")
+    ApiResponse<SliceResponse<ReviewSearchResponse>> getReviewList(
+            @RequestParam String keyword,
+            @RequestParam SortType sort,
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal User user,
+            PageRequest pageRequest);
 }

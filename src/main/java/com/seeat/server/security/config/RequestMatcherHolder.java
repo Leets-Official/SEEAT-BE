@@ -52,6 +52,10 @@ public class RequestMatcherHolder {
             new RequestInfo(GET, "/api/v1/home/**", null),
             new RequestInfo(POST, "/api/v1/home/**", null),
 
+            // 검색 관련
+            new RequestInfo(GET, "/api/v1/search", USER),
+            new RequestInfo(DELETE, "/api/v1/search/**", USER),
+
             // static resources
             new RequestInfo(GET, "/docs/**", null),
             new RequestInfo(GET, "/*.ico", null),

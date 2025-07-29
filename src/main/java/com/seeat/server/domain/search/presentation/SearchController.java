@@ -1,10 +1,14 @@
 package com.seeat.server.domain.search.presentation;
 
+import com.seeat.server.domain.search.application.dto.response.ReviewSearchResponse;
 import com.seeat.server.domain.search.application.dto.response.SearchResponse;
 import com.seeat.server.domain.search.application.usecase.SearchUseCase;
+import com.seeat.server.domain.search.domain.entity.SortType;
 import com.seeat.server.domain.search.presentation.swagger.SearchControllerSpec;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.global.response.pageable.PageRequest;
+import com.seeat.server.global.response.pageable.SliceResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -54,6 +58,19 @@ public class SearchController implements SearchControllerSpec {
         return ApiResponse.ok(null);
     }
 
+    @GetMapping("/reviews")
+    public ApiResponse<SliceResponse<ReviewSearchResponse>> getReviewList(
+            @RequestParam String keyword,
+            @RequestParam SortType sort,
+            @AuthenticationPrincipal User user,
+            PageRequest pageRequest){
+
+        // 조회 서비스 호출
+        SliceResponse<ReviewSearchResponse> responses = service.getReviewList(keyword, sort, user.getId(), pageRequest);
+
+        // 응답값
+        return ApiResponse.ok(responses);
+    }
 
 
 }
