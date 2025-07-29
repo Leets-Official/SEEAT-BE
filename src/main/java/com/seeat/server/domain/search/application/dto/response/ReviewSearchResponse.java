@@ -4,6 +4,7 @@ import com.seeat.server.domain.review.domain.entity.HashTag;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewLike;
 import com.seeat.server.domain.theater.application.dto.response.TheaterListResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.util.Collections;
@@ -13,13 +14,22 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Builder
+@Schema(name = "[응답][검색] 검색을 통한 리뷰 조회 Response",description = "검색을 통한 리뷰 조회에 대한 DTO 입니다.")
 public record ReviewSearchResponse(
+
+        @Schema(description = "리뷰 고유 ID", example = "12")
         Long reviewId,
+        @Schema(description = "리뷰 내용", example = "화질이 다른 곳보다 선명했어요")
         String content,
+        @Schema(description = "평점", example = "3.4")
         double rating,
+        @Schema(description = "리뷰 제목", example = "괴물")
         String movieTitle,
+        @Schema(description = "리뷰 이미지")
         String thumbnailUrl,
+        @Schema(description = "좋아요 수", example = "3")
         ReviewLike reviewLike,
+        @Schema(description = "해시태그", example = "[\"혼자서\", \"사운드 빵빵\",\"화질 선명\"]")
         List<String> hashTags
 ) {
 
