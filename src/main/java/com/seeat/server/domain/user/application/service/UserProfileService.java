@@ -7,6 +7,7 @@ import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoUpdateResponse;
 import com.seeat.server.domain.user.application.usecase.UserProfileUseCase;
+import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserAuditorium;
 import com.seeat.server.domain.user.domain.entity.UserGrade;
@@ -29,9 +30,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserProfileService implements UserProfileUseCase {
 
-    private final UserRepository repository;
-
-    private final UserService service;
+    private final UserUseCase service;
 
     // 외부 의존성
     private final UserAuditoriumRepository userAuditoriumRepository;
