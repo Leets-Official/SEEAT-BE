@@ -1,4 +1,4 @@
-package com.seeat.server.domain.seat.domain;
+package com.seeat.server.domain.theater.domain;
 
 import com.seeat.server.domain.theater.domain.entity.Theater;
 

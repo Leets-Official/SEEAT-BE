@@ -82,11 +82,17 @@ public class ReviewHashTagService implements ReviewHashTagUseCase {
     }
 
 
+    /**
+     * 외부 의존성
+     * @param reviewId  수정 또는 삭제하는 리뷰
+     */
     @Override
-    public void deleteReviewHashTag(Long reviewHashTagId) {
+    public void deleteReviewHashTagByReviewId(Long reviewId) {
+
+        /// 리뷰ID 바탕으로 삭제 구현
+        repository.deleteByReviewId(reviewId);
 
     }
-
 
 
     /// 공통 함수 생성

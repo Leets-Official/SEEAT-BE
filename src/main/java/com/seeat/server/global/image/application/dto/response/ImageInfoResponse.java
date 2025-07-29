@@ -1,6 +1,7 @@
 package com.seeat.server.global.image.application.dto.response;
 
 import com.seeat.server.domain.review.domain.entity.ReviewImage;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import java.util.List;
 /**
@@ -9,8 +10,12 @@ import java.util.List;
  * @param order     이미지 순서
  */
 @Builder
+@Schema(name = "[응답][리뷰] 이미지 정보 Response", description = "리뷰에 포함된 이미지의 URL과 순서를 나타내는 DTO입니다.")
 public record ImageInfoResponse(
+        @Schema(description = "이미지 URL", example = "https://example.com/images/review1.jpg")
         String imageUrl,
+
+        @Schema(description = "이미지 순서", example = "1")
         int order
 ) {
 

@@ -1,14 +1,13 @@
 package com.seeat.server.domain.user.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.seeat.server.domain.seat.domain.AuditoriumFixtures;
-import com.seeat.server.domain.seat.domain.TheaterFixtures;
+import com.seeat.server.domain.theater.domain.AuditoriumFixtures;
+import com.seeat.server.domain.theater.domain.TheaterFixtures;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
 import com.seeat.server.domain.theater.domain.entity.Theater;
 import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
 import com.seeat.server.domain.theater.domain.repository.TheaterRepository;
-import com.seeat.server.domain.user.application.service.UserService;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
 import com.seeat.server.domain.user.domain.UserFixtures;
 import com.seeat.server.domain.user.domain.entity.User;
