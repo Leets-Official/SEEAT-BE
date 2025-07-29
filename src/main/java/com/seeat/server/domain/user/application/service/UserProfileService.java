@@ -84,7 +84,7 @@ public class UserProfileService implements UserProfileUseCase {
             /// 기존 사진 사진
             imageService.deleteFile(thumbnailImage);
 
-            thumbnailImage = imageService.uploadFile(request.getImage());
+            thumbnailImage = request.getImage();
         }
 
         // 사용자 정보 수정

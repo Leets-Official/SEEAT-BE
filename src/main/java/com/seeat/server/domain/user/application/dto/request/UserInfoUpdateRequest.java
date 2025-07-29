@@ -18,7 +18,7 @@ public class UserInfoUpdateRequest {
     /**
      * 프로필 이미지
      */
-    MultipartFile image;
+    String image;
 
     /**
      * 선호하는 영화 장르

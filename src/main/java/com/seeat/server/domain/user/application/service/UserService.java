@@ -41,9 +41,6 @@ public class UserService implements UserUseCase {
     private final UserAuditoriumRepository userAuditoriumRepository;
     private final AuditoriumRepository auditoriumRepository;
 
-    /// 이미지 서비스 추가
-    private final ImageUseCase imageService;
-
     @Value("${server.ssl.enabled}")
     private boolean sslEnabled;
 
@@ -82,7 +79,7 @@ public class UserService implements UserUseCase {
 
         /// 존재한다면 이미지 추가
         if (request.getImage() != null) {
-            thumbnailImage = imageService.uploadFile(request.getImage());
+            thumbnailImage = request.getImage();
         }
         /// 유저 객체 생성
         User requestUser = User.of(tempUserInfo.getEmail(), tempUserInfo.getSocialId(), tempUserInfo.getSocial(), tempUserInfo.getUsername(),
