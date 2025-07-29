@@ -93,7 +93,7 @@ public class UserControllerTest {
 
         /// 파일 저장
         InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
-        file1 = new MockMultipartFile("photos", "sample1.png", MediaType.IMAGE_PNG_VALUE, inputStream1);
+        file1 = new MockMultipartFile("imageUrls", "sample1.png", MediaType.IMAGE_PNG_VALUE, inputStream1);
     }
 
     @Test

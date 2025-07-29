@@ -142,7 +142,7 @@ class TheaterServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(1.5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
