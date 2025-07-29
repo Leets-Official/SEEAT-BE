@@ -39,7 +39,7 @@ public interface ReviewUseCase {
     void updateReview(Long reviewId, ReviewUpdateRequest request, Long userId) throws IOException;
 
     /// 리뷰 삭제
-    void deleteReview(Long reviewId, Long userId);
+    void deleteReview(Long reviewId, Long userId) throws IOException;
 
     /// 외부 의존성을 위한 유즈 케이스
     Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Long> reviews);

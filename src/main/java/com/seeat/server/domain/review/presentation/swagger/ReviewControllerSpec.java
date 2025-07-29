@@ -28,11 +28,9 @@ public interface ReviewControllerSpec {
             summary = "리뷰 작성",
             description = "리뷰를 작성합니다."
     )
-    @PostMapping(
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping()
     ApiResponse<Void> createReview(
-            @ModelAttribute @Valid ReviewRequest request,
+            @RequestBody @Valid ReviewRequest request,
             @Parameter(hidden = true) @AuthenticationPrincipal User user
     ) throws IOException;
 
@@ -102,7 +100,7 @@ public interface ReviewControllerSpec {
 
             @Parameter(description = "수정할 리뷰ID", example = "1")
             @PathVariable Long reviewId,
-            @ModelAttribute @Valid ReviewUpdateRequest request,
+            @RequestBody @Valid ReviewUpdateRequest request,
             @Parameter(hidden = true) @AuthenticationPrincipal User user) throws IOException;;
 
 
@@ -120,5 +118,5 @@ public interface ReviewControllerSpec {
 
             @Parameter(description = "삭제할 리뷰ID", example = "1")
             @PathVariable Long reviewId,
-            @Parameter(hidden = true) @AuthenticationPrincipal User user);
+            @Parameter(hidden = true) @AuthenticationPrincipal User user) throws IOException;
 }

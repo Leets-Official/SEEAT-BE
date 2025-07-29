@@ -1,15 +1,15 @@
-package com.seeat.server.domain.review.application.service;
+package com.seeat.server.domain.image.application.service;
 
-import com.seeat.server.domain.review.application.usecase.ReviewImageUseCase;
+import com.seeat.server.domain.image.application.dto.response.S3ImageResponse;
+import com.seeat.server.domain.image.application.usecase.ReviewImageUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewImage;
-import com.seeat.server.domain.review.domain.repository.ReviewImageRepository;
+import com.seeat.server.domain.image.domain.entity.ReviewImage;
+import com.seeat.server.domain.image.domain.repository.ReviewImageRepository;
 import com.seeat.server.domain.image.application.usecase.ImageUseCase;
 import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -23,23 +23,22 @@ public class ReviewImageService implements ReviewImageUseCase {
 
     private final ReviewImageRepository repository;
 
-    /// S3와 같은 클라우드 이미지 저장 의존성
+    /// 삭제를 위한 외부 의존성
     private final ImageUseCase imageService;
 
     /// 저장하기
     /**
      * 이미지 한 장 저장하기
      * @param review    리뷰
-     * @param photo     저장할 이미지 한 장
+     * @param imageUrl     저장할 이미지 한 장
      */
     @Override
-    public String saveReviewImage(Review review, MultipartFile photo) throws IOException {
+    public String saveReviewImage(Review review, String imageUrl) throws IOException {
 
-        /// 이미지 클라우드에 저장
-        String uploadFile = imageService.uploadFile(photo);
+        /// 이미지는 preSingedURL 을 바탕으로 이미 클라우드에 저장
 
         /// 객체 생성
-        var image = ReviewImage.of(review, uploadFile, 1);
+        var image = ReviewImage.of(review, imageUrl, 1);
 
         /// DB 저장하고, 이미지 주소 반납
         return repository.save(image)
@@ -49,27 +48,26 @@ public class ReviewImageService implements ReviewImageUseCase {
     /**
      * 이미지 여러 장 저장하기
      * @param review        리뷰
-     * @param photos        저장할 이미지 여러 장
+     * @param imageUrls        저장할 이미지 여러 장
      */
     @Override
-    public List<String> saveReviewImage(Review review, List<MultipartFile> photos) throws IOException {
+    public List<String> saveReviewImage(Review review, List<String> imageUrls) throws IOException {
 
         /// 이미지가 없음
-        if (photos.isEmpty()) {
+        if (imageUrls.isEmpty()) {
             throw new IllegalArgumentException(ErrorCode.NO_IMAGE_REVIEW.getMessage());
         }
 
         /// 최대 등록 이미지 수량 정하기
-        if (photos.size() >= 6) {
+        if (imageUrls.size() >= 6) {
             throw new IllegalArgumentException(ErrorCode.TOO_MANY_IMAGES.getMessage());
         }
 
-        /// 이미지 클라우드에 저장
-        List<String> uploadFiles = imageService.uploadFiles(photos);
+        /// 이미지는 이미 클라우드에 올라가있는 상태
 
         /// 순서대로 저장하기
         AtomicInteger cnt = new AtomicInteger(0);
-        return uploadFiles.stream()
+        return imageUrls.stream()
                 .map(im -> ReviewImage.of(review, im, cnt.getAndIncrement()))
                 .map(repository::save)
                 .map(ReviewImage::getImageUrl)
@@ -101,7 +99,7 @@ public class ReviewImageService implements ReviewImageUseCase {
      * @param review    리뷰
      */
     @Override
-    public void deleteReviewImage(Review review) {
+    public void deleteReviewImage(Review review) throws IOException {
 
         /// 리뷰에 해당하는 파일 이름 다 가져오기
         List<ReviewImage> images = repository.findByReview(review);
