@@ -18,18 +18,20 @@ import java.util.List;
  */
 @Data
 @AllArgsConstructor
+@Schema(name = "[요청][사용자] 사용자 획원가입 Request", description = "사용자 회원가입에 대한 DTO 입니다.")
 public class UserSignUpRequest {
 
     /**
      * 닉네임
      */
     @NotNull(message = "닉네임은 필수입니다.")
+    @Schema(description = "유저 닉네임", example = "팝콘이")
     private String nickname;
 
     /**
      * 프로필 이미지
      */
-    @Schema(description = "프로필 이미지", type = "string", format = "binary")
+    @Schema(description = "유저 프로필 이미지", type = "string", format = "binary")
     private MultipartFile image;
 
     /**
@@ -37,6 +39,7 @@ public class UserSignUpRequest {
      */
     @NotNull(message = "좋아하는 영화 장르는 필수입니다.")
     @Size(min = 1, message = "최소 하나 이상의 장르가 필요합니다.")
+    @Schema(description = "유저가 선호하는 영화 장르", example = "[\"ACTION\", \"COMEDY\",\"SF\"]")
     private List<MovieGenre> genres;
 
     /**
@@ -44,5 +47,6 @@ public class UserSignUpRequest {
      */
     @NotNull(message = "선호 상영관은 필수입니다.")
     @Size(min = 1, message = "최소 하나 이상의 상영관이 필요합니다.")
+    @Schema(description = "유저가 선호하는 상영관 Id", example = "[\"1\", \"2\",\"3\"]")
     private List<String> auditoriumId;
 }
