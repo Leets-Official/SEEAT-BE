@@ -4,7 +4,7 @@ import com.seeat.server.domain.review.application.usecase.ReviewImageUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewImage;
 import com.seeat.server.domain.review.domain.repository.ReviewImageRepository;
-import com.seeat.server.global.image.application.usecase.ImageUseCase;
+import com.seeat.server.domain.image.application.usecase.ImageUseCase;
 import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

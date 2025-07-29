@@ -1,4 +1,4 @@
-package com.seeat.server.global.image.application.usecase;
+package com.seeat.server.domain.image.application.usecase;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -8,6 +8,8 @@ import java.util.List;
 /**
  * [이미지 저장을 위한 유즈 케이스를 정의한 인터페이스]입니다.
  * - S3에서 다른 의존성을 참조할 때 서비스를 바꾸면 코드의 변동없이 유지보수 할 수 있습니다.
+ * - Pre-singedURL 을 바탕으로 이미지 기능을 구현합니다.
+ * - Pre-singedURL 을 발급 받는 로직이다
  */
 public interface ImageUseCase {
 

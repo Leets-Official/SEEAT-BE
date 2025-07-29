@@ -1,8 +1,8 @@
-package com.seeat.server.global.image.application.service;
+package com.seeat.server.domain.image.application.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.seeat.server.global.image.application.usecase.ImageUseCase;
+import com.seeat.server.domain.image.application.usecase.ImageUseCase;
 import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

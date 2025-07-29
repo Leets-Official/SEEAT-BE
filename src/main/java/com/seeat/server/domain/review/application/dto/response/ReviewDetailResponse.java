@@ -4,7 +4,7 @@ import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.review.domain.entity.ReviewImage;
 import com.seeat.server.domain.user.application.dto.response.UserResponse;
-import com.seeat.server.global.image.application.dto.response.ImageInfoResponse;
+import com.seeat.server.domain.image.application.dto.response.ImageInfoResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 

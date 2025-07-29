@@ -1,4 +1,4 @@
-package com.seeat.server.global.image.application.dto.response;
+package com.seeat.server.domain.image.application.dto.response;
 
 import com.seeat.server.domain.review.domain.entity.ReviewImage;
 import io.swagger.v3.oas.annotations.media.Schema;
