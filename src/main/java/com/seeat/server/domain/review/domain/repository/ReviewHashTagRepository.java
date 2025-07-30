@@ -30,7 +30,7 @@ public interface ReviewHashTagRepository extends JpaRepository<ReviewHashTag, Lo
             "FROM Review r LEFT JOIN ReviewHashTag rh ON rh.review.id = r.id " +
             "WHERE r.seat.auditorium.id = :auditoriumId " +
             "GROUP BY rh.hashTag.id, rh.hashTag.name " +
-            "ORDER BY COUNT(rh) DESC")
+            "ORDER BY COUNT(rh) DESC, rh.hashTag.id DESC")
     List<ReviewHashTagWithCount> findByAuditorium_Id(@Param("auditoriumId") String auditoriumId);
 
 
