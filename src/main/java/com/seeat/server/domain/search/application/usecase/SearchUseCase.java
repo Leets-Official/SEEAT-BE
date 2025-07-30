@@ -1,5 +1,6 @@
 package com.seeat.server.domain.search.application.usecase;
 
+import com.seeat.server.domain.search.application.dto.request.ReviewSearchCondition;
 import com.seeat.server.domain.search.application.dto.response.ReviewSearchResponse;
 import com.seeat.server.domain.search.application.dto.response.SearchResponse;
 import com.seeat.server.domain.search.domain.entity.Search;
@@ -19,7 +20,7 @@ public interface SearchUseCase {
     void deleteSearch(Long searchId, Long userId);
 
     // 인기순, 평점순, 최신순 조회
-    SliceResponse<ReviewSearchResponse> getReviewList(String keyword, SortType sort,
+    SliceResponse<ReviewSearchResponse> getReviewList(ReviewSearchCondition request,
                                                       Long userId, PageRequest pageRequest);
 
 

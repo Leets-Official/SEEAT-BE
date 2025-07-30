@@ -1,5 +1,6 @@
 package com.seeat.server.domain.search.presentation.swagger;
 
+import com.seeat.server.domain.search.application.dto.request.ReviewSearchCondition;
 import com.seeat.server.domain.search.application.dto.response.ReviewSearchResponse;
 import com.seeat.server.domain.search.application.dto.response.SearchResponse;
 import com.seeat.server.domain.search.domain.entity.SortType;
@@ -11,10 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -57,8 +55,7 @@ public interface SearchControllerSpec {
     /**
      * 검색어 인기순, 평점순, 최신순 API
      *
-     * @param keyword 검색어
-     * @param sort 정렬기준
+     * @param request 필터 조건 DTO
      * @param user 유저
      * @param pageRequest 페이징
      * @return SliceResponse<ReviewSearchResponse>
@@ -69,8 +66,7 @@ public interface SearchControllerSpec {
     )
     @GetMapping("/reviews")
     ApiResponse<SliceResponse<ReviewSearchResponse>> getReviewList(
-            @RequestParam String keyword,
-            @RequestParam SortType sort,
+            @RequestBody ReviewSearchCondition request,
             @Parameter(hidden = true)
             @AuthenticationPrincipal User user,
             PageRequest pageRequest);

@@ -1,16 +1,20 @@
 package com.seeat.server.domain.review.domain.repository;
 
 import com.seeat.server.domain.review.domain.entity.Review;
+import com.seeat.server.domain.review.domain.entity.custom.ReviewRepositoryCustom;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
+import com.seeat.server.domain.search.application.dto.request.ReviewSearchCondition;
 import com.seeat.server.domain.user.domain.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import java.util.*;
 
-public interface ReviewRepository extends JpaRepository<Review, Long> {
+import java.util.List;
+import java.util.Optional;
+
+public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRepositoryCustom {
 
 
     /**
@@ -108,50 +112,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Review> findByUserAndId(User user, Long id);
 
     /**
-     * 인기순(좋아요 많은순) 리뷰 검색어 조회
-     * @param keyword 검색어
+     * 검색 필터 조회
+     *
+     * @param condition 조건 DTO
      * @param pageable 페이징
-     * @return Slice<Review>
+     * @return Slice<Review> 응답
      */
-    @Query(
-            "SELECT r " +
-                    "FROM Review r " +
-                    "LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
-                    "WHERE r.movieTitle LIKE %:keyword% " +
-                    "GROUP BY r " +
-                    "ORDER BY COUNT(rl) DESC, r.createdAt DESC"
-    )
-    Slice<Review> findPopularReviews(@Param("keyword")String keyword, Pageable pageable);
-
-    /**
-     * 평점순 리뷰 검색어 조회
-     * @param keyword 검색어
-     * @param pageable 페이징
-     * @return Slice<Review>
-     */
-    @Query(
-            "SELECT r " +
-                    "FROM Review r " +
-                    "WHERE r.movieTitle " +
-                    "LIKE %:keyword% " +
-                    "ORDER BY r.rating DESC"
-    )
-    Slice<Review> findReviewsOrderByRating(@Param("keyword")String keyword, Pageable pageable);
-
-
-    /**
-     * 최신순 리뷰 검색어 조회
-     * @param keyword 검색어
-     * @param pageable 페이징
-     * @return Slice<Review>
-     */
-    @Query(
-            "SELECT r " +
-                    "FROM Review r " +
-                    "WHERE r.movieTitle " +
-                    "LIKE %:keyword% " +
-                    "ORDER BY r.createdAt DESC"
-    )
-    Slice<Review> findReviewsOrderByCreatedAt(@Param("keyword")String keyword, Pageable pageable);
+    Slice<Review> searchReviewsWithFilters(ReviewSearchCondition condition, Pageable pageable);
 
 }

@@ -28,13 +28,16 @@ public record ReviewSearchResponse(
         @Schema(description = "리뷰 이미지")
         String thumbnailUrl,
         @Schema(description = "좋아요 수", example = "3")
-        ReviewLike reviewLike,
+        Long likeCount,
+        @Schema(description = "유저 좋아요 여부", example = "true")
+        Boolean likedByUser,
         @Schema(description = "해시태그", example = "[\"혼자서\", \"사운드 빵빵\",\"화질 선명\"]")
         List<String> hashTags
 ) {
 
     // 정적 메소드
-    public static ReviewSearchResponse from(Review review, ReviewLike reviewLike, List<String> hashTags) {
+    public static ReviewSearchResponse from(Review review, Long likeCount,
+                                            Boolean likedByUser, List<String> hashTags) {
 
         return ReviewSearchResponse.builder()
                 .reviewId(review.getId())
@@ -42,15 +45,14 @@ public record ReviewSearchResponse(
                 .rating(review.getRating())
                 .movieTitle(review.getMovieTitle())
                 .thumbnailUrl(review.getThumbnailUrl())
-                .reviewLike(reviewLike)
+                .likeCount(likeCount != null ? likeCount : 0L)
+                .likedByUser(likedByUser != null ? likedByUser : false)
                 .hashTags(hashTags)
                 .build();
     }
 
-    public static List<ReviewSearchResponse> from(
-            List<Review> reviews,
-            List<ReviewLike> reviewLikes,
-            List<List<String>> hashTags) {
+    public static List<ReviewSearchResponse> from(List<Review> reviews, List<ReviewLike> reviewLikes,
+                                                  Map<Long, Long> likeCountMap, List<List<String>> hashTags) {
 
         Map<Long, ReviewLike> reviewLikeMap = reviewLikes.stream()
                 .collect(Collectors.toMap(
@@ -67,9 +69,13 @@ public record ReviewSearchResponse(
 
         return reviews.stream()
                 .map(review -> {
-                    ReviewLike like = reviewLikeMap.get(review.getId());
+                    ReviewLike userLike = reviewLikeMap.get(review.getId());
                     List<String> tags = hashTagMap.getOrDefault(review.getId(), Collections.emptyList());
-                    return from(review, like, tags);
+
+                    Long likeCount = likeCountMap.getOrDefault(review.getId(), 0L);
+                    Boolean likedByUser = userLike != null;
+
+                    return from(review, likeCount, likedByUser, tags);
                 })
                 .toList();
     }
