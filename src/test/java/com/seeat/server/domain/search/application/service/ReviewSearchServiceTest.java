@@ -52,9 +52,6 @@ public class ReviewSearchServiceTest {
     private ReviewSearchUseCase sut;
 
     @Autowired
-    private SearchRepository repository;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
