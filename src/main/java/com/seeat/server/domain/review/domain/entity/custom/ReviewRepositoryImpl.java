@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom{
         jpql.append("WHERE (r.movieTitle LIKE :keyword OR r.content LIKE :keyword) ");
 
         // 상영관 필터
-        if (condition.getAuditoriumId() != null) {
+        if (StringUtils.hasText(condition.getAuditoriumId())) {
             jpql.append("AND s.auditorium.id = :auditoriumId ");
         }
 
@@ -83,7 +84,7 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom{
 
 
         // 상영관 파라미터 설정
-        if (condition.getAuditoriumId() != null) {
+        if (StringUtils.hasText(condition.getAuditoriumId())) {
             query.setParameter("auditoriumId", condition.getAuditoriumId());
         }
 
