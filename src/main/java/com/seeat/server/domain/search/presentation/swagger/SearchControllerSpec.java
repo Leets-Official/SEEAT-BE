@@ -67,8 +67,8 @@ public interface SearchControllerSpec {
      * @return SliceResponse<ReviewSearchResponse>
      */
     @Operation(
-            summary = "검색어 인기순, 평점순, 최신순 상영관 리뷰 조회",
-            description = "검색어를 인기순, 평점순, 최신순으로 검색하여 상영관 리뷰를 조회합니다."
+            summary = "검색어 인기순(POPULAR), 최신순(LATEST),평점순(RATING) 및 검색 필터로 상영관 리뷰 조회",
+            description = "검색어를 인기순(POPULAR), 최신순(LATEST),평점순(RATING) 및 검색 필터로 검색하여 상영관 리뷰를 조회합니다."
     )
     @GetMapping("/reviews")
     ApiResponse<SliceResponse<ReviewSearchResponse>> getReviewList(
