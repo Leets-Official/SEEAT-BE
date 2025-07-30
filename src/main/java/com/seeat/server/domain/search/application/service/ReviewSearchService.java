@@ -14,6 +14,7 @@ import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserSearch;
 import com.seeat.server.domain.user.domain.repository.UserSearchRepository;
+import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.PageUtil;
 import com.seeat.server.global.response.pageable.SliceResponse;
@@ -74,6 +75,9 @@ public class ReviewSearchService implements ReviewSearchUseCase {
             }
         } else if (guestToken != null) { // 비회원 token 저장
             recentSearchRedisService.addRecentSearch(guestToken, condition.getKeyword());
+        } else {
+            // 비회원인데 토큰도 null 이면 에러 처리
+            throw new IllegalArgumentException(ErrorCode.INVALID_TOKEN.getMessage());
         }
 
         // 페이징 처리

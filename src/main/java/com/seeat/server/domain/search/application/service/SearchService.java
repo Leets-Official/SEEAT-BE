@@ -72,6 +72,11 @@ public class SearchService implements SearchUseCase {
     @Override
     public List<SearchResponse> getGuestSearchList(String guestToken) {
 
+        // 토큰 없을시 에러처리
+        if (guestToken == null){
+            throw new IllegalArgumentException(ErrorCode.INVALID_TOKEN.getMessage());
+        }
+
         return recentSearchService.getGuestSearchList(guestToken);
     }
 
@@ -100,6 +105,11 @@ public class SearchService implements SearchUseCase {
      * @param keyword 검색어
      */
     public void deleteGuestSearch(String guestToken, String keyword) {
+
+        // 토큰 없을시 에러처리
+        if (guestToken == null){
+            throw new IllegalArgumentException(ErrorCode.INVALID_TOKEN.getMessage());
+        }
 
         // 삭제
         recentSearchService.deleteGuestSearch(guestToken, keyword);
