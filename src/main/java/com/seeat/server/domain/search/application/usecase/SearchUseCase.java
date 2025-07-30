@@ -13,14 +13,20 @@ import java.util.List;
 
 public interface SearchUseCase {
 
-    // 최근 검색어 리스트 조회
+    // 최근 검색어 리스트 조회 - 회원
     List<SearchResponse> getSearchList(Long userId);
 
-    // 검색어 삭제
+    // 최근 검색어 리스트 조회 - 비회원
+    List<SearchResponse> getGuestSearchList(String guestToken);
+
+    // 검색어 삭제 - 회원
     void deleteSearch(Long searchId, Long userId);
 
-    // 인기순, 평점순, 최신순 조회
-    SliceResponse<ReviewSearchResponse> getReviewList(ReviewSearchCondition request,
+    // 검색어 삭제 - 비회원
+    void deleteGuestSearch(String guestToken, String keyword);
+
+    // 인기순, 평점순, 최신순 및 필터 조회
+    SliceResponse<ReviewSearchResponse> getReviewList(ReviewSearchCondition request, String guestToken,
                                                       Long userId, PageRequest pageRequest);
 
 

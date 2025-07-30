@@ -23,31 +23,36 @@ public interface SearchControllerSpec {
      * 최근 검색 리스트 조회 API
      *
      * @param user 유저
+     * @param guestToken 게스트 토큰
      * @return 최근 검색 리스트
      */
     @Operation(
             summary = "최근 검색 리스트 조회",
-            description = "사용자 ID로 검색 리스트를 최신별로 조회합니다."
+            description = "사용자 ID, 게스트 토큰으로 검색 리스트를 최신별로 조회합니다."
     )
     @GetMapping
     ApiResponse<List<SearchResponse>> getSearchList(
             @Parameter(hidden = true)
-            @AuthenticationPrincipal User user);
+            @AuthenticationPrincipal User user,
+            @RequestHeader(value = "X-Guest-Token", required = false) String guestToken);
 
     /**
      * 최근 검색어 하나 삭제 API
      *
-     * @param searchId 검색어 ID
+     * @param searchId 회원용 검색 Id
+     * @param keyword 비회원용 검색어
+     * @param guestToken 게스트 토큰
      * @param user 유저
-     * @return ok 응답값
      */
     @Operation(
             summary = "검색어 기록 삭제",
             description = "검색어 하나의 기록을 삭제합니다."
     )
-    @DeleteMapping("/{searchId}")
+    @DeleteMapping
     ApiResponse<Void> deleteSearch(
-            @PathVariable Long searchId,
+            @RequestParam(required = false) Long searchId,
+            @RequestParam(required = false) String keyword,
+            @RequestHeader(value = "X-Guest-Token", required = false) String guestToken,
             @Parameter(hidden = true)
             @AuthenticationPrincipal User user);
 
@@ -57,6 +62,7 @@ public interface SearchControllerSpec {
      *
      * @param request 필터 조건 DTO
      * @param user 유저
+     * @param guestToken 게스트 토큰
      * @param pageRequest 페이징
      * @return SliceResponse<ReviewSearchResponse>
      */
@@ -66,8 +72,9 @@ public interface SearchControllerSpec {
     )
     @GetMapping("/reviews")
     ApiResponse<SliceResponse<ReviewSearchResponse>> getReviewList(
-            @RequestBody ReviewSearchCondition request,
+            @ModelAttribute ReviewSearchCondition request,
             @Parameter(hidden = true)
             @AuthenticationPrincipal User user,
+            @RequestHeader(value = "X-Guest-Token", required = false) String guestToken,
             PageRequest pageRequest);
 }

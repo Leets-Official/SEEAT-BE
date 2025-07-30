@@ -20,12 +20,16 @@ import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.PageUtil;
 import com.seeat.server.global.response.pageable.SliceResponse;
+import com.seeat.server.global.service.RecentSearchRedisService;
+import com.seeat.server.global.util.RedisKeyUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.redis.core.ListOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -44,9 +48,10 @@ public class SearchService implements SearchUseCase {
     private final ReviewRepository reviewRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final HashTagUseCase hashTagService;
+    private final RecentSearchRedisService recentSearchRedisService;
 
     /**
-     * 최근 검색 리스트 조회
+     * 회원 최근 검색 리스트 조회
      * @param userId 유저 Id
      * @return 최근 검색 리스트 DTO
      */
@@ -63,7 +68,19 @@ public class SearchService implements SearchUseCase {
     }
 
     /**
-     * 최근 검색어 삭제
+     * 비회원 최근 검색어 리스트 조회
+     *
+     * @param guestToken 게스트 토큰
+     * @return 최근 검색 리스트 DTO
+     */
+    @Override
+    public List<SearchResponse> getGuestSearchList(String guestToken) {
+
+        return recentSearchRedisService.getGuestSearchList(guestToken);
+    }
+
+    /**
+     * 회원 최근 검색어 삭제
      * @param searchId 검색 Id
      * @param userId 유저 Id
      */
@@ -82,6 +99,18 @@ public class SearchService implements SearchUseCase {
     }
 
     /**
+     * 비회원 최근 검색어 삭제
+     *
+     * @param guestToken 게스트 토큰
+     * @param keyword 검색어
+     */
+    public void deleteGuestSearch(String guestToken, String keyword) {
+
+        // 삭제
+        recentSearchRedisService.deleteGuestSearch(guestToken, keyword);
+    }
+
+    /**
      * 인기순, 평점순, 최신순 기준으로 리뷰 검색(조회)
      *
      * @param condition 필터 요청 DTD
@@ -90,21 +119,27 @@ public class SearchService implements SearchUseCase {
      * @return SliceResponse<ReviewSearchResponse>
      */
     public SliceResponse<ReviewSearchResponse> getReviewList(
-            ReviewSearchCondition condition,
+            ReviewSearchCondition condition, String guestToken,
             Long userId, PageRequest pageRequest){
 
-        // 유저 예외
-        User user = userService.getUser(userId);
+        User user = null;
 
-        // 유저 검색어 저장하기 (저장되어있으면 넘어가기)
-        Search search = repository.findByContent(condition.getKeyword())
-                .orElseGet(() -> repository.save(Search.of(condition.getKeyword())));
+        if (userId != null) {
+            // 유저 예외
+            user = userService.getUser(userId);
 
-        // 유저 검색 엔티티 조회 후 없으면 저장
-        boolean exists = userSearchRepository.existsByUserAndSearch(user, search);
-        if (!exists) {
-            UserSearch userSearch = UserSearch.of(user, search);
-            userSearchRepository.save(userSearch);
+            // 유저 검색어 저장하기 (저장되어있으면 넘어가기)
+            Search search = repository.findByContent(condition.getKeyword())
+                    .orElseGet(() -> repository.save(Search.of(condition.getKeyword())));
+
+            // 유저 검색 엔티티 조회 후 없으면 저장
+            boolean exists = userSearchRepository.existsByUserAndSearch(user, search);
+            if (!exists) {
+                UserSearch userSearch = UserSearch.of(user, search);
+                userSearchRepository.save(userSearch);
+            }
+        } else if (guestToken != null) { // 비회원 token 저장
+            recentSearchRedisService.addRecentSearch(guestToken, condition.getKeyword());
         }
 
         // 페이징 처리
@@ -116,7 +151,14 @@ public class SearchService implements SearchUseCase {
         // 조회
         List<Review> reviewList = reviews.getContent();
         List<List<String>> hashTags = hashTagService.getHashTagsForReviews(reviewList);
-        List<ReviewLike> userReviewLikes = reviewLikeRepository.findAllByUserAndReviewIn(user, reviewList);
+        List<ReviewLike> userReviewLikes = Collections.emptyList();
+
+        // 비회원 좋아요 누른 것 false 처리
+        if (user != null) {
+            userReviewLikes = reviewLikeRepository.findAllByUserAndReviewIn(user, reviewList);
+        }
+
+        // 좋아요 수 조회
         List<Object[]> likeCounts = reviewLikeRepository.countLikesByReviewIn(reviewList);
         Map<Long, Long> likeCountMap = likeCounts.stream()
                 .collect(Collectors.toMap(

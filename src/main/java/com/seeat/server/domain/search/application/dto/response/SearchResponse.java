@@ -4,6 +4,7 @@ import com.seeat.server.domain.search.domain.entity.Search;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
+import java.util.Collections;
 import java.util.List;
 
 @Builder
@@ -19,6 +20,15 @@ public record SearchResponse(
         return searches.stream()
                 .map(search -> SearchResponse.builder()
                         .content(search.getContent())
+                        .build())
+                .toList();
+    }
+
+    public static List<SearchResponse> fromStrings(List<String> contents) {
+        if (contents == null) return Collections.emptyList();
+        return contents.stream()
+                .map(content -> SearchResponse.builder()
+                        .content(content)
                         .build())
                 .toList();
     }
