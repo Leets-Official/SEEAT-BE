@@ -8,6 +8,8 @@ import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.search.application.dto.request.ReviewSearchCondition;
 import com.seeat.server.domain.search.application.dto.response.ReviewSearchResponse;
 import com.seeat.server.domain.search.application.dto.response.SearchResponse;
+import com.seeat.server.domain.search.application.usecase.RecentSearchUserCase;
+import com.seeat.server.domain.search.application.usecase.ReviewSearchUseCase;
 import com.seeat.server.domain.search.application.usecase.SearchUseCase;
 import com.seeat.server.domain.search.domain.entity.Search;
 import com.seeat.server.domain.search.domain.entity.SortType;
@@ -44,11 +46,8 @@ public class SearchService implements SearchUseCase {
 
     // 외부 의존성
     private final UserUseCase userService;
-    private final UserSearchRepository userSearchRepository;
-    private final ReviewRepository reviewRepository;
-    private final ReviewLikeRepository reviewLikeRepository;
-    private final HashTagUseCase hashTagService;
-    private final RecentSearchRedisService recentSearchRedisService;
+    private final RecentSearchUserCase recentSearchService;
+    private final ReviewSearchUseCase reviewSearchService;
 
     /**
      * 회원 최근 검색 리스트 조회
@@ -61,10 +60,7 @@ public class SearchService implements SearchUseCase {
         // 유저 예외
         userService.getUser(userId);
 
-        // searchList 조회
-        List<Search> searches = userSearchRepository.findSearchListByUserId(userId);
-
-        return SearchResponse.from(searches);
+        return recentSearchService.getSearchList(userId);
     }
 
     /**
@@ -76,7 +72,7 @@ public class SearchService implements SearchUseCase {
     @Override
     public List<SearchResponse> getGuestSearchList(String guestToken) {
 
-        return recentSearchRedisService.getGuestSearchList(guestToken);
+        return recentSearchService.getGuestSearchList(guestToken);
     }
 
     /**
@@ -94,8 +90,7 @@ public class SearchService implements SearchUseCase {
         Search search = getSearch(searchId);
 
         // 삭제 (userSearch 지운 후 searchId로 지움)
-        userSearchRepository.deleteByUserAndSearch(user, search);
-        repository.deleteById(searchId);
+        recentSearchService.deleteSearch(user, search);
     }
 
     /**
@@ -107,7 +102,7 @@ public class SearchService implements SearchUseCase {
     public void deleteGuestSearch(String guestToken, String keyword) {
 
         // 삭제
-        recentSearchRedisService.deleteGuestSearch(guestToken, keyword);
+        recentSearchService.deleteGuestSearch(guestToken, keyword);
     }
 
     /**
@@ -122,56 +117,7 @@ public class SearchService implements SearchUseCase {
             ReviewSearchCondition condition, String guestToken,
             Long userId, PageRequest pageRequest){
 
-        User user = null;
-
-        if (userId != null) {
-            // 유저 예외
-            user = userService.getUser(userId);
-
-            // 유저 검색어 저장하기 (저장되어있으면 넘어가기)
-            Search search = repository.findByContent(condition.getKeyword())
-                    .orElseGet(() -> repository.save(Search.of(condition.getKeyword())));
-
-            // 유저 검색 엔티티 조회 후 없으면 저장
-            boolean exists = userSearchRepository.existsByUserAndSearch(user, search);
-            if (!exists) {
-                UserSearch userSearch = UserSearch.of(user, search);
-                userSearchRepository.save(userSearch);
-            }
-        } else if (guestToken != null) { // 비회원 token 저장
-            recentSearchRedisService.addRecentSearch(guestToken, condition.getKeyword());
-        }
-
-        // 페이징 처리
-        org.springframework.data.domain.PageRequest pageable = PageUtil.getPageable(pageRequest);
-
-        // 커스텀 레포로 조회
-        Slice<Review> reviews = reviewRepository.searchReviewsWithFilters(condition, pageable);
-
-        // 조회
-        List<Review> reviewList = reviews.getContent();
-        List<List<String>> hashTags = hashTagService.getHashTagsForReviews(reviewList);
-        List<ReviewLike> userReviewLikes = Collections.emptyList();
-
-        // 비회원 좋아요 누른 것 false 처리
-        if (user != null) {
-            userReviewLikes = reviewLikeRepository.findAllByUserAndReviewIn(user, reviewList);
-        }
-
-        // 좋아요 수 조회
-        List<Object[]> likeCounts = reviewLikeRepository.countLikesByReviewIn(reviewList);
-        Map<Long, Long> likeCountMap = likeCounts.stream()
-                .collect(Collectors.toMap(
-                        obj -> (Long) obj[0],
-                        obj -> (Long) obj[1]
-                ));
-
-        // DTO 변환
-        List<ReviewSearchResponse> responses = ReviewSearchResponse.from(reviewList, userReviewLikes, likeCountMap, hashTags);
-
-        Slice<ReviewSearchResponse> slice = new SliceImpl<>(responses, pageable, reviews.hasNext());
-
-        return SliceResponse.from(slice);
+        return reviewSearchService.getReviewList(condition, guestToken, userId, pageRequest);
     }
 
 

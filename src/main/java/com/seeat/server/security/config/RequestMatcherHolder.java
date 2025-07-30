@@ -53,8 +53,8 @@ public class RequestMatcherHolder {
             new RequestInfo(POST, "/api/v1/home/**", null),
 
             // 검색 관련
-            new RequestInfo(GET, "/api/v1/search", USER),
-            new RequestInfo(DELETE, "/api/v1/search/**", USER),
+            new RequestInfo(GET, "/api/v1/search", null),
+            new RequestInfo(GET, "/api/v1/search/**", null),
 
             // static resources
             new RequestInfo(GET, "/docs/**", null),
