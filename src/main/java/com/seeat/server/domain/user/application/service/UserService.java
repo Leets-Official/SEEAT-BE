@@ -150,7 +150,7 @@ public class UserService implements UserUseCase {
      */
     @Override
     public User getUser(Long userId) {
-        return repository.findById(userId)
+        return repository.findByIdAndIsDeleteFalse(userId)
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_USER.getMessage()));
     }
 

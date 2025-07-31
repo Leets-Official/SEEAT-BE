@@ -8,7 +8,6 @@ import com.seeat.server.domain.theater.domain.entity.MovieGenre;
 import com.seeat.server.domain.theater.domain.entity.Theater;
 import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
 import com.seeat.server.domain.theater.domain.repository.TheaterRepository;
-import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
 import com.seeat.server.domain.user.domain.UserFixtures;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserRole;
@@ -129,7 +128,7 @@ public class UserControllerTest {
         List<MovieGenre> expectedGenres = List.of(MovieGenre.ROMANCE, MovieGenre.ACTION);
         assertIterableEquals(expectedGenres, savedUser.getGenres());
 
-        List<Auditorium> auditoriums = userAuditoriumRepository.findDistinctAuditoriumsByUserId(savedUser.getId());
+        List<Auditorium> auditoriums = userAuditoriumRepository.findAuditoriumsByUserId(savedUser.getId());
         List<String> savedAuditoriumIds = auditoriums.stream()
                 .map(ut -> ut.getId())
                 .collect(Collectors.toList());

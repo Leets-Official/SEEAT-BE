@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Where;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.List;
 @Builder
 @Getter
 @Table(name = "`user`")
+@Where(clause = "is_delete = false")
 public class User extends BaseEntity {
 
     @Id
@@ -42,6 +44,8 @@ public class User extends BaseEntity {
     private String nickname;
 
     private String imageUrl;
+
+    private Boolean isDelete;
 
     @Builder.Default
     @Column(name = "genre")
@@ -71,6 +75,7 @@ public class User extends BaseEntity {
                 .genres(genres)
                 .role(UserRole.USER)
                 .grade(UserGrade.BRONZE)
+                .isDelete(false)
                 .build();
     }
 
@@ -79,5 +84,10 @@ public class User extends BaseEntity {
         this.nickname = nickname;
         this.imageUrl = imageUrl;
         this.genres = genres;
+    }
+
+    // 사용자 탈퇴 true 메소드
+    public void deactivateUser(){
+        this.isDelete = true;
     }
 }
