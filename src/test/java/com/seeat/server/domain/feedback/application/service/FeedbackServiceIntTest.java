@@ -7,6 +7,7 @@ import com.seeat.server.domain.manage.domain.repository.FeedbackRepository;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
+import com.seeat.server.global.response.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 
 @SpringBootTest
@@ -73,15 +75,12 @@ public class FeedbackServiceIntTest {
                 .feedbackContent("예외 발생 테스트")
                 .build();
 
-        // when
-        Throwable thrown = catchThrowable(() ->
+        // when & then
+        assertThatThrownBy(() ->
                 feedbackService.createFeedback(request, notExistUserId)
-        );
-
-        // then
-        assertThat(thrown)
+        )
                 .isInstanceOf(NoSuchElementException.class)
-                .hasMessageContaining("존재하지 않는 유저입니다");
+                .hasMessageContaining(ErrorCode.NOT_USER.getMessage());
     }
 
     @Test
@@ -97,14 +96,11 @@ public class FeedbackServiceIntTest {
                 .feedbackContent(null)
                 .build();
 
-        // when
-        Throwable thrown = catchThrowable(() ->
+        // when & then
+        assertThatThrownBy(() ->
                 feedbackService.createFeedback(request, user.getId())
-        );
-
-        // then
-        assertThat(thrown)
+        )
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("피드백 내용은 필수입니다");
+                .hasMessageContaining(ErrorCode.INVALID_FEEDBACK_CONTENT.getMessage());
     }
 }
