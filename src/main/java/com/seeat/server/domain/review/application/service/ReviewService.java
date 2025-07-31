@@ -339,13 +339,13 @@ public class ReviewService implements ReviewUseCase {
      * @param auditoriumId  상영관 ID
      */
     @Override
-    public boolean existsReviewsByAuditoriumId(String auditoriumId) {
+    public Long countsReviewsByAuditoriumId(String auditoriumId) {
 
         /// 상영관 존재 예외처리
         Auditorium auditorium = theaterService.getAuditorium(auditoriumId);
 
         /// DB 조회
-        return repository.existsByAuditoriumId(auditorium.getId());
+        return repository.countByAuditoriumId(auditorium.getId());
     }
 
     // ========================

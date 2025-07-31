@@ -44,10 +44,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
      * @param auditoriumId  상영관
      * @return   boolean
      */
-    @Query("SELECT COUNT(r) > 0 " +
+    @Query("SELECT COUNT(r) " +
             "FROM Review r "+
             "WHERE r.seat.auditorium.id = :auditoriumId")
-    boolean existsByAuditoriumId(@Param("auditoriumId") String auditoriumId);
+    Long countByAuditoriumId(@Param("auditoriumId") String auditoriumId);
 
     /**
      * 인기순 검색

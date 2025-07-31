@@ -1,6 +1,5 @@
 package com.seeat.server.domain.review.application.usecase;
 
-import com.seeat.server.domain.best.application.dto.response.BestReviewListResponse;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
@@ -46,6 +45,6 @@ public interface ReviewUseCase {
 
     Review getReview(Long reviewId);
 
-    boolean existsReviewsByAuditoriumId(String auditoriumId);
+    Long countsReviewsByAuditoriumId(String auditoriumId);
 }
 

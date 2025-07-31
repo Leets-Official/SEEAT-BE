@@ -1,5 +1,8 @@
 package com.seeat.server.domain.review.application.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.seeat.server.domain.review.application.dto.response.ReviewSummaryResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewSummaryUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
@@ -34,6 +37,7 @@ public class ReviewSummaryService implements ReviewSummaryUseCase {
     /// 외부 의존성
     private final TheaterUseCase theaterService;
     private final ReviewUseCase reviewService;
+    private final ObjectMapper objectMapper;
 
     /**
      * 상영관 ID를 바탕으로 랭체인 요청 보내는 함수
@@ -47,25 +51,40 @@ public class ReviewSummaryService implements ReviewSummaryUseCase {
         /// 상영관 예외처리
         Auditorium auditorium = theaterService.getAuditorium(auditoriumId);
 
-        /// 요약을 진행할 리뷰가 존재하는지 체크
-        boolean hasReviews = reviewService.existsReviewsByAuditoriumId(auditoriumId);
+        /// 이름 정의
+        String auditoriumName = auditorium.getTheater().getName() + " " + auditorium.getName();
 
-        /// 요약을 할 리뷰가 없다면
-        if (!hasReviews){
-            return ReviewSummaryResponse.from(auditoriumId, "요약을 진행할 리뷰가 존재하지 않습니다.");
+        /// 요약을 진행할 리뷰가 존재하는지 체크
+        Long hasReviews = reviewService.countsReviewsByAuditoriumId(auditorium.getId());
+
+        /// 요약을 할 리뷰가 10개 이하면 불가능
+        if (hasReviews < 10L) {
+            return ReviewSummaryResponse.from(auditorium.getId(), auditoriumName, "10개 이상의 리뷰가 존재할 때부터 요약이 가능합니다.");
         }
 
         /// 상영관 아이디 전송으로 AI에게 요약 정보 요청하기
         String summary;
+
         try {
-            summary = langchainApi.postSummaryByLangchain(auditoriumId)
+            String rawSummary = langchainApi.postSummaryByLangchain(auditorium.getId())
                     .block();
-        } catch (LangchainApiException e) {
+
+            /// rawSummary는 문자열 형태의 JSON이므로 파싱
+
+            JsonNode rootNode = objectMapper.readTree(rawSummary);
+
+            /// "answer" 필드 추출
+            summary = rootNode.get("answer").asText();
+
+            /// 개행 문자 제거
+            summary = summary.replace("\n", "");
+
+        } catch (LangchainApiException | JsonProcessingException e) {
             /// 실패의 경우 프런트에게 예외 메세지 처리
             throw new IllegalStateException(ErrorCode.INTERNAL_LANGCHAIN_ERROR.getMessage());
         }
 
         /// 결과 응답하기
-        return ReviewSummaryResponse.from(auditorium.getId(), summary);
+        return ReviewSummaryResponse.from(auditorium.getId(), auditoriumName, summary);
     }
 }
