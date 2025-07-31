@@ -18,8 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static com.seeat.server.domain.user.domain.UserFixtures.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 
@@ -41,10 +41,7 @@ public class FeedbackServiceIntTest {
     @DisplayName("유저가 피드백을 정상적으로 등록")
     void createFeedback_Success() {
         // given
-        User user = userRepository.save(User.builder()
-                .nickname("테스트유저")
-                .role(UserRole.USER)
-                .build());
+        User user = userRepository.save(createUser());
 
         FeedbackRequest request = FeedbackRequest.builder()
                 .feedbackContent("테스트 피드백")
@@ -87,10 +84,7 @@ public class FeedbackServiceIntTest {
     @DisplayName("피드백 내용이 null이면 예외가 발생")
     void createFeedback_Fail_NullContent() {
         // given
-        User user = userRepository.save(User.builder()
-                .nickname("예외유저")
-                .role(UserRole.USER)
-                .build());
+        User user = userRepository.save(createUser());
 
         FeedbackRequest request = FeedbackRequest.builder()
                 .feedbackContent(null)
@@ -103,4 +97,5 @@ public class FeedbackServiceIntTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining(ErrorCode.INVALID_FEEDBACK_CONTENT.getMessage());
     }
+
 }
