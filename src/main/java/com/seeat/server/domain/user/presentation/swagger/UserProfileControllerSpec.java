@@ -101,6 +101,10 @@ public interface UserProfileControllerSpec {
      * @param user 유저
      */
     @DeleteMapping
+    @Operation(
+            description = "사용자 탈퇴 API",
+            summary = "사용자 탈퇴 API 입니다."
+    )
     ApiResponse<Void> deactivateUser(
             @Parameter(hidden = true)
             @AuthenticationPrincipal User user);
