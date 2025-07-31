@@ -28,6 +28,9 @@ public record AuditoriumDetailResponse(
         @Schema(description = "상영관 이름", example = "1관 IMAX")
         String auditoriumName,
 
+        @Schema(description = "좌석 배치도 이미지", example = "https://seeat-dev.s3.ap-northeast-2.amazonaws.com/sample.png")
+        String imageUrl,
+
         @Schema(description = "스크린 크기 또는 타입", example = "IMAX Laser")
         String screenSize,
 
@@ -53,6 +56,7 @@ public record AuditoriumDetailResponse(
                 .theaterName(auditorium.getTheater().getName())
                 .auditoriumId(auditorium.getId())
                 .auditoriumName(auditorium.getName())
+                .imageUrl(auditorium.getImageUrl())
                 .screenSize(auditorium.getScreenSize())
                 .soundType(auditorium.getSoundType())
                 .reviewCount(reviewCount == null ? 0 : reviewCount)

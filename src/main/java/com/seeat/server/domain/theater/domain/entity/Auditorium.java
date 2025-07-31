@@ -33,6 +33,8 @@ public class Auditorium {
     @Enumerated(EnumType.STRING)
     private AuditoriumType type;
 
+    private String imageUrl;
+
     private String screenSize;
 
     private String soundType;
