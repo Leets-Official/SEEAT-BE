@@ -22,6 +22,7 @@ public class UserFixtures {
                 .grade(UserGrade.PLATINUM)
                 .imageUrl("www.test.imageUrl")
                 .social(UserSocial.KAKAO)
+                .isDelete(false)
                 .genres(List.of(MovieGenre.ACTION, MovieGenre.ROMANCE, MovieGenre.DRAMA))
                 .build();
     }
@@ -35,6 +36,7 @@ public class UserFixtures {
                 .grade(UserGrade.PLATINUM)
                 .imageUrl("www.test.imageUrl")
                 .social(UserSocial.KAKAO)
+                .isDelete(false)
                 .genres(List.of(MovieGenre.ACTION, MovieGenre.ROMANCE, MovieGenre.DRAMA))
                 .build();
     }

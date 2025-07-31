@@ -1,16 +1,14 @@
 package com.seeat.server.domain.user.domain.entity;
 
 import com.seeat.server.domain.BaseEntity;
-import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
-import com.seeat.server.domain.theater.domain.entity.Seat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Where;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +26,6 @@ import java.util.List;
 @Builder
 @Getter
 @Table(name = "`user`")
-@Where(clause = "is_delete = false")
 public class User extends BaseEntity {
 
     @Id
@@ -89,5 +86,10 @@ public class User extends BaseEntity {
     // 사용자 탈퇴 true 메소드
     public void deactivateUser(){
         this.isDelete = true;
+    }
+
+    // 테스트 전용 메서드
+    public void setUpdatedAt(LocalDateTime time) {
+        super.setUpdatedAt(time);
     }
 }

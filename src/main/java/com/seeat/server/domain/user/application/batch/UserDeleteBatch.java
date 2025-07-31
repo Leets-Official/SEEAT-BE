@@ -13,7 +13,7 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class batchDeleteUsers {
+public class UserDeleteBatch {
 
     private final UserRepository userRepository;
 
@@ -24,6 +24,6 @@ public class batchDeleteUsers {
         LocalDateTime cutoffDate = LocalDateTime.now().minusDays(30);
         List<User> usersToDelete = userRepository.findAllByIsDeleteTrueAndUpdatedAtBefore(cutoffDate);
 
-        userRepository.deleteAll(usersToDelete);
+        usersToDelete.forEach(userRepository::delete);
     }
 }
