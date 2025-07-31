@@ -46,5 +46,6 @@ public interface ReviewUseCase {
 
     Review getReview(Long reviewId);
 
+    boolean existsReviewsByAuditoriumId(String auditoriumId);
 }
 

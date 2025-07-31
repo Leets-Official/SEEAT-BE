@@ -334,6 +334,20 @@ public class ReviewService implements ReviewUseCase {
 
     }
 
+    /**
+     * 해당 상영관에 작성된 리뷰가 존재하는지 체크
+     * @param auditoriumId  상영관 ID
+     */
+    @Override
+    public boolean existsReviewsByAuditoriumId(String auditoriumId) {
+
+        /// 상영관 존재 예외처리
+        Auditorium auditorium = theaterService.getAuditorium(auditoriumId);
+
+        /// DB 조회
+        return repository.existsByAuditoriumId(auditorium.getId());
+    }
+
     // ========================
     //  공통 함수
     // ========================

@@ -40,6 +40,16 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Slice<ReviewWithLikeCount> findByAuditorium_Id(@Param("auditoriumId") String auditoriumId, Pageable pageable);
 
     /**
+     * 상영관 기반으로 리뷰가 존재하는지 여부 체크
+     * @param auditoriumId  상영관
+     * @return   boolean
+     */
+    @Query("SELECT COUNT(r) > 0 " +
+            "FROM Review r "+
+            "WHERE r.seat.auditorium.id = :auditoriumId")
+    boolean existsByAuditoriumId(@Param("auditoriumId") String auditoriumId);
+
+    /**
      * 인기순 검색
      * @param pageable  페이징
      * @return Slice<ReviewWithLikeCount>
