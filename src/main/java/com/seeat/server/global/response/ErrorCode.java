@@ -87,6 +87,7 @@ public enum ErrorCode {
     NOT_AUDITORIUM(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 상영관이 존재하지 않습니다."),
     NOT_SEAT(2000, HttpStatus.NOT_FOUND, "해당 ID를 가진 좌석이 존재하지 않습니다."),
     NOT_FEEDBACK(2001, HttpStatus.NOT_FOUND, "해당 ID를 가진 피드백이 존재하지 않습니다."),
+    INVALID_FEEDBACK_CONTENT(2002, HttpStatus.BAD_REQUEST, "피드백 내용은 필수입니다."),
     TRANSACTION_ERROR(2999, HttpStatus.CONFLICT, "동시성 문제가 발생했습니다."),
     // ========================
     // 3000~3999 : 리뷰 관련 에러
