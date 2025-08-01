@@ -5,6 +5,7 @@ import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewLike;
 import com.seeat.server.domain.review.domain.repository.ReviewLikeRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
+import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
 import com.seeat.server.domain.search.application.dto.request.ReviewSearchCondition;
 import com.seeat.server.domain.search.application.dto.response.ReviewSearchResponse;
 import com.seeat.server.domain.search.application.usecase.ReviewSearchUseCase;
@@ -97,11 +98,11 @@ public class ReviewSearchService implements ReviewSearchUseCase {
         }
 
         // 좋아요 수 조회
-        List<Object[]> likeCounts = reviewLikeRepository.countLikesByReviewIn(reviewList);
+        List<ReviewWithLikeCount> likeCounts = reviewLikeRepository.countLikesByReviewIn(reviewList);
         Map<Long, Long> likeCountMap = likeCounts.stream()
                 .collect(Collectors.toMap(
-                        obj -> (Long) obj[0],
-                        obj -> (Long) obj[1]
+                        rlc -> rlc.getReview().getId(),
+                        ReviewWithLikeCount::getLikeCount
                 ));
 
         // DTO 변환
