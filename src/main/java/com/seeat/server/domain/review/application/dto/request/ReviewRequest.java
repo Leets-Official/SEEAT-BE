@@ -13,6 +13,7 @@ import java.util.List;
  */
 @Data
 @Builder
+@Schema(name = "[요청][리뷰] 리뷰 작성 Request",description = "리뷰 작성에 대한 DTO 입니다.")
 public class ReviewRequest {
 
     /**
@@ -57,7 +58,7 @@ public class ReviewRequest {
     /**
      * 사진 목록 (선택)
      */
-    @Schema(description = "리뷰 이미지들", type = "string", format = "binary")
+    @Schema(description = "리뷰 이미지 주소들")
     @Size(max = 5, message = "이미지는 최대 5개까지 가능합니다.")
-    private List<MultipartFile> photos;
+    private List<String> imageUrls;
 }

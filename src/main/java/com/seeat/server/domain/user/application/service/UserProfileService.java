@@ -1,5 +1,6 @@
 package com.seeat.server.domain.user.application.service;
 
+import com.seeat.server.domain.image.application.usecase.ImageUseCase;
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
@@ -11,8 +12,6 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserAuditorium;
 import com.seeat.server.domain.user.domain.entity.UserGrade;
 import com.seeat.server.domain.user.domain.repository.UserAuditoriumRepository;
-import com.seeat.server.domain.user.domain.repository.UserRepository;
-import com.seeat.server.global.image.application.usecase.ImageUseCase;
 import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,8 +27,6 @@ import java.util.stream.Collectors;
 @Transactional
 @RequiredArgsConstructor
 public class UserProfileService implements UserProfileUseCase {
-
-    private final UserRepository repository;
 
     private final UserService service;
 
@@ -84,7 +81,7 @@ public class UserProfileService implements UserProfileUseCase {
             /// 기존 사진 사진
             imageService.deleteFile(thumbnailImage);
 
-            thumbnailImage = imageService.uploadFile(request.getImage());
+            thumbnailImage = request.getImage();
         }
 
         // 사용자 정보 수정
@@ -118,10 +115,24 @@ public class UserProfileService implements UserProfileUseCase {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 사용자 탈퇴 상태로 수정하는 로직
+     *
+     * @param userId 유저 Id
+     */
+    @Override
+    public void deactivateUser(Long userId){
+        // 사용자 예외처리 및 사용자 정보 조회
+        User user = service.getUser(userId);
+
+        // 더티체킹으로 변경
+        user.deactivateUser();
+    }
+
 
     /// 공통 함수
     private List<Auditorium> getAuditoriums(Long userId) {
-        List<Auditorium> auditoriums = userAuditoriumRepository.findDistinctAuditoriumsByUserId(userId);
+        List<Auditorium> auditoriums = userAuditoriumRepository.findAuditoriumsByUserId(userId);
 
         if (auditoriums.isEmpty()) {
             throw new NoSuchElementException(ErrorCode.NOT_AUDITORIUM.getMessage());

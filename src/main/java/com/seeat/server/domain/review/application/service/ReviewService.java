@@ -1,10 +1,12 @@
 package com.seeat.server.domain.review.application.service;
 
-import com.seeat.server.domain.review.application.usecase.ReviewImageUseCase;
+import com.seeat.server.domain.best.application.usecase.BestContentUseCase;
+import com.seeat.server.domain.image.application.usecase.ReviewImageUseCase;
+import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
-import com.seeat.server.domain.review.domain.entity.ReviewImage;
+import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
@@ -42,7 +44,7 @@ import static com.seeat.server.global.response.pageable.PageUtil.getPageable;
 public class ReviewService implements ReviewUseCase {
 
     private final ReviewRepository repository;
-    private final ReviewHashTagService hashTagService;
+    private final ReviewHashTagUseCase hashTagService;
 
     /// 이미지 의존성 처리
     private final ReviewImageUseCase imageService;
@@ -51,6 +53,7 @@ public class ReviewService implements ReviewUseCase {
     private final TheaterUseCase theaterService;
     private final UserUseCase userService;
     private final SeatRatingUseCase seatRatingService;
+    private final BestContentUseCase bestContentService;
 
     // ========================
     //  저장 함수
@@ -82,8 +85,8 @@ public class ReviewService implements ReviewUseCase {
             Review savedReview = repository.save(review);
 
             // 이미지 저장
-            if (request.getPhotos() != null && !request.getPhotos().isEmpty()) {
-                String thumbnail = imageService.saveReviewImage(savedReview, request.getPhotos()).get(0);
+            if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
+                String thumbnail = imageService.saveReviewImage(savedReview, request.getImageUrls()).get(0);
                 savedReview.changeThumbnailUrl(thumbnail);
             }
 
@@ -186,70 +189,51 @@ public class ReviewService implements ReviewUseCase {
         return SliceResponse.from(slice);
     }
 
-    /**
-     * 홈 화면에서 사용할 인기 리뷰 목록 조회를 위한 로직 (무한 스크롤)
-     * @param pageRequest   페이지 네이션
-     */
-    @Override
-    public SliceResponse<ReviewListResponse> loadFavoriteReviews(PageRequest pageRequest) {
-
-        /// Pageable 처리
-        Pageable pageable = getPageable(pageRequest);
-
-        /// 인기 있는 리뷰 검색
-        Slice<ReviewWithLikeCount> reviews = repository.findAllOrderByPopularity(pageable);
-
-        /// DTO 변환
-        // 리뷰 ID 목록 추출
-        List<Long> reviewIds = getLongs(reviews);
-
-        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
-        List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
-
-        /// Slice 객체 처리
-        SliceImpl<ReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
-        return SliceResponse.from(slice);
-    }
-
-    /**
-     * 내가 작성한 리뷰 확인하기
-     * @param userId        로그인한 유저 ID
-     * @param pageRequest   페이지 요청
-     */
-    @Override
-    public SliceResponse<ReviewListResponse> loadMyReviews(Long userId, PageRequest pageRequest) {
-
-        /// Pageable 처리
-        Pageable pageable = getPageable(pageRequest);
-
-        /// 나의 리뷰 조회하기
-        Slice<ReviewWithLikeCount> reviews = repository.findMyReviews(userId, pageable);
-
-        /// DTO 변환
-        // 리뷰 ID 목록 추출
-        List<Long> reviewIds = getLongs(reviews);
-
-        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
-        List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
-
-        /// Slice 객체 처리
-        SliceImpl<ReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
-        return SliceResponse.from(slice);
-
-    }
-
-
     // ========================
     //  수정 함수
     // ========================
 
     /**
      * 리뷰 수정을 위한 로직
-     * @param request 수정을 위한 DTO
-     * @param userId 수정을 원하는 유저 Id (@AuthenticationPrincipal)
+     * @param reviewId   수정을 위한 Id
+     * @param request    수정을 위한 DTO
+     * @param userId     수정을 원하는 유저 Id (@AuthenticationPrincipal)
      */
     @Override
-    public void updateReview(ReviewUpdateRequest request, Long userId) {
+    public void updateReview(Long reviewId, ReviewUpdateRequest request, Long userId) throws IOException {
+
+        /// 유저가 맞는지 예외처리
+        User user = userService.getUser(userId);
+
+        /// 글을 작성한 유저가 맞는지 예외처리
+        Review review = getReview(reviewId, user);
+
+        /// 도메인 로직을 통한 더티체킹 수행
+        review.updateReview(request.getRating(), request.getContent());
+
+        /// 이미지 있다면 이미지도 처리
+        // 이미지 저장
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+
+            /// 기존 이미지 삭제
+            imageService.deleteReviewImage(review);
+
+            /// 새로운 이미지 추가
+            String thumbnail = imageService.saveReviewImage(review, request.getImages()).get(0);
+            review.changeThumbnailUrl(thumbnail);
+        }
+
+        /// 해시태그 수정한다면 삭제후, 저장하기
+        if (request.getHashtags() != null && !request.getHashtags().isEmpty()) {
+
+            /// 기존 해시태그 삭제
+            hashTagService.deleteReviewHashTagByReviewId(review.getId());
+
+            /// 해시태그 저장하기
+            hashTagService.createReviewHashTag(review, request.getHashtags());
+
+        }
+
 
     }
 
@@ -263,13 +247,35 @@ public class ReviewService implements ReviewUseCase {
      * @param userId 삭제를 원하는 유저 Id (@AuthenticationPrincipal)
      */
     @Override
-    public void deleteReview(Long reviewId, Long userId) {
+    public void deleteReview(Long reviewId, Long userId) throws IOException {
 
+        /// 유저가 맞는지 예외처리
+        User user = userService.getUser(userId);
+
+        /// 글을 작성한 유저가 맞는지 예외처리
+        Review review = getReview(reviewId, user);
+
+        /// 해시태그 삭제
+        hashTagService.deleteReviewHashTagByReviewId(review.getId());
+
+        /// DB 삭제
+        repository.deleteById(reviewId);
+
+        /// 이미지 삭제
+        imageService.deleteReviewImage(review);
+
+        /// 인기 게시글이라면, 캐싱 초기화
+        boolean checked = bestContentService.checkBestContentsByReviewId(reviewId);
+
+        if (checked) {
+            /// 인기 게시글을 삭제 후, 다시 초기화 (리셋)
+            bestContentService.resetBestContents();
+        }
     }
 
 
     // ========================
-    //  공통 함수
+    //  외부 함수
     // ========================
 
     /**
@@ -303,13 +309,57 @@ public class ReviewService implements ReviewUseCase {
     }
 
     /**
-     * 리뷰의 Id를 얻기 위한 공통 로직
-     * @param reviews ID를 추출할 리뷰 목록
+     * 내가 작성한 리뷰 확인하기
+     * @param userId        로그인한 유저 ID
+     * @param pageRequest   페이지 요청
      */
-    private List<Long> getLongs(List<Review> reviews) {
-        return reviews.stream()
-                .map(Review::getId)
-                .toList();
+    @Override
+    public SliceResponse<ReviewListResponse> loadMyReviews(Long userId, PageRequest pageRequest) {
+
+        /// Pageable 처리
+        Pageable pageable = getPageable(pageRequest);
+
+        /// 나의 리뷰 조회하기
+        Slice<ReviewWithLikeCount> reviews = repository.findMyReviews(userId, pageable);
+
+        /// DTO 변환
+        // 리뷰 ID 목록 추출
+        List<Long> reviewIds = getLongs(reviews);
+
+        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
+
+        /// Slice 객체 처리
+        SliceImpl<ReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
+        return SliceResponse.from(slice);
+
+    }
+
+    /**
+     * 해당 상영관에 작성된 리뷰가 존재하는지 체크
+     * @param auditoriumId  상영관 ID
+     */
+    @Override
+    public Long countsReviewsByAuditoriumId(String auditoriumId) {
+
+        /// 상영관 존재 예외처리
+        Auditorium auditorium = theaterService.getAuditorium(auditoriumId);
+
+        /// DB 조회
+        return repository.countByAuditoriumId(auditorium.getId());
+    }
+
+    // ========================
+    //  공통 함수
+    // ========================
+    /**
+     * 내부 서비스에서 유저와 리뷰가 동일하지 확인하는 공통 함수
+     * @param reviewId   리뷰 ID
+     * @param user      유저
+     */
+    private Review getReview(Long reviewId, User user) {
+        return repository.findByUserAndId(user, reviewId)
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_OWN_USER_REVIEW.getMessage()));
     }
 
     /**
@@ -369,6 +419,9 @@ public class ReviewService implements ReviewUseCase {
                 )
                 .toList();
     }
+
+
+
 
 }
 

@@ -6,9 +6,9 @@ import com.seeat.server.domain.review.domain.HashTagFixtures;
 import com.seeat.server.domain.review.domain.entity.HashTag;
 import com.seeat.server.domain.review.domain.entity.HashTagType;
 import com.seeat.server.domain.review.domain.repository.HashTagRepository;
-import com.seeat.server.domain.seat.domain.AuditoriumFixtures;
-import com.seeat.server.domain.seat.domain.SeatFixtures;
-import com.seeat.server.domain.seat.domain.TheaterFixtures;
+import com.seeat.server.domain.theater.domain.AuditoriumFixtures;
+import com.seeat.server.domain.theater.domain.SeatFixtures;
+import com.seeat.server.domain.theater.domain.TheaterFixtures;
 import com.seeat.server.domain.theater.application.dto.response.SeatRatingSummaryResponse;
 import com.seeat.server.domain.theater.application.dto.response.SeatType;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
@@ -126,7 +126,7 @@ class SeatRatingServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(1.5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -160,7 +160,7 @@ class SeatRatingServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(4.5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -193,7 +193,7 @@ class SeatRatingServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("review1")
                     .movieTitle("title1")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(4.3)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -202,7 +202,7 @@ class SeatRatingServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("review2")
                     .movieTitle("title2")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(2.1)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -234,7 +234,7 @@ class SeatRatingServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(1.4)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -269,7 +269,7 @@ class SeatRatingServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(4.6)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();

@@ -9,7 +9,7 @@ import com.seeat.server.domain.user.domain.entity.UserAuditorium;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
 import com.seeat.server.domain.user.domain.repository.UserAuditoriumRepository;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
-import com.seeat.server.global.image.application.usecase.ImageUseCase;
+import com.seeat.server.domain.image.application.usecase.ImageUseCase;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.service.RedisService;
 import com.seeat.server.global.util.JwtConstants;
@@ -40,9 +40,6 @@ public class UserService implements UserUseCase {
     private final RedisService redisService;
     private final UserAuditoriumRepository userAuditoriumRepository;
     private final AuditoriumRepository auditoriumRepository;
-
-    /// 이미지 서비스 추가
-    private final ImageUseCase imageService;
 
     @Value("${server.ssl.enabled}")
     private boolean sslEnabled;
@@ -82,7 +79,7 @@ public class UserService implements UserUseCase {
 
         /// 존재한다면 이미지 추가
         if (request.getImage() != null) {
-            thumbnailImage = imageService.uploadFile(request.getImage());
+            thumbnailImage = request.getImage();
         }
         /// 유저 객체 생성
         User requestUser = User.of(tempUserInfo.getEmail(), tempUserInfo.getSocialId(), tempUserInfo.getSocial(), tempUserInfo.getUsername(),
@@ -150,7 +147,7 @@ public class UserService implements UserUseCase {
      */
     @Override
     public User getUser(Long userId) {
-        return repository.findById(userId)
+        return repository.findByIdAndIsDeleteFalse(userId)
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_USER.getMessage()));
     }
 

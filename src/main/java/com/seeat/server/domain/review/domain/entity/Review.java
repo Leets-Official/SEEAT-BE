@@ -57,4 +57,10 @@ public class Review extends BaseEntity {
         this.thumbnailUrl = thumbnailUrl;
     }
 
+    /// 수정하는 함수
+    public void updateReview(double rating, String content) {
+        this.rating = rating;
+        this.content = content;
+    }
+
 }
