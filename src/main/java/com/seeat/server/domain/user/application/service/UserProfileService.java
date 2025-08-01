@@ -12,7 +12,8 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserAuditorium;
 import com.seeat.server.domain.user.domain.entity.UserGrade;
 import com.seeat.server.domain.user.domain.repository.UserAuditoriumRepository;
-import com.seeat.server.global.image.application.usecase.ImageUseCase;
+import com.seeat.server.domain.user.domain.repository.UserRepository;
+import com.seeat.server.domain.image.application.usecase.ImageUseCase;
 import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -82,7 +83,7 @@ public class UserProfileService implements UserProfileUseCase {
             /// 기존 사진 사진
             imageService.deleteFile(thumbnailImage);
 
-            thumbnailImage = imageService.uploadFile(request.getImage());
+            thumbnailImage = request.getImage();
         }
 
         // 사용자 정보 수정

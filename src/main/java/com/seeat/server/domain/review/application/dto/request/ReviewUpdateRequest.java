@@ -36,9 +36,9 @@ public class ReviewUpdateRequest {
     /**
      * 사진 목록 (선택)
      */
-    @Schema(description = "수정할 리뷰 이미지들", type = "string", format = "binary")
+    @Schema(description = "수정할 리뷰 이미지들")
     @Size(max = 5, message = "이미지는 최대 5개까지 가능합니다.")
-    private List<MultipartFile> photos;
+    private List<String> images;
 
 
 }

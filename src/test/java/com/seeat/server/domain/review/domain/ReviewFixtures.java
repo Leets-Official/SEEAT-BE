@@ -29,6 +29,7 @@ public class ReviewFixtures {
                 .rating(1)
                 .user(user)
                 .seat(seat)
+                .thumbnailUrl("thumbnailUrl")
                 .build();
     }
 
@@ -39,6 +40,7 @@ public class ReviewFixtures {
                 .rating(rating)
                 .user(user)
                 .seat(seat)
+                .thumbnailUrl("thumbnailUrl")
                 .build();
     }
 
@@ -49,6 +51,7 @@ public class ReviewFixtures {
                 .rating(rating)
                 .user(user)
                 .seat(seat)
+                .thumbnailUrl("thumbnailUrl")
                 .build();
     }
 
@@ -59,6 +62,7 @@ public class ReviewFixtures {
                 .rating(rating)
                 .user(user)
                 .seat(seat)
+                .thumbnailUrl("thumbnailUrl")
                 .build();
     }
 

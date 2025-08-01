@@ -60,14 +60,6 @@ public class UserProfileServiceTest {
     @Autowired
     private UserAuditoriumRepository userAuditoriumRepository;
 
-    private MockMultipartFile file1;
-    @BeforeEach
-    void setUp() throws IOException {
-        InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
-        file1 = new MockMultipartFile("photos", "sample1.png", MediaType.IMAGE_PNG_VALUE, inputStream1);
-
-    }
-
     @Nested
     @DisplayName("사용자 정보 조회 테스트")
     class getUserInfo{
@@ -150,7 +142,7 @@ public class UserProfileServiceTest {
             String newNickname = "updateNick";
             List<MovieGenre> newGenres = List.of(MovieGenre.COMEDY, MovieGenre.HORROR);
             List<String> auditoriumIds = List.of("audTest2");
-            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, file1, newGenres, auditoriumIds);
+            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, "file1.jpg", newGenres, auditoriumIds);
 
             // when
             UserInfoUpdateResponse response = sut.updateUserInfo(user.getId(), request);
@@ -158,7 +150,7 @@ public class UserProfileServiceTest {
             // then
             assertEquals(newNickname, response.nickname());
             String thumbnailUrl = user.getImageUrl();
-            Assertions.assertThat(thumbnailUrl.contains("sample"));
+            Assertions.assertThat(thumbnailUrl.contains("file1"));
 
             assertIterableEquals(newGenres, response.genres());
             List<AuditoriumResponse> auditoriumResponse = List.of(AuditoriumResponse.from(auditorium2));
@@ -175,7 +167,7 @@ public class UserProfileServiceTest {
             String newNickname = "updateNick";
             List<MovieGenre> newGenres = List.of(MovieGenre.COMEDY, MovieGenre.HORROR);
             List<String> auditoriumIds = List.of("aud1");
-            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, file1, newGenres, auditoriumIds);
+            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, "file1.jpg", newGenres, auditoriumIds);
 
             // when & then
             Assertions.assertThatThrownBy(() -> sut.updateUserInfo(user.getId(), request))
@@ -194,7 +186,7 @@ public class UserProfileServiceTest {
             String newNickname = "updateNick";
             List<MovieGenre> newGenres = List.of(MovieGenre.COMEDY, MovieGenre.HORROR);
             List<String> auditoriumIds = List.of("aud1");
-            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, file1, newGenres, auditoriumIds);
+            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, "file1.jpg", newGenres, auditoriumIds);
 
             // when & then
             Assertions.assertThatThrownBy(() -> sut.updateUserInfo(user.getId(), request))

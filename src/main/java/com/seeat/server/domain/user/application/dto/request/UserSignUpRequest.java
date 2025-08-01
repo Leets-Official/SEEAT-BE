@@ -31,8 +31,8 @@ public class UserSignUpRequest {
     /**
      * 프로필 이미지
      */
-    @Schema(description = "유저 프로필 이미지", type = "string", format = "binary")
-    private MultipartFile image;
+    @Schema(description = "프로필 이미지", type = "string", format = "binary")
+    private String image;
 
     /**
      * 좋아하는 영화 장르

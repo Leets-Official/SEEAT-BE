@@ -22,7 +22,7 @@ public class UserInfoUpdateRequest {
      * 프로필 이미지
      */
     @Schema(description = "유저 프로필 이미지", type = "string", format = "binary")
-    MultipartFile image;
+    String image;
 
     /**
      * 선호하는 영화 장르
