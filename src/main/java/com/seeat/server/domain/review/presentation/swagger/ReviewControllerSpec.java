@@ -4,6 +4,7 @@ import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
+import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
@@ -79,7 +80,7 @@ public interface ReviewControllerSpec {
             description = "좌석 ID로 리뷰 목록을 조회합니다."
     )
     @GetMapping("/seat/{seatId}")
-    ApiResponse<SliceResponse<ReviewListResponse>> getReviewsBySeat(
+    ApiResponse<SliceResponse<ReviewSeatListResponse>> getReviewsBySeat(
             @Parameter(description = "조회할 좌석ID", example = "13018A4")
             @PathVariable String seatId,
             PageRequest pageRequest

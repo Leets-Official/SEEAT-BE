@@ -15,8 +15,6 @@ import java.util.List;
  * @param reviewId      리뷰 아이디
  * @param thumbnailUrl  썸네일 이미지
  * @param hashtags      해시태그 목록 DTO
- * @param movieTitle    영화 제목
- * @param theaterName   영화관 제목
  * @param content       리뷰 내용
  * @param user          유저 관련 DTO
  * @param heartCount    좋아요(하트) 수
@@ -34,11 +32,6 @@ public record ReviewListResponse(
 
         List<ReviewHashTagResponse> hashtags,
 
-        @Schema(description = "영화 제목", example = "어벤져스: 엔드게임")
-        String movieTitle,
-
-        @Schema(description = "영화관 이름", example = "CGV 용산아이파크몰")
-        String theaterName,
 
         @Schema(description = "리뷰 제목", example = "용아맥은 전설이다!")
         String title,
@@ -67,8 +60,6 @@ public record ReviewListResponse(
                 .thumbnailUrl(review.getThumbnailUrl())
                 .hashtags(ReviewHashTagResponse
                         .from(hashTags))
-                .movieTitle(review.getMovieTitle())
-                .theaterName(review.getSeat().getAuditorium().getTheater().getName())
                 .title(review.getTitle())
                 .content(review.getContent())
                 .user(UserResponse

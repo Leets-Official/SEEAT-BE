@@ -2,6 +2,7 @@ package com.seeat.server.domain.review.application.service;
 
 import com.seeat.server.domain.best.application.usecase.BestContentUseCase;
 import com.seeat.server.domain.image.application.usecase.ReviewImageUseCase;
+import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
@@ -13,6 +14,7 @@ import com.seeat.server.domain.review.application.dto.request.ReviewUpdateReques
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
+import com.seeat.server.domain.review.domain.repository.dto.SeatReviewStats;
 import com.seeat.server.domain.theater.application.usecase.SeatRatingUseCase;
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
@@ -30,10 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.seeat.server.global.response.pageable.PageUtil.getPageable;
@@ -137,10 +136,13 @@ public class ReviewService implements ReviewUseCase {
      * @return 리뷰에 대한 목록 조회 DTO
      */
     @Override
-    public SliceResponse<ReviewListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest) {
+    public SliceResponse<ReviewSeatListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest) {
 
         /// 좌석 예외처리
         Seat seat = theaterService.getSeat(seatId);
+
+        /// 좌석의 리뷰정보 조회
+        SeatReviewStats stats = repository.findSeatReviewStats(seatId);
 
         // Pageable 처리
         Pageable pageable = getPageable(pageRequest);
@@ -154,8 +156,10 @@ public class ReviewService implements ReviewUseCase {
         // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
         List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
 
-        // 결과
-        SliceImpl<ReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
+        // DTO로 묶기 결과
+        var response = ReviewSeatListResponse.from(stats, result);
+
+        SliceImpl<ReviewSeatListResponse> slice = new SliceImpl<>(List.of(response), reviews.getPageable(), reviews.hasNext());
 
         return SliceResponse.from(slice);
     }

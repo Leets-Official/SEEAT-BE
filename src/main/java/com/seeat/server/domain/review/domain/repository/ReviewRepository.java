@@ -3,6 +3,7 @@ package com.seeat.server.domain.review.domain.repository;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.custom.ReviewRepositoryCustom;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
+import com.seeat.server.domain.review.domain.repository.dto.SeatReviewStats;
 import com.seeat.server.domain.search.application.dto.request.ReviewSearchCondition;
 import com.seeat.server.domain.user.domain.entity.User;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,23 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRepositoryCustom {
+
+
+    /**
+     * 좌석의 리뷰 정보 조회
+     *
+     * @param seatId 조회할 좌석 ID
+     */
+    @Query("""
+                SELECT r.seat AS seat, 
+                       COUNT(r) AS reviewCount, 
+                       AVG(r.rating) AS averageRating
+                FROM Review r
+                WHERE r.seat.id = :seatId
+                GROUP BY r.seat
+            """)
+    SeatReviewStats findSeatReviewStats(@Param("seatId") String seatId);
+
 
 
     /**
