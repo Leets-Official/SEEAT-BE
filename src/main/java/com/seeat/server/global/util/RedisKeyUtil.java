@@ -15,6 +15,7 @@ public class RedisKeyUtil {
     private static final String BEST = "best";
     private static final String AUDITORIUM = "auditorium";
     private static final String REVIEW = "review";
+    private static final String RECENT_SEARCH_PREFIX = "recentSearch:guest:";
     private static final String SUMMARY = "Summary";
 
 
@@ -24,4 +25,5 @@ public class RedisKeyUtil {
     public static String generateOAuth2TempUserKey() {
         return OAUTH2_TEMP_USER + UUID.randomUUID();
     }
+    public static String getGuestRecentSearchKey(String guestToken) { return RECENT_SEARCH_PREFIX + guestToken; }
 }

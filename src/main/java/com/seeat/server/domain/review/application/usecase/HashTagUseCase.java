@@ -1,6 +1,8 @@
 package com.seeat.server.domain.review.application.usecase;
 
 import com.seeat.server.domain.review.application.dto.response.HashTagResponse;
+import com.seeat.server.domain.review.domain.entity.Review;
+
 import java.util.List;
 
 /**
@@ -12,5 +14,7 @@ public interface HashTagUseCase {
     /// 조회
     List<HashTagResponse> loadAllHashTags();
 
+    // 리뷰별 해시태그 조회
+    List<List<String>> getHashTagsForReviews(List<Review> reviews);
 
 }

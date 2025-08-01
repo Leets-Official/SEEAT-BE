@@ -8,6 +8,7 @@ import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoResponse;
 import com.seeat.server.domain.user.application.dto.response.UserInfoUpdateResponse;
 import com.seeat.server.domain.user.application.usecase.UserProfileUseCase;
+import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserAuditorium;
 import com.seeat.server.domain.user.domain.entity.UserGrade;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserProfileService implements UserProfileUseCase {
 
-    private final UserService service;
+    private final UserUseCase service;
 
     // 외부 의존성
     private final UserAuditoriumRepository userAuditoriumRepository;
@@ -70,7 +71,7 @@ public class UserProfileService implements UserProfileUseCase {
         // request 상영관 예외 처리
         List<Auditorium> auditoriums = request.getAuditoriumIds().stream()
                 .map(theaterService::getAuditorium)
-                .collect(Collectors.toList());
+                .toList();
 
         /// 기존 이미지 사진이 기본 값
         String thumbnailImage = user.getImageUrl();

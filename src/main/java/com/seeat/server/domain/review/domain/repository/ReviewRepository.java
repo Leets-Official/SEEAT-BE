@@ -1,16 +1,20 @@
 package com.seeat.server.domain.review.domain.repository;
 
 import com.seeat.server.domain.review.domain.entity.Review;
+import com.seeat.server.domain.review.domain.entity.custom.ReviewRepositoryCustom;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
+import com.seeat.server.domain.search.application.dto.request.ReviewSearchCondition;
 import com.seeat.server.domain.user.domain.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import java.util.*;
 
-public interface ReviewRepository extends JpaRepository<Review, Long> {
+import java.util.List;
+import java.util.Optional;
+
+public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRepositoryCustom {
 
 
     /**
@@ -116,5 +120,14 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
      * @param id    아이디
      */
     Optional<Review> findByUserAndId(User user, Long id);
+
+    /**
+     * 검색 필터 조회
+     *
+     * @param condition 조건 DTO
+     * @param pageable 페이징
+     * @return Slice<Review> 응답
+     */
+    Slice<Review> searchReviewsWithFilters(ReviewSearchCondition condition, Pageable pageable);
 
 }

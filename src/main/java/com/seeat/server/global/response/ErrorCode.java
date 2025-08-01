@@ -103,8 +103,13 @@ public enum ErrorCode {
     NOT_OWN_USER_REVIEW(3006,HttpStatus.NOT_FOUND,"리뷰 작성자와 유저가 상이합니다."),
     NO_IMAGE_REVIEW(3007, HttpStatus.BAD_REQUEST, "등록할 이미지가 없음에도 추가하고자 합니다."),
     TOO_MANY_IMAGES(3008, HttpStatus.BAD_REQUEST, "등록할 이미지가 5개 초과입니다."),
-    NOT_GET_LANGCHAIN(3009,HttpStatus.NOT_IMPLEMENTED,"랭체인 서버에서 값을 받지 못했습니다.");
+    NOT_GET_LANGCHAIN(3009,HttpStatus.NOT_IMPLEMENTED,"랭체인 서버에서 값을 받지 못했습니다."),
 
+    // ========================
+    // 4000~4999 : 검색어 관련 에러
+    // ========================
+    NOT_SEARCH(4000, HttpStatus.NOT_FOUND, "해당하는 검색 정보가 존재하지 않습니다."),
+    INVALID_SORT_TYPE(4001, HttpStatus.BAD_REQUEST, "잘못된 정렬 방식입니다.");
 
     /** 에러 코드 (고유값) */
     private final Integer code;
