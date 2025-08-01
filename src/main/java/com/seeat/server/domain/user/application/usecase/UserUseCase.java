@@ -26,4 +26,6 @@ public interface UserUseCase {
 
     /// 외부 의존성을 위한 함수
     User getUser(Long userId);
+
+
 }

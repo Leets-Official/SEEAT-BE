@@ -47,9 +47,14 @@ public class RequestMatcherHolder {
             // 영화관 관련
             new RequestInfo(GET, "/api/v1/theaters/**", null),
 
+            // 피드백 관련
+            new RequestInfo(POST, "/api/v1/feedback", USER),
+            new RequestInfo(GET, "/api/v1/feedback/**", USER),
+
             // 홈화면 관련
             new RequestInfo(GET, "/api/v1/home/**", null),
             new RequestInfo(POST, "/api/v1/home/**", null),
+
 
             // static resources
             new RequestInfo(GET, "/docs/**", null),
