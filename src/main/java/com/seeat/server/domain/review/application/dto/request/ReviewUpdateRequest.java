@@ -36,7 +36,8 @@ public class ReviewUpdateRequest {
     /**
      * 해시태그 ID 목록 (필수)
      */
-    @Schema(example = "[\"1\", \"2\",\"3\"]")
+    @Size(min = 1, max = 5, message = "1개~5개 사이의 해시태그가 필요합니다.")
+    @Schema(example = "[\"1\", \"7\",\"13\"]")
     private List<Long> hashtags;
 
     /**

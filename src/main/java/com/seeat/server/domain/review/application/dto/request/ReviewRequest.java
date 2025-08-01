@@ -58,8 +58,8 @@ public class ReviewRequest {
      * 해시태그 ID 목록 (필수)
      */
     @NotNull(message = "해시태그 목록은 필수입니다.")
-    @Size(min = 1, message = "최소 하나 이상의 해시태그가 필요합니다.")
-    @Schema(example = "[\"1\", \"2\",\"3\"]")
+    @Size(min = 1, max = 5, message = "1개~5개 사이의 해시태그가 필요합니다.")
+    @Schema(example = "[\"1\", \"7\",\"13\"]")
     private List<Long> hashtags;
 
     /**

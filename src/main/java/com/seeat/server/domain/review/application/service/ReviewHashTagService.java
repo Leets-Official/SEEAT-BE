@@ -48,16 +48,24 @@ public class ReviewHashTagService implements ReviewHashTagUseCase {
     @Override
     public void createReviewHashTag(Review review, List<Long> hashTagIds) {
 
+        /// 해시태그가 6개 넘어가면 에러
+        if (hashTagIds.isEmpty() || hashTagIds.size() >= 6) {
+            throw new IllegalArgumentException(ErrorCode.INVALID_HASHTAG_SIZE.getMessage());
+        }
+
         // 해시태그 조회
         List<HashTag> hashTags = hashTagRepository.findByIdIn(hashTagIds);
 
-        // 각 파트별로 1개 이상의 해시태그를 작성해야합니다.
+        /// 동반인 제외, 각 파트별로 1개 이상의 해시태그를 작성해야합니다.
         boolean isValid = Arrays.stream(HashTagType.values())
+                .filter(type -> type != HashTagType.COMPANION)
                 .allMatch(type -> hashTags.stream()
-                                .map(HashTag::getType)
-                                .filter(t -> t == type)
-                                .count() >= 1);
+                        .map(HashTag::getType)
+                        .filter(t -> t == type)
+                        .count() >= 1);
 
+
+        /// 필수 조건이 안맞으면 에러 발생
         if (!isValid) {
             throw new IllegalArgumentException(ErrorCode.INVALID_HASHTAG.getMessage());
         }
