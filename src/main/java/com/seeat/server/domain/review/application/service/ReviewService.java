@@ -2,6 +2,7 @@ package com.seeat.server.domain.review.application.service;
 
 import com.seeat.server.domain.best.application.usecase.BestContentUseCase;
 import com.seeat.server.domain.image.application.usecase.ReviewImageUseCase;
+import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
