@@ -1,11 +1,12 @@
 package com.seeat.server.domain.review.application.service;
 
 import com.seeat.server.domain.best.application.usecase.BestContentUseCase;
-import com.seeat.server.domain.review.application.usecase.ReviewImageUseCase;
+import com.seeat.server.domain.image.application.usecase.ReviewImageUseCase;
+import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
-import com.seeat.server.domain.review.domain.entity.ReviewImage;
+import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
@@ -43,7 +44,7 @@ import static com.seeat.server.global.response.pageable.PageUtil.getPageable;
 public class ReviewService implements ReviewUseCase {
 
     private final ReviewRepository repository;
-    private final ReviewHashTagService hashTagService;
+    private final ReviewHashTagUseCase hashTagService;
 
     /// 이미지 의존성 처리
     private final ReviewImageUseCase imageService;
@@ -84,8 +85,8 @@ public class ReviewService implements ReviewUseCase {
             Review savedReview = repository.save(review);
 
             // 이미지 저장
-            if (request.getPhotos() != null && !request.getPhotos().isEmpty()) {
-                String thumbnail = imageService.saveReviewImage(savedReview, request.getPhotos()).get(0);
+            if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
+                String thumbnail = imageService.saveReviewImage(savedReview, request.getImageUrls()).get(0);
                 savedReview.changeThumbnailUrl(thumbnail);
             }
 
@@ -212,13 +213,13 @@ public class ReviewService implements ReviewUseCase {
 
         /// 이미지 있다면 이미지도 처리
         // 이미지 저장
-        if (request.getPhotos() != null && !request.getPhotos().isEmpty()) {
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
 
             /// 기존 이미지 삭제
             imageService.deleteReviewImage(review);
 
             /// 새로운 이미지 추가
-            String thumbnail = imageService.saveReviewImage(review, request.getPhotos()).get(0);
+            String thumbnail = imageService.saveReviewImage(review, request.getImages()).get(0);
             review.changeThumbnailUrl(thumbnail);
         }
 
@@ -246,7 +247,7 @@ public class ReviewService implements ReviewUseCase {
      * @param userId 삭제를 원하는 유저 Id (@AuthenticationPrincipal)
      */
     @Override
-    public void deleteReview(Long reviewId, Long userId) {
+    public void deleteReview(Long reviewId, Long userId) throws IOException {
 
         /// 유저가 맞는지 예외처리
         User user = userService.getUser(userId);

@@ -1,5 +1,6 @@
 package com.seeat.server.domain.review.application.service;
 
+import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.review.domain.HashTagFixtures;
@@ -7,7 +8,7 @@ import com.seeat.server.domain.review.domain.ReviewFixtures;
 import com.seeat.server.domain.review.domain.entity.*;
 import com.seeat.server.domain.review.domain.repository.HashTagRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewHashTagRepository;
-import com.seeat.server.domain.review.domain.repository.ReviewImageRepository;
+import com.seeat.server.domain.image.domain.repository.ReviewImageRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
@@ -129,7 +130,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -172,7 +173,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId(), seat2.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -209,19 +210,15 @@ class ReviewServiceIntTest {
          */
         @Test
         @DisplayName("[happy] 로그인한 유저 이미지 1장으로 리뷰 정상 생성")
-        void createReviewByUser_happy_with_photos() throws IOException {
+        void createReviewByUser_happy_with_imageUrls() throws IOException {
             //given
-            InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
-
-            MockMultipartFile file1 = new MockMultipartFile("photos", "sample1.png", MediaType.IMAGE_PNG_VALUE, inputStream1);
-
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
-                    .photos(List.of(file1))
+                    .imageUrls(List.of("file1.jpg"))
                     .build();
 
             //when
@@ -255,7 +252,7 @@ class ReviewServiceIntTest {
 
             // 이미지 검증
             String thumbnailUrl = review.getThumbnailUrl();
-            Assertions.assertThat(thumbnailUrl.contains("sample"));
+            Assertions.assertThat(thumbnailUrl.contains("file1.jpg"));
         }
 
         /**
@@ -263,25 +260,15 @@ class ReviewServiceIntTest {
          */
         @Test
         @DisplayName("[happy] 로그인한 유저 이미지 3장으로 리뷰 정상 생성")
-        void createReviewByUser_happy_with_photos_3() throws IOException {
+        void createReviewByUser_happy_with_imageUrls_3() throws IOException {
             //given
-
-            InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
-            InputStream inputStream2 = getClass().getClassLoader().getResourceAsStream("static/testImage2.jpg");
-            InputStream inputStream3 = getClass().getClassLoader().getResourceAsStream("static/testImage3.png");
-
-            MockMultipartFile file1 = new MockMultipartFile("photos", "sample1.jpg", MediaType.IMAGE_PNG_VALUE, inputStream1);
-            MockMultipartFile file2 = new MockMultipartFile("photos", "sample2.png", MediaType.IMAGE_JPEG_VALUE, inputStream2);
-            MockMultipartFile file3 = new MockMultipartFile("photos", "sample3.jpeg", MediaType.IMAGE_PNG_VALUE, inputStream3);
-
-
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(3)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
-                    .photos(List.of(file1, file2, file3))
+                    .imageUrls(List.of("file1.jpg", "file2.png", "file3.jpeg"))
                     .build();
 
             //when
@@ -324,8 +311,8 @@ class ReviewServiceIntTest {
 
             assertThat(storedFileNames)
                     .anyMatch(url -> url.endsWith(".jpg"))
-                    .anyMatch(url -> url.endsWith(".jpeg"))
-                    .anyMatch(url -> url.endsWith(".png"));
+                    .anyMatch(url -> url.endsWith(".png"))
+                    .anyMatch(url -> url.endsWith(".jpeg"));
 
             // 썸네일 검사
             assertThat(review.getThumbnailUrl()).isEqualTo(storedFileNames.stream().findFirst().get());
@@ -337,29 +324,15 @@ class ReviewServiceIntTest {
          */
         @Test
         @DisplayName("[unhappy] 로그인한 유저가 이미지 6장 이상 등록 시 예외 발생")
-        void createReviewByUser_unhappy_with_photos_6() throws IOException {
+        void createReviewByUser_unhappy_with_imageUrls_6() throws IOException {
             // given
-            InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
-            InputStream inputStream2 = getClass().getClassLoader().getResourceAsStream("static/testImage2.jpg");
-            InputStream inputStream3 = getClass().getClassLoader().getResourceAsStream("static/testImage3.png");
-            InputStream inputStream4 = getClass().getClassLoader().getResourceAsStream("static/testImage4.jpg");
-            InputStream inputStream5 = getClass().getClassLoader().getResourceAsStream("static/testImage5.jpg");
-            InputStream inputStream6 = getClass().getClassLoader().getResourceAsStream("static/testImage6.png");
-
-            MockMultipartFile file1 = new MockMultipartFile("photos", "sample1.png", MediaType.IMAGE_PNG_VALUE, inputStream1);
-            MockMultipartFile file2 = new MockMultipartFile("photos", "sample2.jpg", MediaType.IMAGE_JPEG_VALUE, inputStream2);
-            MockMultipartFile file3 = new MockMultipartFile("photos", "sample3.png", MediaType.IMAGE_PNG_VALUE, inputStream3);
-            MockMultipartFile file4 = new MockMultipartFile("photos", "sample4.jpg", MediaType.IMAGE_JPEG_VALUE, inputStream4);
-            MockMultipartFile file5 = new MockMultipartFile("photos", "sample5.jpg", MediaType.IMAGE_JPEG_VALUE, inputStream5);
-            MockMultipartFile file6 = new MockMultipartFile("photos", "sample6.png", MediaType.IMAGE_PNG_VALUE, inputStream6);
-
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(3)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
-                    .photos(List.of(file1, file2, file3, file4, file5, file6))
+                    .imageUrls(List.of("file1.jpg", "file2.jpg", "file3.jpg", "file4.jpg", "file5.jpg", "file6.jpg"))
                     .build();
 
             // when & then
@@ -383,7 +356,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -405,7 +378,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId()))
                     .build();
@@ -527,7 +500,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -558,7 +531,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test1")
                     .movieTitle("ReviewTestTitle1")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -567,7 +540,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test2")
                     .movieTitle("ReviewTestTitle2")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(3)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -634,7 +607,7 @@ class ReviewServiceIntTest {
 
         @Test
         @DisplayName("[happy] 사진 포함, 리뷰의 작성자는 정상적으로 수정할 수 있습니다.")
-        void update_happy_photos() throws IOException {
+        void update_happy_imageUrls() throws IOException {
 
             // given
             /// 요청
@@ -644,16 +617,11 @@ class ReviewServiceIntTest {
             List<Review> reviews = sut.createReview(request, user1.getId());
             Review review = reviews.get(0);
 
-            /// 새롭게 사진
-            InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
-            MockMultipartFile file1 = new MockMultipartFile("photos", "sample1.png", MediaType.IMAGE_PNG_VALUE, inputStream1);
-
-
             /// 수정용 요청
             var newRequest = ReviewUpdateRequest.
                     builder()
                     .content("수정")
-                    .photos(List.of(file1))
+                    .images(List.of("file1.jpg"))
                     .rating(1)
                     .build();
 
@@ -672,7 +640,7 @@ class ReviewServiceIntTest {
 
             // thumbnailUrl 검증: 빈 문자열이 아니고 .png 확장자 포함 확인
             Assertions.assertThat(savedReview.getThumbnailUrl()).isNotBlank();
-            Assertions.assertThat(savedReview.getThumbnailUrl()).contains(".png");
+            Assertions.assertThat(savedReview.getThumbnailUrl()).contains(".jpg");
 
 
             /// 기존내용 변경 여부
@@ -812,7 +780,7 @@ class ReviewServiceIntTest {
                 .seatIds(List.of(seat.getId()))
                 .content("test1")
                 .movieTitle("ReviewTestTitle1")
-                .photos(null)
+                .imageUrls(null)
                 .rating(rating)
                 .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                 .build();

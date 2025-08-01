@@ -32,11 +32,9 @@ public class ReviewController implements ReviewControllerSpec {
      * @param user Jwt 기반 SecurityContext 저장되어있는 유저
      * @return 리뷰 작성 알림
      */
-    @PostMapping(
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping()
     public ApiResponse<Void> createReview(
-            @ModelAttribute @Valid ReviewRequest request,
+            @RequestBody @Valid ReviewRequest request,
             @AuthenticationPrincipal User user) throws IOException {
 
         // 서비스 호출
@@ -106,7 +104,7 @@ public class ReviewController implements ReviewControllerSpec {
     @PatchMapping(path = "/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Void> updateReview(
             @PathVariable Long reviewId,
-            @ModelAttribute @Valid ReviewUpdateRequest request,
+            @RequestBody @Valid ReviewUpdateRequest request,
             @AuthenticationPrincipal User user) throws IOException {
 
         /// 서비스 호출
@@ -123,7 +121,7 @@ public class ReviewController implements ReviewControllerSpec {
     @DeleteMapping("/{reviewId}")
     public ApiResponse<Void> deleteReview(
             @PathVariable Long reviewId,
-            @Parameter(hidden = true) @AuthenticationPrincipal User user){
+            @Parameter(hidden = true) @AuthenticationPrincipal User user) throws IOException {
 
         /// 서비스 호출
         reviewService.deleteReview(reviewId, user.getId());

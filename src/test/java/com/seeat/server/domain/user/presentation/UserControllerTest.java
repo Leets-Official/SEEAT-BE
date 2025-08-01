@@ -90,10 +90,6 @@ public class UserControllerTest {
         auditorium2 = AuditoriumFixtures.createAuditorium(theater2, "theater2");
 
         auditoriumRepository.saveAll(List.of(auditorium1, auditorium2));
-
-        /// 파일 저장
-        InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
-        file1 = new MockMultipartFile("photos", "sample1.png", MediaType.IMAGE_PNG_VALUE, inputStream1);
     }
 
     @Test
@@ -106,11 +102,18 @@ public class UserControllerTest {
         willDoNothing().given(redisService).deleteValues(tempUserKey);
 
         // When
-        mockMvc.perform(multipart("/api/v1/users")
-                        .file(file1) // 이미지 파일
-                        .param("nickname", "nickname") // 닉네임
-                        .param("genres", "ROMANCE", "ACTION") // 장르 여러 개
-                        .param("auditoriumId", auditorium1.getId(), auditorium2.getId()) // 상영관 ID 여러 개
+        String requestBody = """
+        {
+            "nickname": "nickname",
+            "genres": ["ROMANCE", "ACTION"],
+            "auditoriumId": ["%s", "%s"],
+            "imageUrl": "https://example.com/file1.jpg"
+        }
+        """.formatted(auditorium1.getId(), auditorium2.getId());
+
+        mockMvc.perform(post("/api/v1/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)
                         .header("Temp-User-Key", tempUserKey)
                         .characterEncoding("UTF-8")
                 )
@@ -119,7 +122,7 @@ public class UserControllerTest {
         // Then
         var savedUser = userRepository.findByEmail("test@example.com").orElseThrow();
         assertEquals("nickname", savedUser.getNickname());
-        Assertions.assertThat(savedUser.getImageUrl().contains("sample"));
+        Assertions.assertThat(savedUser.getImageUrl().contains("example"));
         assertEquals("test@example.com", savedUser.getEmail());
         assertEquals("providerId123", savedUser.getSocialId());
         assertEquals(UserSocial.KAKAO, savedUser.getSocial());
