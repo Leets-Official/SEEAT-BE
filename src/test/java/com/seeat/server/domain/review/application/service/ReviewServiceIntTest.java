@@ -1,6 +1,7 @@
 package com.seeat.server.domain.review.application.service;
 
 import com.seeat.server.domain.image.domain.entity.ReviewImage;
+import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
@@ -452,7 +453,7 @@ class ReviewServiceIntTest {
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             //when
-            SliceResponse<ReviewSeatListResponse> response = sut.loadReviewsBySeatId(seat1.getId(), pageRequest);
+            SliceResponse<ReviewSeatListResponse> response = sut.loadReviewsBySeatId(seat1.getId(), pageRequest, ReviewSortType.LATEST);
 
             //then
             List<ReviewSeatListResponse> responses = response.content();
@@ -484,7 +485,7 @@ class ReviewServiceIntTest {
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             // when
-            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest);
+            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest, ReviewSortType.LATEST);
 
             // then
             List<ReviewListResponse> responses = response.content();
@@ -567,7 +568,7 @@ class ReviewServiceIntTest {
             likeService.reviewLike(user2.getId(), sutReview1.get(0).getId());
 
             // when
-            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest);
+            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest, ReviewSortType.RATING_DESC);
 
             // then
             List<ReviewListResponse> contents = response.content();

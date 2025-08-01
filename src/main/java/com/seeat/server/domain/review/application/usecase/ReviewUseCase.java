@@ -1,6 +1,7 @@
 package com.seeat.server.domain.review.application.usecase;
 
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
+import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
@@ -33,10 +34,12 @@ public interface ReviewUseCase {
     ReviewDetailResponse loadReview(Long reviewId);
 
     /// 좌석 바탕 리뷰 목록 조회
-    SliceResponse<ReviewSeatListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest);
+    SliceResponse<ReviewSeatListResponse> loadReviewsBySeatId(
+            String seatId, PageRequest pageRequest, ReviewSortType sort);
 
     /// 상영관 바탕 리뷰 목록 조회
-    SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(String auditoriumId, PageRequest pageRequest);
+    SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(
+            String auditoriumId, PageRequest pageRequest, ReviewSortType sort);
 
     // ========================
     //  수정 함수

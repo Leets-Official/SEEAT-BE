@@ -2,6 +2,7 @@ package com.seeat.server.domain.review.application.service;
 
 import com.seeat.server.domain.best.application.usecase.BestContentUseCase;
 import com.seeat.server.domain.image.application.usecase.ReviewImageUseCase;
+import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
 import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
@@ -35,6 +36,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.seeat.server.domain.review.application.dto.request.ReviewSortType.LATEST;
 import static com.seeat.server.global.response.pageable.PageUtil.getPageable;
 
 @Service
@@ -136,7 +138,8 @@ public class ReviewService implements ReviewUseCase {
      * @return 리뷰에 대한 목록 조회 DTO
      */
     @Override
-    public SliceResponse<ReviewSeatListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest) {
+    public SliceResponse<ReviewSeatListResponse> loadReviewsBySeatId(
+            String seatId, PageRequest pageRequest,ReviewSortType sort) {
 
         /// 좌석 예외처리
         Seat seat = theaterService.getSeat(seatId);
@@ -147,8 +150,25 @@ public class ReviewService implements ReviewUseCase {
         // Pageable 처리
         Pageable pageable = getPageable(pageRequest);
 
-        // DB 조회
-        Slice<ReviewWithLikeCount> reviews = repository.findBySeat_Id(seat.getId(), pageable);
+        /// 값 초기화
+        Slice<ReviewWithLikeCount> reviews;
+
+        /// Enum 에 따른 정렬
+
+        // 정렬 분기
+        switch (sort != null ? sort : LATEST) {
+            case LIKES:
+                reviews = repository.findBySeat_IdOrderByLikesDesc(seat.getId(), pageable);
+                break;
+            case RATING_DESC:
+                reviews = repository.findBySeat_IdOrderByRatingDesc(seat.getId(), pageable);
+                break;
+            case RATING_ASC:
+                reviews = repository.findBySeat_IdOrderByRatingAsc(seat.getId(), pageable);
+                break;
+            default: // 최신순(기본)
+                reviews = repository.findBySeat_IdOrderByLatest(seat.getId(), pageable);
+        }
 
         // 리뷰 ID 목록 추출
         List<Long> reviewIds = getLongs(reviews);
@@ -166,11 +186,13 @@ public class ReviewService implements ReviewUseCase {
 
     /**
      * 상영관에 따른 리뷰 목록 조회를 위한 로직
+     *
      * @param auditoriumId 상영관 Id
      * @return 리뷰에 대한 목록 조회 DTO
      */
     @Override
-    public SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(String auditoriumId, PageRequest pageRequest) {
+    public SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(
+            String auditoriumId, PageRequest pageRequest, ReviewSortType sort) {
 
         /// 상영관 존재 예외처리
         Auditorium auditorium = theaterService.getAuditorium(auditoriumId);
@@ -178,8 +200,23 @@ public class ReviewService implements ReviewUseCase {
         // Pageable 처리
         Pageable pageable = getPageable(pageRequest);
 
+        /// 값 초기화
+        Slice<ReviewWithLikeCount> reviews;
+
         // DB 조회
-        Slice<ReviewWithLikeCount> reviews = repository.findByAuditorium_Id(auditorium.getId(), pageable);
+        switch (sort != null ? sort : LATEST) {
+            case LIKES:
+                reviews = repository.findByAuditorium_IdOrderByLikesDesc(auditorium.getId(), pageable);
+                break;
+            case RATING_DESC:
+                reviews = repository.findByAuditorium_IdOrderByRatingDesc(auditorium.getId(), pageable);
+                break;
+            case RATING_ASC:
+                reviews = repository.findByAuditorium_IdOrderByRatingAsc(auditorium.getId(), pageable);
+                break;
+            default: // 최신순(기본)
+                reviews = repository.findByAuditorium_IdOrderByLatest(auditorium.getId(), pageable);
+        }
 
         // 리뷰 ID 목록 추출
         List<Long> reviewIds = getLongs(reviews);
