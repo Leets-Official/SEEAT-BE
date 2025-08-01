@@ -74,7 +74,7 @@ public class CustomOAuth2SuccessHandlerTest {
 
         // Then
         verify(tokenService).generateTokensAndSetHeaders(authentication, response, 1L);
-        verify(redirectStrategy).sendRedirect(request, response, "http://localhost:3000/");
+        verify(redirectStrategy).sendRedirect(request, response, "http://localhost:3000/home");
     }
 
     @Test
@@ -151,6 +151,6 @@ public class CustomOAuth2SuccessHandlerTest {
 
         // Then
         verify(tokenService).generateTokensAndSetHeaders(authentication, response, 1L);
-        verify(redirectStrategy).sendRedirect(request, response, "http://dev.example.com/");
+        verify(redirectStrategy).sendRedirect(request, response, "http://dev.example.com/home");
     }
 }
