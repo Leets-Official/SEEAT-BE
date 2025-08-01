@@ -49,7 +49,7 @@ public interface ReviewUseCase {
     // ========================
 
     /// 리뷰 삭제
-    void deleteReview(Long reviewId, Long userId);
+    void deleteReview(Long reviewId, Long userId) throws IOException;
 
     // ========================
     //  외부 함수

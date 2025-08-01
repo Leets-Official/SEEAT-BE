@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,11 +36,9 @@ public class UserController implements UserControllerSpec {
      * @param tempUserKey 임시유저정보 담긴 RedisKey
      * @return 회원가입 완료 응답
      */
-    @PostMapping(
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping()
     public ApiResponse<Void> userSignUp(
-            @ModelAttribute @Valid UserSignUpRequest request,
+            @RequestBody @Valid UserSignUpRequest request,
             @RequestHeader("Temp-User-Key") String tempUserKey) throws IOException {
 
         TempUserInfo tempUserInfo = redisService.getValues(tempUserKey, TempUserInfo.class);

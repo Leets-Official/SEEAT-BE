@@ -64,6 +64,7 @@ public enum ErrorCode {
     /** 서버 내부 오류  */
     INTERNAL_SERVER_ERROR(500, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
     INTERNAL_S3_ERROR(500_001, HttpStatus.INTERNAL_SERVER_ERROR, "AWS S3 설정이 잘못되었습니다. 속성을 확인하세요."),
+    INTERNAL_S3_PresignedURL_ERROR(500_001, HttpStatus.INTERNAL_SERVER_ERROR, "AWS S3 PreSignedURL 설정이 잘못되었습니다. 속성을 확인하세요."),
     INTERNAL_FILE_ERROR(500_002, HttpStatus.INTERNAL_SERVER_ERROR, "이미지 등록 하는 과정에서 에러가 발생했습니다."),
 
     /** 요청 파라미터 오류 */
