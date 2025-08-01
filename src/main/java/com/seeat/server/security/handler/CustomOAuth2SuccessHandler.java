@@ -1,5 +1,7 @@
 package com.seeat.server.security.handler;
 
+import com.seeat.server.global.response.CustomException;
+import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.util.RedisKeyUtil;
 import com.seeat.server.security.jwt.service.TokenService;
 import com.seeat.server.security.oauth2.application.dto.TempUserInfo;
@@ -43,7 +45,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             switch (userInfo.getStatus()) {
                 case EXISTING_USER -> {
                     tokenService.generateTokensAndSetHeaders(authentication, response, userInfo.getId());
-                    redirectStrategy.sendRedirect(request, response, frontUrl + "/");
+                    redirectStrategy.sendRedirect(request, response, frontUrl + "/home");
                 }
                 case NEW_USER -> {
                     String tempUserKey = RedisKeyUtil.generateOAuth2TempUserKey();
@@ -66,8 +68,8 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
                     redirectStrategy.sendRedirect(request, response, frontUrl + "/login/duplicate-email");
                 }
                 default -> {
-
-                    redirectStrategy.sendRedirect(request, response, frontUrl + "/login");
+                    // 처리할 수 없는 인증 상태 에러
+                    throw new CustomException(ErrorCode.OAUTH2_UNKNOWN_STATUS, null);
                 }
             }
         } catch (IOException e){
