@@ -17,7 +17,7 @@ public class UserDeleteBatch {
 
     private final UserRepository userRepository;
 
-    @Scheduled(cron = "0 0 0 1 * ?") // 매월 1일 0시 실행
+    @Scheduled(cron = "0 0 0 * * ?") // 매일 자정에 실행
     public void deleteUsersMonthly() {
 
         // updated 30일 지난것만 지우기
