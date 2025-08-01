@@ -3,6 +3,7 @@ package com.seeat.server.domain.review.application.dto.response;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.user.application.dto.response.UserResponse;
+import com.seeat.server.global.util.DateFormatUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -48,7 +49,15 @@ public record ReviewListResponse(
         UserResponse user,
 
         @Schema(description = "좋아요(하트) 수", example = "250")
-        Long heartCount
+        Long heartCount,
+
+        @Schema(description = "작성일", example = "2025.08.02")
+        String createdAt,
+
+        @Schema(description = "리뷰 점수", example = "3.7")
+        Double rating
+
+
 ) {
 
     public static ReviewListResponse from(Review review, List<ReviewHashTag> hashTags, Long heartCount) {
@@ -65,6 +74,8 @@ public record ReviewListResponse(
                 .user(UserResponse
                         .from(review.getUser()))
                 .heartCount(heartCount)
+                .rating(review.getRating())
+                .createdAt(DateFormatUtil.formatDate(review.getCreatedAt()))
                 .build();
     }
 }
