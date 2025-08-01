@@ -1,7 +1,7 @@
 package com.seeat.server.domain.user.presentation;
 
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
-import com.seeat.server.domain.review.application.usecase.BookmarkUseCase;
+import com.seeat.server.domain.bookmark.application.usecase.BookmarkUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
 import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
@@ -11,13 +11,17 @@ import com.seeat.server.domain.user.application.usecase.UserProfileUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.presentation.swagger.UserProfileControllerSpec;
 import com.seeat.server.global.response.ApiResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.SliceResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -54,10 +58,10 @@ public class UserProfileController implements UserProfileControllerSpec {
      * @param request 수정 정보 요청값 (닉네임, 유저프로필, 선호 장르, 선호 상영관)
      * @return UserInfoUpdateResponse DTO 응답
      */
-    @PatchMapping
+    @PatchMapping()
     public ApiResponse<UserInfoUpdateResponse> updateUserInfo(
             @AuthenticationPrincipal User user,
-            @RequestBody UserInfoUpdateRequest request){
+            @RequestBody @Valid UserInfoUpdateRequest request) throws IOException {
 
         // 사용자 정보 수정
         UserInfoUpdateResponse response = userProfileService.updateUserInfo(user.getId(), request);

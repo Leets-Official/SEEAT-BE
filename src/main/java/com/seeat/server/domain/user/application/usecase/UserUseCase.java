@@ -7,6 +7,7 @@ import com.seeat.server.security.oauth2.application.dto.TempUserInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.util.Optional;
 
 public interface UserUseCase {
@@ -18,7 +19,7 @@ public interface UserUseCase {
     Optional<User> getUserBySocialAndSocialId(UserSocial social, String socialId);
 
     // 사용자 생성
-    void createUser(TempUserInfo tempUserInfo, UserSignUpRequest request);
+    void createUser(TempUserInfo tempUserInfo, UserSignUpRequest request) throws IOException;
 
     // redis, cookie - refreshToken 삭제 (로그아웃)
     void logout(HttpServletRequest request, HttpServletResponse response);

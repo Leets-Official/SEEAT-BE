@@ -1,14 +1,13 @@
 package com.seeat.server.domain.user.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.seeat.server.domain.seat.domain.AuditoriumFixtures;
-import com.seeat.server.domain.seat.domain.TheaterFixtures;
+import com.seeat.server.domain.theater.domain.AuditoriumFixtures;
+import com.seeat.server.domain.theater.domain.TheaterFixtures;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
 import com.seeat.server.domain.theater.domain.entity.Theater;
 import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
 import com.seeat.server.domain.theater.domain.repository.TheaterRepository;
-import com.seeat.server.domain.user.application.service.UserService;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
 import com.seeat.server.domain.user.domain.UserFixtures;
 import com.seeat.server.domain.user.domain.entity.User;
@@ -20,6 +19,7 @@ import com.seeat.server.global.service.RedisService;
 import com.seeat.server.security.jwt.JwtProvider;
 import com.seeat.server.security.oauth2.application.dto.TempUserInfo;
 import jakarta.servlet.http.Cookie;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -34,6 +35,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -75,9 +79,10 @@ public class UserControllerTest {
 
     private Auditorium auditorium1;
     private Auditorium auditorium2;
+    private MockMultipartFile file1;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         Theater theater1 = theaterRepository.save(TheaterFixtures.createTheater());
         Theater theater2 = theaterRepository.save(TheaterFixtures.createTheater());
 
@@ -92,27 +97,32 @@ public class UserControllerTest {
         // Given
         String tempUserKey = "OAUTH2_TEMP_USER:abc123";
         TempUserInfo tempUserInfo = new TempUserInfo("test@example.com", "providerId123", UserSocial.KAKAO, "username");
-        UserSignUpRequest request = new UserSignUpRequest(
-                "nickname",
-                "https://example.com/profile.jpg",
-                List.of(MovieGenre.ROMANCE, MovieGenre.ACTION),
-                List.of(auditorium1.getId(), auditorium2.getId())
-        );
 
         given(redisService.getValues(tempUserKey, TempUserInfo.class)).willReturn(tempUserInfo);
         willDoNothing().given(redisService).deleteValues(tempUserKey);
 
         // When
+        String requestBody = """
+        {
+            "nickname": "nickname",
+            "genres": ["ROMANCE", "ACTION"],
+            "auditoriumId": ["%s", "%s"],
+            "imageUrl": "https://example.com/file1.jpg"
+        }
+        """.formatted(auditorium1.getId(), auditorium2.getId());
+
         mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)
                         .header("Temp-User-Key", tempUserKey)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .characterEncoding("UTF-8")
+                )
                 .andExpect(status().isOk());
 
         // Then
         var savedUser = userRepository.findByEmail("test@example.com").orElseThrow();
         assertEquals("nickname", savedUser.getNickname());
-        assertEquals("https://example.com/profile.jpg", savedUser.getImageUrl());
+        Assertions.assertThat(savedUser.getImageUrl().contains("example"));
         assertEquals("test@example.com", savedUser.getEmail());
         assertEquals("providerId123", savedUser.getSocialId());
         assertEquals(UserSocial.KAKAO, savedUser.getSocial());

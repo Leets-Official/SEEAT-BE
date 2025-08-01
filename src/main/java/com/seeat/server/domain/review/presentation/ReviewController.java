@@ -1,5 +1,6 @@
 package com.seeat.server.domain.review.presentation;
 
+import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
@@ -9,6 +10,7 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.SliceResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -30,16 +32,15 @@ public class ReviewController implements ReviewControllerSpec {
      * @param user Jwt 기반 SecurityContext 저장되어있는 유저
      * @return 리뷰 작성 알림
      */
-    @PostMapping(
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping()
     public ApiResponse<Void> createReview(
-            @ModelAttribute @Valid ReviewRequest request,
+            @RequestBody @Valid ReviewRequest request,
             @AuthenticationPrincipal User user) throws IOException {
 
         // 서비스 호출
         reviewService.createReview(request, user.getId());
 
+        // 결과 리턴
         return ApiResponse.created();
     }
 
@@ -72,7 +73,7 @@ public class ReviewController implements ReviewControllerSpec {
         // 서비스 호출
         SliceResponse<ReviewListResponse> response = reviewService.loadReviewsByAuditoriumId(auditoriumId, pageRequest);
 
-        // 응답
+        // 결과 리턴
         return ApiResponse.ok(response);
     }
 
@@ -90,7 +91,43 @@ public class ReviewController implements ReviewControllerSpec {
         // 서비스 호출
         SliceResponse<ReviewListResponse> response = reviewService.loadReviewsBySeatId(seatId, pageRequest);
 
+        // 결과 리턴
         return ApiResponse.ok(response);
+    }
+
+    /**
+     * 리뷰 수정
+     *
+     * @param request 수정 DTO
+     * @param user    유저
+     */
+    @PatchMapping(path = "/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<Void> updateReview(
+            @PathVariable Long reviewId,
+            @RequestBody @Valid ReviewUpdateRequest request,
+            @AuthenticationPrincipal User user) throws IOException {
+
+        /// 서비스 호출
+        reviewService.updateReview(reviewId, request, user.getId());
+
+        return ApiResponse.updated();
+    }
+
+    /**
+     * 리뷰 삭제
+     * @param reviewId  리뷰ID
+     * @param user      유저
+     */
+    @DeleteMapping("/{reviewId}")
+    public ApiResponse<Void> deleteReview(
+            @PathVariable Long reviewId,
+            @Parameter(hidden = true) @AuthenticationPrincipal User user) throws IOException {
+
+        /// 서비스 호출
+        reviewService.deleteReview(reviewId, user.getId());
+
+        // 결과 리턴
+        return ApiResponse.deleted();
     }
 
 }

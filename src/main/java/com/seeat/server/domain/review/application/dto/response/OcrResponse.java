@@ -1,5 +1,6 @@
 package com.seeat.server.domain.review.application.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.util.List;
@@ -14,11 +15,21 @@ import java.util.List;
  * @param hall       상영관(예: 2관 (Laser))
  */
 @Builder
+@Schema(name = "[응답][리뷰] 티켓 OCR Response",description = "티켓 OCR에 대한 DTO 입니다.")
 public record OcrResponse(
+        @Schema(description = "극장명", example = "CGV 야탑")
         String theater,
+
+        @Schema(description = "영화제목", example = "F1 더 무비")
         String title,
+
+        @Schema(description = "영화 상영 종류", example = "IMAX")
         String movieType,
+
+        @Schema(description = "좌석 번호", example = "H13")
         String seat,
+
+        @Schema(description = "상영관 이름", example = "2관 (Laser)")
         String hall
 ) {
 

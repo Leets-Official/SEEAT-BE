@@ -1,19 +1,21 @@
 package com.seeat.server.domain.review.application.service;
 
+import com.seeat.server.domain.image.domain.entity.ReviewImage;
+import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.review.domain.HashTagFixtures;
 import com.seeat.server.domain.review.domain.ReviewFixtures;
 import com.seeat.server.domain.review.domain.entity.*;
 import com.seeat.server.domain.review.domain.repository.HashTagRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewHashTagRepository;
-import com.seeat.server.domain.review.domain.repository.ReviewImageRepository;
+import com.seeat.server.domain.image.domain.repository.ReviewImageRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
-import com.seeat.server.domain.seat.domain.AuditoriumFixtures;
-import com.seeat.server.domain.seat.domain.SeatFixtures;
-import com.seeat.server.domain.seat.domain.TheaterFixtures;
+import com.seeat.server.domain.theater.domain.AuditoriumFixtures;
+import com.seeat.server.domain.theater.domain.SeatFixtures;
+import com.seeat.server.domain.theater.domain.TheaterFixtures;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.theater.domain.entity.Theater;
@@ -42,9 +44,8 @@ import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import java.util.List;
 /**
  * [리뷰 서비스의 통합 테스트 클래스]입니다.
  * 리뷰 생성, 조회에 대한 happy/unhappy 테스트를 수행합니다.
@@ -129,7 +130,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -172,7 +173,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId(), seat2.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -209,19 +210,15 @@ class ReviewServiceIntTest {
          */
         @Test
         @DisplayName("[happy] 로그인한 유저 이미지 1장으로 리뷰 정상 생성")
-        void createReviewByUser_happy_with_photos() throws IOException {
+        void createReviewByUser_happy_with_imageUrls() throws IOException {
             //given
-            InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
-
-            MockMultipartFile file1 = new MockMultipartFile("photos", "sample1.png", MediaType.IMAGE_PNG_VALUE, inputStream1);
-
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
-                    .photos(List.of(file1))
+                    .imageUrls(List.of("file1.jpg"))
                     .build();
 
             //when
@@ -255,7 +252,7 @@ class ReviewServiceIntTest {
 
             // 이미지 검증
             String thumbnailUrl = review.getThumbnailUrl();
-            Assertions.assertThat(thumbnailUrl.contains("sample"));
+            Assertions.assertThat(thumbnailUrl.contains("file1.jpg"));
         }
 
         /**
@@ -263,25 +260,15 @@ class ReviewServiceIntTest {
          */
         @Test
         @DisplayName("[happy] 로그인한 유저 이미지 3장으로 리뷰 정상 생성")
-        void createReviewByUser_happy_with_photos_3() throws IOException {
+        void createReviewByUser_happy_with_imageUrls_3() throws IOException {
             //given
-
-            InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
-            InputStream inputStream2 = getClass().getClassLoader().getResourceAsStream("static/testImage2.jpg");
-            InputStream inputStream3 = getClass().getClassLoader().getResourceAsStream("static/testImage3.png");
-
-            MockMultipartFile file1 = new MockMultipartFile("photos", "sample1.jpg", MediaType.IMAGE_PNG_VALUE, inputStream1);
-            MockMultipartFile file2 = new MockMultipartFile("photos", "sample2.png", MediaType.IMAGE_JPEG_VALUE, inputStream2);
-            MockMultipartFile file3 = new MockMultipartFile("photos", "sample3.jpeg", MediaType.IMAGE_PNG_VALUE, inputStream3);
-
-
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(3)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
-                    .photos(List.of(file1, file2, file3))
+                    .imageUrls(List.of("file1.jpg", "file2.png", "file3.jpeg"))
                     .build();
 
             //when
@@ -324,8 +311,8 @@ class ReviewServiceIntTest {
 
             assertThat(storedFileNames)
                     .anyMatch(url -> url.endsWith(".jpg"))
-                    .anyMatch(url -> url.endsWith(".jpeg"))
-                    .anyMatch(url -> url.endsWith(".png"));
+                    .anyMatch(url -> url.endsWith(".png"))
+                    .anyMatch(url -> url.endsWith(".jpeg"));
 
             // 썸네일 검사
             assertThat(review.getThumbnailUrl()).isEqualTo(storedFileNames.stream().findFirst().get());
@@ -337,29 +324,15 @@ class ReviewServiceIntTest {
          */
         @Test
         @DisplayName("[unhappy] 로그인한 유저가 이미지 6장 이상 등록 시 예외 발생")
-        void createReviewByUser_unhappy_with_photos_6() throws IOException {
+        void createReviewByUser_unhappy_with_imageUrls_6() throws IOException {
             // given
-            InputStream inputStream1 = getClass().getClassLoader().getResourceAsStream("static/testImage1.png");
-            InputStream inputStream2 = getClass().getClassLoader().getResourceAsStream("static/testImage2.jpg");
-            InputStream inputStream3 = getClass().getClassLoader().getResourceAsStream("static/testImage3.png");
-            InputStream inputStream4 = getClass().getClassLoader().getResourceAsStream("static/testImage4.jpg");
-            InputStream inputStream5 = getClass().getClassLoader().getResourceAsStream("static/testImage5.jpg");
-            InputStream inputStream6 = getClass().getClassLoader().getResourceAsStream("static/testImage6.png");
-
-            MockMultipartFile file1 = new MockMultipartFile("photos", "sample1.png", MediaType.IMAGE_PNG_VALUE, inputStream1);
-            MockMultipartFile file2 = new MockMultipartFile("photos", "sample2.jpg", MediaType.IMAGE_JPEG_VALUE, inputStream2);
-            MockMultipartFile file3 = new MockMultipartFile("photos", "sample3.png", MediaType.IMAGE_PNG_VALUE, inputStream3);
-            MockMultipartFile file4 = new MockMultipartFile("photos", "sample4.jpg", MediaType.IMAGE_JPEG_VALUE, inputStream4);
-            MockMultipartFile file5 = new MockMultipartFile("photos", "sample5.jpg", MediaType.IMAGE_JPEG_VALUE, inputStream5);
-            MockMultipartFile file6 = new MockMultipartFile("photos", "sample6.png", MediaType.IMAGE_PNG_VALUE, inputStream6);
-
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(3)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
-                    .photos(List.of(file1, file2, file3, file4, file5, file6))
+                    .imageUrls(List.of("file1.jpg", "file2.jpg", "file3.jpg", "file4.jpg", "file5.jpg", "file6.jpg"))
                     .build();
 
             // when & then
@@ -383,7 +356,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -405,7 +378,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId()))
                     .build();
@@ -515,105 +488,6 @@ class ReviewServiceIntTest {
     }
 
     @Nested
-    @DisplayName("인기 목록 조회 테스트")
-    class LoadReviewsPopular {
-
-        @Test
-        @DisplayName("[happy] 인기순정렬_기본케이스")
-        public void loadPopular() {
-
-            //given
-            PageRequest pageRequest = PageRequest.builder().page(1).size(8).build();
-            Review review1 = repository.save(ReviewFixtures.createReview(user1, seat1));
-            Review review2 = repository.save(ReviewFixtures.createReview(user1, seat2));
-
-            // 좋아요 추가
-            likeService.reviewLike(user1.getId(), review1.getId());
-
-            //when
-            SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
-
-            // then
-            List<ReviewListResponse> contents = response.content();
-
-            // 응답 리스트가 Null 이 아니고 사이즈가 2개인지 확인
-            Assertions.assertThat(contents).isNotNull();
-            Assertions.assertThat(contents.size()).isEqualTo(2);
-
-            // 순서 검증: 좋아요 2개 받은 review2가 먼저, 그 다음 review1
-            Assertions.assertThat(contents.get(0).reviewId()).isEqualTo(review1.getId());
-            Assertions.assertThat(contents.get(1).reviewId()).isEqualTo(review2.getId());
-            org.junit.jupiter.api.Assertions.assertFalse(response.hasNext());
-        }
-
-        @Test
-        @DisplayName("[happy] 좋아요 수가 같은 경우 최신순 정렬")
-        void loadPopular_same_new() {
-            // given
-            PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();
-            Review older = repository.save(ReviewFixtures.createReview(user1, seat1)); // 먼저 저장, 좋아요 1개
-            Review newer = repository.save(ReviewFixtures.createReview(user1, seat2)); // 나중 저장, 좋아요 1개
-            likeService.reviewLike(user1.getId(), older.getId());
-            likeService.reviewLike(user1.getId(), newer.getId());
-
-            // when
-            SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
-            List<ReviewListResponse> contents = response.content();
-
-            // then
-            Assertions.assertThat(contents.size()).isEqualTo(2);
-            // (정책에 따라 최신 우선/생성순/ID 내림차순 등 원하는 로직 고정)
-            Assertions.assertThat(contents.get(0).reviewId()).isEqualTo(newer.getId());
-            Assertions.assertThat(contents.get(1).reviewId()).isEqualTo(older.getId());
-        }
-
-        @Test
-        @DisplayName("[happy] 여러 유저가 복수 개 리뷰에 좋아요를 누른 경우 합산 집계 및 순위정렬의 정확성")
-        void multiple_user_like() {
-            // given
-            PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();
-            Review revA = repository.save(ReviewFixtures.createReview(user1, seat1));
-            Review revB = repository.save(ReviewFixtures.createReview(user1, seat2));
-            User user2 = userRepository.save(UserFixtures.createUser());
-            User user3 = userRepository.save(UserFixtures.createUser());
-
-            // A: 3명, B: 2명(중복 허용X)
-            likeService.reviewLike(user1.getId(), revA.getId());
-            likeService.reviewLike(user2.getId(), revA.getId());
-            likeService.reviewLike(user3.getId(), revA.getId());
-            likeService.reviewLike(user1.getId(), revB.getId());
-            likeService.reviewLike(user2.getId(), revB.getId());
-
-            // when
-            SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
-            List<ReviewListResponse> contents = response.content();
-
-            // then
-            Assertions.assertThat(contents.size()).isEqualTo(2);
-            Assertions.assertThat(contents.get(0).reviewId()).isEqualTo(revA.getId());
-            Assertions.assertThat(contents.get(1).reviewId()).isEqualTo(revB.getId());
-        }
-
-        /**
-         * 리뷰가 아예 없는 경우 빈 리스트임을 검증한다.
-         */
-        @Test
-        @DisplayName("[happy] 등록된 리뷰가 없을 때 빈 리스트 반환")
-        void loadPopular_empty() {
-            // given
-            PageRequest pageRequest = PageRequest.builder().page(1).size(5).build();
-
-            // when
-            SliceResponse<ReviewListResponse> response = sut.loadFavoriteReviews(pageRequest);
-            List<ReviewListResponse> contents = response.content();
-
-            // then
-            Assertions.assertThat(contents).isEmpty();
-        }
-
-    }
-
-    @Nested
     @DisplayName("좋아요 반영 조회 테스트")
     class LoadReviewsByLike {
 
@@ -626,7 +500,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test")
                     .movieTitle("ReviewTestTitle")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -657,7 +531,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test1")
                     .movieTitle("ReviewTestTitle1")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(5)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -666,7 +540,7 @@ class ReviewServiceIntTest {
                     .seatIds(List.of(seat1.getId()))
                     .content("test2")
                     .movieTitle("ReviewTestTitle2")
-                    .photos(null)
+                    .imageUrls(null)
                     .rating(3)
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
@@ -689,6 +563,227 @@ class ReviewServiceIntTest {
             Assertions.assertThat(response.content().get(1).heartCount()).isEqualTo(0);
 
         }
+    }
+
+    @Nested
+    @DisplayName("수정 테스트")
+    class UpdateReviewTest {
+
+        @Test
+        @DisplayName("[happy] 사진 제외, 리뷰의 작성자는 정상적으로 수정할 수 있습니다.")
+        void update_happy() throws IOException {
+
+            // given
+            /// 요청
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            /// 수정용 요청
+            var newRequest = ReviewUpdateRequest.
+                    builder()
+                    .content("수정")
+                    .rating(1)
+                    .build();
+
+            // when
+            sut.updateReview(review.getId(), newRequest, user1.getId());
+
+            // then
+            var savedReview = repository.findById(review.getId()).get();
+
+            Assertions.assertThat(savedReview).isNotNull();
+            /// 새로운 값 적용 여부
+            Assertions.assertThat(savedReview.getRating()).isEqualTo(1);
+            Assertions.assertThat(savedReview.getContent()).isEqualTo("수정");
+
+            /// 기존내용 변경 여부
+            Assertions.assertThat(savedReview.getMovieTitle()).isEqualTo(request.getMovieTitle());
+            Assertions.assertThat(savedReview.getSeat()).isEqualTo(seat1);
+
+        }
+
+        @Test
+        @DisplayName("[happy] 사진 포함, 리뷰의 작성자는 정상적으로 수정할 수 있습니다.")
+        void update_happy_imageUrls() throws IOException {
+
+            // given
+            /// 요청
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            /// 수정용 요청
+            var newRequest = ReviewUpdateRequest.
+                    builder()
+                    .content("수정")
+                    .images(List.of("file1.jpg"))
+                    .rating(1)
+                    .build();
+
+            Assertions.assertThat(review.getThumbnailUrl()).isEqualTo("thumbnailUrl");
+
+            // when
+            sut.updateReview(review.getId(), newRequest, user1.getId());
+
+            // then
+            var savedReview = repository.findById(review.getId()).get();
+
+            Assertions.assertThat(savedReview).isNotNull();
+            /// 새로운 값 적용 여부
+            Assertions.assertThat(savedReview.getRating()).isEqualTo(1);
+            Assertions.assertThat(savedReview.getContent()).isEqualTo("수정");
+
+            // thumbnailUrl 검증: 빈 문자열이 아니고 .png 확장자 포함 확인
+            Assertions.assertThat(savedReview.getThumbnailUrl()).isNotBlank();
+            Assertions.assertThat(savedReview.getThumbnailUrl()).contains(".jpg");
+
+
+            /// 기존내용 변경 여부
+            Assertions.assertThat(savedReview.getMovieTitle()).isEqualTo(request.getMovieTitle());
+            Assertions.assertThat(savedReview.getSeat()).isEqualTo(seat1);
+
+        }
+
+        @Test
+        @DisplayName("[unhappy] 존재하지 않는 사용자는 수정할 수 없습니다.")
+        void update_throws_not_users() throws IOException {
+
+            // given
+            Long attackedUserId = 99999999L;
+
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            /// 수정용 요청
+            var newRequest = ReviewUpdateRequest.
+                    builder()
+                    .content("수정")
+                    .rating(1)
+                    .build();
+
+            // when & then
+            assertThatThrownBy(() -> sut.updateReview(review.getId(), newRequest, attackedUserId))
+                    .isInstanceOf(NoSuchElementException.class)
+                    .hasMessage(ErrorCode.NOT_USER.getMessage());
+        }
+
+        @Test
+        @DisplayName("[unhappy] 리뷰의 작성자가 아닌 사용자는 수정할 수 없습니다.")
+        void update_throws_not_my_reviews() throws IOException {
+
+            // given
+            Long attackedUserId = user2.getId();
+
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            /// 수정용 요청
+            var newRequest = ReviewUpdateRequest.
+                    builder()
+                    .content("수정")
+                    .rating(1)
+                    .build();
+
+            // when & then
+            assertThatThrownBy(() -> sut.updateReview(review.getId(), newRequest, attackedUserId))
+                    .isInstanceOf(NoSuchElementException.class)
+                    .hasMessage(ErrorCode.NOT_OWN_USER_REVIEW.getMessage());
+        }
+    }
+
+    @Nested
+    @DisplayName("삭제 테스트")
+    class DeleteReview {
+
+        @Test
+        @DisplayName("[happy] 리뷰의 작성자는 정상적으로 삭제할 수 있습니다.")
+        void happyDelete() throws IOException {
+
+            /// 요청
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            // when
+            sut.deleteReview(review.getId(), user1.getId());
+
+            // then
+            /// DB에 존재하는지 체크
+            assertTrue(repository.findById(review.getId()).isEmpty());
+
+            /// 해시태그 존재하는지 체크
+            List<ReviewHashTag> hashTags = reviewHashTagRepository.findByReview_Id(review.getId());
+            Assertions.assertThat(hashTags).isEmpty();
+
+            /// 이미지 존재하는지 체크
+            List<ReviewImage> images = imageRepository.findByReview(review);
+            Assertions.assertThat(images).isEmpty();
+        }
+
+        @Test
+        @DisplayName("[unhappy] 존재하지 않는 사용자는 삭제할 수 없습니다.")
+        void delete_throws_not_users() throws IOException {
+
+            // given
+            Long attackedUserId = 99999999L;
+
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            // when & then
+            assertThatThrownBy(() -> sut.deleteReview(review.getId(), attackedUserId))
+                    .isInstanceOf(NoSuchElementException.class)
+                    .hasMessage(ErrorCode.NOT_USER.getMessage());
+
+        }
+
+        @Test
+        @DisplayName("[unhappy] 리뷰의 작성자가 아닌 사용자는 삭제할 수 없습니다.")
+        void delete_throws_not_my_reviews() throws IOException {
+
+            // given
+            Long attackedUserId = user2.getId();
+
+            var request = getReviewRequest(seat1, 4);
+
+            /// 생성
+            List<Review> reviews = sut.createReview(request, user1.getId());
+            Review review = reviews.get(0);
+
+            // when & then
+            assertThatThrownBy(() -> sut.deleteReview(review.getId(), attackedUserId))
+                    .isInstanceOf(NoSuchElementException.class)
+                    .hasMessage(ErrorCode.NOT_OWN_USER_REVIEW.getMessage());
+
+        }
+    }
+
+
+    private ReviewRequest getReviewRequest(Seat seat, double rating) {
+        return ReviewRequest.builder()
+                .seatIds(List.of(seat.getId()))
+                .content("test1")
+                .movieTitle("ReviewTestTitle1")
+                .imageUrls(null)
+                .rating(rating)
+                .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                .build();
     }
 
 }

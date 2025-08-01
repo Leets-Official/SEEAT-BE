@@ -48,6 +48,10 @@ public class RequestMatcherHolder {
             // 영화관 관련
             new RequestInfo(GET, "/api/v1/theaters/**", null),
 
+            // 홈화면 관련
+            new RequestInfo(GET, "/api/v1/home/**", null),
+            new RequestInfo(POST, "/api/v1/home/**", null),
+
             // static resources
             new RequestInfo(GET, "/docs/**", null),
             new RequestInfo(GET, "/*.ico", null),

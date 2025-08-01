@@ -64,6 +64,7 @@ public enum ErrorCode {
     /** 서버 내부 오류  */
     INTERNAL_SERVER_ERROR(500, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류입니다."),
     INTERNAL_S3_ERROR(500_001, HttpStatus.INTERNAL_SERVER_ERROR, "AWS S3 설정이 잘못되었습니다. 속성을 확인하세요."),
+    INTERNAL_S3_PresignedURL_ERROR(500_001, HttpStatus.INTERNAL_SERVER_ERROR, "AWS S3 PreSignedURL 설정이 잘못되었습니다. 속성을 확인하세요."),
     INTERNAL_FILE_ERROR(500_002, HttpStatus.INTERNAL_SERVER_ERROR, "이미지 등록 하는 과정에서 에러가 발생했습니다."),
 
     /** 요청 파라미터 오류 */
@@ -96,8 +97,9 @@ public enum ErrorCode {
     DUPLICATE_REVIEW(3003, HttpStatus.CONFLICT, "해당하는 리뷰를 이미 좋아요 했습니다"),
     NOT_OWN_BOOKMARK(3004, HttpStatus.CONFLICT, "추가되어있지 않은 북마크를 삭제할 수 없습니다."),
     NOT_OWN_REVIEW(3005, HttpStatus.CONFLICT, "추가되어있지 않은 리뷰를 삭제할 수 없습니다."),
-    NO_IMAGE_REVIEW(3006, HttpStatus.BAD_REQUEST, "등록할 이미지가 없음에도 추가하고자 합니다."),
-    TOO_MANY_IMAGES(3007, HttpStatus.BAD_REQUEST, "등록할 이미지가 5개 초과입니다.");
+    NOT_OWN_USER_REVIEW(3006,HttpStatus.NOT_FOUND,"리뷰 작성자와 유저가 상이합니다."),
+    NO_IMAGE_REVIEW(3007, HttpStatus.BAD_REQUEST, "등록할 이미지가 없음에도 추가하고자 합니다."),
+    TOO_MANY_IMAGES(3008, HttpStatus.BAD_REQUEST, "등록할 이미지가 5개 초과입니다.");
 
 
     /** 에러 코드 (고유값) */

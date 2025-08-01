@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
@@ -34,10 +36,10 @@ public class UserController implements UserControllerSpec {
      * @param tempUserKey 임시유저정보 담긴 RedisKey
      * @return 회원가입 완료 응답
      */
-    @PostMapping
+    @PostMapping()
     public ApiResponse<Void> userSignUp(
-            @Valid @RequestBody UserSignUpRequest request,
-            @RequestHeader("Temp-User-Key") String tempUserKey) {
+            @RequestBody @Valid UserSignUpRequest request,
+            @RequestHeader("Temp-User-Key") String tempUserKey) throws IOException {
 
         TempUserInfo tempUserInfo = redisService.getValues(tempUserKey, TempUserInfo.class);
 

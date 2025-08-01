@@ -1,7 +1,7 @@
 package com.seeat.server.domain.user.application.service;
 
-import com.seeat.server.domain.seat.domain.AuditoriumFixtures;
-import com.seeat.server.domain.seat.domain.TheaterFixtures;
+import com.seeat.server.domain.theater.domain.AuditoriumFixtures;
+import com.seeat.server.domain.theater.domain.TheaterFixtures;
 import com.seeat.server.domain.theater.application.dto.response.AuditoriumResponse;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
@@ -20,14 +20,19 @@ import com.seeat.server.domain.user.domain.repository.UserAuditoriumRepository;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -119,7 +124,7 @@ public class UserProfileServiceTest {
     class updateUserInfo {
         @Test
         @DisplayName("로그인한 유저 정보 정상 수정")
-        void updateUserInfo_Success() {
+        void updateUserInfo_Success() throws IOException {
             // given
             User user = UserFixtures.createUser();
             Theater theater1 = TheaterFixtures.createTheater();
@@ -135,17 +140,18 @@ public class UserProfileServiceTest {
 
             // 수정 정보
             String newNickname = "updateNick";
-            String newImageUrl = "https://update.image.url";
             List<MovieGenre> newGenres = List.of(MovieGenre.COMEDY, MovieGenre.HORROR);
             List<String> auditoriumIds = List.of("audTest2");
-            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, newImageUrl, newGenres, auditoriumIds);
+            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, "file1.jpg", newGenres, auditoriumIds);
 
             // when
             UserInfoUpdateResponse response = sut.updateUserInfo(user.getId(), request);
 
             // then
             assertEquals(newNickname, response.nickname());
-            assertEquals(newImageUrl, response.imageUrl());
+            String thumbnailUrl = user.getImageUrl();
+            Assertions.assertThat(thumbnailUrl.contains("file1"));
+
             assertIterableEquals(newGenres, response.genres());
             List<AuditoriumResponse> auditoriumResponse = List.of(AuditoriumResponse.from(auditorium2));
             assertEquals(auditoriumResponse, response.auditoriums());
@@ -159,10 +165,9 @@ public class UserProfileServiceTest {
 
             // 수정 정보
             String newNickname = "updateNick";
-            String newImageUrl = "https://update.image.url";
             List<MovieGenre> newGenres = List.of(MovieGenre.COMEDY, MovieGenre.HORROR);
             List<String> auditoriumIds = List.of("aud1");
-            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, newImageUrl, newGenres, auditoriumIds);
+            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, "file1.jpg", newGenres, auditoriumIds);
 
             // when & then
             Assertions.assertThatThrownBy(() -> sut.updateUserInfo(user.getId(), request))
@@ -179,10 +184,9 @@ public class UserProfileServiceTest {
 
             // 수정 정보
             String newNickname = "updateNick";
-            String newImageUrl = "https://update.image.url";
             List<MovieGenre> newGenres = List.of(MovieGenre.COMEDY, MovieGenre.HORROR);
             List<String> auditoriumIds = List.of("aud1");
-            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, newImageUrl, newGenres, auditoriumIds);
+            UserInfoUpdateRequest request = new UserInfoUpdateRequest(newNickname, "file1.jpg", newGenres, auditoriumIds);
 
             // when & then
             Assertions.assertThatThrownBy(() -> sut.updateUserInfo(user.getId(), request))

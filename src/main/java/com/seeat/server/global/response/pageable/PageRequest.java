@@ -19,12 +19,14 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @NoArgsConstructor
 @Slf4j
+@Schema(name = "[요청][공통] 페이지 Request", description = "페이지 요청을 하는 DTO입니다.")
 public class PageRequest {
     @Builder.Default
-    @Schema(example = "1")
+    @Schema(description = "페이지 시작 파라미터. 1부터 시작", example = "1")
     private int page = 1;
 
+
     @Builder.Default
-    @Schema(example = "10")
+    @Schema(description = "가져올 데이터 개수", example = "10")
     private int size = 10;
 }
