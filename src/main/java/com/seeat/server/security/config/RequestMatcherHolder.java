@@ -37,13 +37,12 @@ public class RequestMatcherHolder {
             new RequestInfo(GET, "/api/v1/profile", USER),
             new RequestInfo(PATCH, "/api/v1/profile", USER),
             new RequestInfo(GET, "/api/v1/profile/grades", null),
+            new RequestInfo(GET, "/api/v1/profile/**", USER),
+            new RequestInfo(DELETE, "/api/v1/profile/**", USER),
 
             // 리뷰 관련
             new RequestInfo(POST, "/api/v1/reviews/**", USER),
             new RequestInfo(GET, "/api/v1/reviews/**", null),
-
-            // 마이페이지 관련
-            new RequestInfo(POST, "/api/v1/profile/**", USER),
 
             // 영화관 관련
             new RequestInfo(GET, "/api/v1/theaters/**", null),

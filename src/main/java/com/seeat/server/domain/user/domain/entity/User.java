@@ -1,15 +1,14 @@
 package com.seeat.server.domain.user.domain.entity;
 
 import com.seeat.server.domain.BaseEntity;
-import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
-import com.seeat.server.domain.theater.domain.entity.Seat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +42,8 @@ public class User extends BaseEntity {
 
     private String imageUrl;
 
+    private Boolean isDelete;
+
     @Builder.Default
     @Column(name = "genre")
     @Enumerated(EnumType.STRING)
@@ -71,6 +72,7 @@ public class User extends BaseEntity {
                 .genres(genres)
                 .role(UserRole.USER)
                 .grade(UserGrade.BRONZE)
+                .isDelete(false)
                 .build();
     }
 
@@ -79,5 +81,15 @@ public class User extends BaseEntity {
         this.nickname = nickname;
         this.imageUrl = imageUrl;
         this.genres = genres;
+    }
+
+    // 사용자 탈퇴 true 메소드
+    public void deactivateUser(){
+        this.isDelete = true;
+    }
+
+    // 테스트 전용 메서드
+    public void setUpdatedAt(LocalDateTime time) {
+        super.setUpdatedAt(time);
     }
 }

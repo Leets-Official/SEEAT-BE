@@ -11,6 +11,7 @@ import com.seeat.server.domain.user.application.usecase.UserProfileUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.presentation.swagger.UserProfileControllerSpec;
 import com.seeat.server.global.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -18,6 +19,7 @@ import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.SliceResponse;
 import org.springframework.data.domain.Slice;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,12 +60,10 @@ public class UserProfileController implements UserProfileControllerSpec {
      * @param request 수정 정보 요청값 (닉네임, 유저프로필, 선호 장르, 선호 상영관)
      * @return UserInfoUpdateResponse DTO 응답
      */
-    @PatchMapping(
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PatchMapping()
     public ApiResponse<UserInfoUpdateResponse> updateUserInfo(
             @AuthenticationPrincipal User user,
-            @ModelAttribute @Valid UserInfoUpdateRequest request) throws IOException {
+            @RequestBody @Valid UserInfoUpdateRequest request) throws IOException {
 
         // 사용자 정보 수정
         UserInfoUpdateResponse response = userProfileService.updateUserInfo(user.getId(), request);
@@ -121,4 +121,22 @@ public class UserProfileController implements UserProfileControllerSpec {
 
         return ApiResponse.ok(response);
     }
+
+    /**
+     * 사용자 탈퇴 상태로 수정
+     *
+     * @param user 유저
+     */
+    @DeleteMapping
+    public ApiResponse<Void> deactivateUser(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal User user){
+
+        // 삭제 서비스
+        userProfileService.deactivateUser(user.getId());
+
+        // 리턴
+        return ApiResponse.deleted();
+    }
+
 }

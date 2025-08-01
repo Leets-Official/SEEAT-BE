@@ -1,7 +1,7 @@
-package com.seeat.server.domain.review.domain.repository;
+package com.seeat.server.domain.image.domain.repository;
 
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewImage;
+import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -15,10 +15,12 @@ public class RedisKeyUtil {
     private static final String BEST = "best";
     private static final String AUDITORIUM = "auditorium";
     private static final String REVIEW = "review";
+    private static final String SUMMARY = "Summary";
 
 
     public static final String BEST_AUDITORIUM_LIST_KEY = BEST + SEPARATOR + AUDITORIUM + SEPARATOR + LIST;
     public static final String BEST_REVIEW_LIST_KEY = BEST + SEPARATOR + REVIEW + SEPARATOR + LIST;
+    public static final String REVIEW_SUMMARY_KEY = REVIEW + SUMMARY;
     public static String generateOAuth2TempUserKey() {
         return OAUTH2_TEMP_USER + UUID.randomUUID();
     }
