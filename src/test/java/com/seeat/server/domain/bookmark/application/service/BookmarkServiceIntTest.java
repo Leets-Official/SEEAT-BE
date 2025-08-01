@@ -83,6 +83,7 @@ class BookmarkServiceIntTest {
         Review review = Review.builder()
                 .seat(seat)
                 .user(user)
+                .title("title")
                 .content(content)
                 .movieTitle("ReviewTestTitle")
                 .rating(rating)

@@ -128,6 +128,7 @@ class ReviewServiceIntTest {
             //given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .imageUrls(null)
@@ -171,6 +172,7 @@ class ReviewServiceIntTest {
             // given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId(), seat2.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .imageUrls(null)
@@ -214,6 +216,7 @@ class ReviewServiceIntTest {
             //given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(5)
@@ -264,6 +267,7 @@ class ReviewServiceIntTest {
             //given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(3)
@@ -328,6 +332,7 @@ class ReviewServiceIntTest {
             // given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(3)
@@ -354,6 +359,7 @@ class ReviewServiceIntTest {
             User fakeUser = UserFixtures.fakeUser();
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .imageUrls(null)
@@ -376,6 +382,7 @@ class ReviewServiceIntTest {
             //given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .imageUrls(null)
@@ -498,6 +505,7 @@ class ReviewServiceIntTest {
             //given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .imageUrls(null)
@@ -529,6 +537,7 @@ class ReviewServiceIntTest {
 
             var request1 = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test1")
                     .movieTitle("ReviewTestTitle1")
                     .imageUrls(null)
@@ -538,6 +547,7 @@ class ReviewServiceIntTest {
 
             var request2 = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test2")
                     .movieTitle("ReviewTestTitle2")
                     .imageUrls(null)
@@ -778,6 +788,7 @@ class ReviewServiceIntTest {
     private ReviewRequest getReviewRequest(Seat seat, double rating) {
         return ReviewRequest.builder()
                 .seatIds(List.of(seat.getId()))
+                .title("review title")
                 .content("test1")
                 .movieTitle("ReviewTestTitle1")
                 .imageUrls(null)
