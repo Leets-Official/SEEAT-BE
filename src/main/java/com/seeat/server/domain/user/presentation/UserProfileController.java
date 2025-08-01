@@ -136,7 +136,7 @@ public class UserProfileController implements UserProfileControllerSpec {
         userProfileService.deactivateUser(user.getId());
 
         // 리턴
-        return ApiResponse.ok(null);
+        return ApiResponse.deleted();
     }
 
 }
