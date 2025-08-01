@@ -60,12 +60,10 @@ public class UserProfileController implements UserProfileControllerSpec {
      * @param request 수정 정보 요청값 (닉네임, 유저프로필, 선호 장르, 선호 상영관)
      * @return UserInfoUpdateResponse DTO 응답
      */
-    @PatchMapping(
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PatchMapping()
     public ApiResponse<UserInfoUpdateResponse> updateUserInfo(
             @AuthenticationPrincipal User user,
-            @ModelAttribute @Valid UserInfoUpdateRequest request) throws IOException {
+            @RequestBody @Valid UserInfoUpdateRequest request) throws IOException {
 
         // 사용자 정보 수정
         UserInfoUpdateResponse response = userProfileService.updateUserInfo(user.getId(), request);

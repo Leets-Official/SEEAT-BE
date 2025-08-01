@@ -2,9 +2,9 @@ package com.seeat.server.domain.review.application.dto.response;
 
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
-import com.seeat.server.domain.review.domain.entity.ReviewImage;
+import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import com.seeat.server.domain.user.application.dto.response.UserResponse;
-import com.seeat.server.global.image.application.dto.response.ImageInfoResponse;
+import com.seeat.server.domain.image.application.dto.response.ReviewImageInfoResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -39,7 +39,7 @@ public record ReviewDetailResponse(
 
         UserResponse user,
 
-        List<ImageInfoResponse> imageInfo,
+        List<ReviewImageInfoResponse> imageInfo,
 
         @Schema(description = "좋아요 개수", example = "152")
         Long heartCount,
@@ -63,7 +63,7 @@ public record ReviewDetailResponse(
                 .heartCount(heartCount)
                 .user(UserResponse
                         .from(review.getUser()))
-                .imageInfo(ImageInfoResponse.from(images))
+                .imageInfo(ReviewImageInfoResponse.from(images))
                 .createdAt(review.getCreatedAt())
                 .build();
     }

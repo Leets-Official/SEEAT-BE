@@ -1,6 +1,6 @@
-package com.seeat.server.global.image.application.dto.response;
+package com.seeat.server.domain.image.application.dto.response;
 
-import com.seeat.server.domain.review.domain.entity.ReviewImage;
+import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
  */
 @Builder
 @Schema(name = "[응답][리뷰] 이미지 정보 Response", description = "리뷰에 포함된 이미지의 URL과 순서를 나타내는 DTO입니다.")
-public record ImageInfoResponse(
+public record ReviewImageInfoResponse(
         @Schema(description = "이미지 URL", example = "https://example.com/images/review1.jpg")
         String imageUrl,
 
@@ -20,17 +20,17 @@ public record ImageInfoResponse(
 ) {
 
     /// 정적 팩토리 메서드
-    public static ImageInfoResponse from(ReviewImage reviewImage) {
-        return ImageInfoResponse.builder()
+    public static ReviewImageInfoResponse from(ReviewImage reviewImage) {
+        return ReviewImageInfoResponse.builder()
                 .imageUrl(reviewImage.getImageUrl())
                 .order(reviewImage.getDisplayOrder())
                 .build();
     }
 
     /// 정적 팩토리 메서드
-    public static List<ImageInfoResponse> from(List<ReviewImage> images) {
+    public static List<ReviewImageInfoResponse> from(List<ReviewImage> images) {
         return images.stream()
-                .map(ImageInfoResponse::from)
+                .map(ReviewImageInfoResponse::from)
                 .toList();
     }
 }
