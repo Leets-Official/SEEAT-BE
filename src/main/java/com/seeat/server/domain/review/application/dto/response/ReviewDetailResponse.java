@@ -6,6 +6,7 @@ import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import com.seeat.server.domain.user.application.dto.response.UserResponse;
 import com.seeat.server.domain.image.application.dto.response.ReviewImageInfoResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ import java.util.List;
  *
  * @param movieSeatInfo 영화 및 좌석 정보 DTO
  * @param hashtags      해시태그 목록 DTO
+ * @param title         후기 제목
  * @param content       리뷰 내용
  * @param rating        평점 (1~5)
  * @param user          작성자 정보 DTO
@@ -30,6 +32,9 @@ public record ReviewDetailResponse(
         ReviewSeatInfoResponse movieSeatInfo,
 
         List<ReviewHashTagResponse> hashtags,
+
+        @Schema(description = "리뷰 제목", example = "용아맥은 전설이다!")
+        String title,
 
         @Schema(description = "리뷰 내용", example = "정말 재미있고 감동적이었어요!")
         String content,
@@ -58,6 +63,7 @@ public record ReviewDetailResponse(
                         .from(review))
                 .hashtags(ReviewHashTagResponse
                         .from(hashTags))
+                .title(review.getTitle())
                 .content(review.getContent())
                 .rating(review.getRating())
                 .heartCount(heartCount)

@@ -24,6 +24,7 @@ public class SnapShotConverter {
                 response.thumbnailUrl(),
                 response.movieTitle(),
                 response.theaterName(),
+                response.title(),
                 response.content(),
                 response.userId(),
                 response.nickname(),

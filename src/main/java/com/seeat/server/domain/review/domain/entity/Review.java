@@ -32,6 +32,8 @@ public class Review extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Seat seat;
 
+    private String title;
+
     private String movieTitle;
 
     private String thumbnailUrl;
@@ -41,10 +43,12 @@ public class Review extends BaseEntity {
     private String content;
 
     /// 정적 팩토리 메서드
-    public static Review of(User user, Seat seat, String movieTitle, double rating, String content) {
+    public static Review of(User user, Seat seat, String movieTitle, double rating, String content, String title) {
+
         return Review.builder()
                 .user(user)
                 .seat(seat)
+                .title(title)
                 .movieTitle(movieTitle)
                 .thumbnailUrl("thumbnailUrl")
                 .rating(rating)
@@ -58,7 +62,8 @@ public class Review extends BaseEntity {
     }
 
     /// 수정하는 함수
-    public void updateReview(double rating, String content) {
+    public void updateReview(double rating, String content, String title) {
+        this.title = title;
         this.rating = rating;
         this.content = content;
     }

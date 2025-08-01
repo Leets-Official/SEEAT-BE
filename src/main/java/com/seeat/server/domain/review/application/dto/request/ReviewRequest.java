@@ -24,6 +24,13 @@ public class ReviewRequest {
     private List<String> seatIds;
 
     /**
+     * 후기 제목
+     */
+    @NotBlank(message = "후기 제목은 필수입니다.")
+    @Schema(example = "용아맥은 전설이다!")
+    private String title;
+
+    /**
      * 영화 제목 또는 영화 ID
      */
     @NotBlank(message = "영화 제목은 필수입니다.")

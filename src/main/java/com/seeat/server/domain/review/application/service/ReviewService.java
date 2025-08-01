@@ -79,7 +79,7 @@ public class ReviewService implements ReviewUseCase {
 
         for (Seat seat : seats) {
             // 리뷰 객체 생성
-            Review review = Review.of(user, seat, request.getMovieTitle(), request.getRating(), request.getContent());
+            Review review = Review.of(user, seat, request.getMovieTitle(), request.getRating(), request.getContent(), request.getTitle());
 
             // DB 저장
             Review savedReview = repository.save(review);
@@ -209,7 +209,7 @@ public class ReviewService implements ReviewUseCase {
         Review review = getReview(reviewId, user);
 
         /// 도메인 로직을 통한 더티체킹 수행
-        review.updateReview(request.getRating(), request.getContent());
+        review.updateReview(request.getRating(), request.getContent(), request.getTitle());
 
         /// 이미지 있다면 이미지도 처리
         // 이미지 저장

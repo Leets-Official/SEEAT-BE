@@ -14,6 +14,12 @@ import java.util.List;
 public class ReviewUpdateRequest {
 
     /**
+     * 후기 제목
+     */
+    @Schema(example = "용아맥은 전설이다!")
+    private String title;
+
+    /**
      * 평점 (1~5)
      */
     @Schema(example = "3.2")

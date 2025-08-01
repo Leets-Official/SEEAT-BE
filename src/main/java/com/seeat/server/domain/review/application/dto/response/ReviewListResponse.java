@@ -39,6 +39,9 @@ public record ReviewListResponse(
         @Schema(description = "영화관 이름", example = "CGV 용산아이파크몰")
         String theaterName,
 
+        @Schema(description = "리뷰 제목", example = "용아맥은 전설이다!")
+        String title,
+
         @Schema(description = "리뷰 내용", example = "액션이 뛰어나고 스토리가 감동적이었습니다.")
         String content,
 
@@ -57,6 +60,7 @@ public record ReviewListResponse(
                         .from(hashTags))
                 .movieTitle(review.getMovieTitle())
                 .theaterName(review.getSeat().getAuditorium().getTheater().getName())
+                .title(review.getTitle())
                 .content(review.getContent())
                 .user(UserResponse
                         .from(review.getUser()))
