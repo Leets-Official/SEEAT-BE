@@ -21,6 +21,7 @@ import com.seeat.server.global.response.pageable.PageUtil;
 import com.seeat.server.global.response.pageable.SliceResponse;
 import com.seeat.server.global.service.RecentSearchRedisService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
@@ -82,7 +83,7 @@ public class ReviewSearchService implements ReviewSearchUseCase {
         }
 
         // 페이징 처리
-        org.springframework.data.domain.PageRequest pageable = PageUtil.getPageable(pageRequest);
+        Pageable pageable = PageUtil.getPageable(pageRequest);
 
         // 커스텀 레포로 조회
         Slice<Review> reviews = reviewRepository.searchReviewsWithFilters(condition, pageable);
