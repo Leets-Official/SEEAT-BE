@@ -2,6 +2,7 @@ package com.seeat.server.domain.review.application.service;
 
 import com.seeat.server.domain.best.application.usecase.BestContentUseCase;
 import com.seeat.server.domain.image.application.usecase.ReviewImageUseCase;
+import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
@@ -43,7 +44,7 @@ import static com.seeat.server.global.response.pageable.PageUtil.getPageable;
 public class ReviewService implements ReviewUseCase {
 
     private final ReviewRepository repository;
-    private final ReviewHashTagService hashTagService;
+    private final ReviewHashTagUseCase hashTagService;
 
     /// 이미지 의존성 처리
     private final ReviewImageUseCase imageService;

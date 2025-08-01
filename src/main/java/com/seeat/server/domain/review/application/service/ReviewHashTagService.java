@@ -1,5 +1,6 @@
 package com.seeat.server.domain.review.application.service;
 
+import com.seeat.server.domain.review.application.dto.response.AuditoriumHashTagResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
 import com.seeat.server.domain.review.domain.entity.HashTag;
 import com.seeat.server.domain.review.domain.entity.HashTagType;
@@ -7,6 +8,9 @@ import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.review.domain.repository.HashTagRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewHashTagRepository;
+import com.seeat.server.domain.review.domain.repository.dto.ReviewHashTagWithCount;
+import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
+import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +34,11 @@ public class ReviewHashTagService implements ReviewHashTagUseCase {
 
     /// 외부 의존성
     private final HashTagRepository hashTagRepository;
+    private final TheaterUseCase theaterService;
+
+    // ========================
+    //  저장 함수
+    // ========================
 
     /**
      * 리뷰 서비스에서 해시태그를 저장을 위해 사용할 로직
@@ -61,6 +70,45 @@ public class ReviewHashTagService implements ReviewHashTagUseCase {
 
     }
 
+    // ========================
+    //  조회 함수
+    // ========================
+
+    /**
+     * 상영관 해시태그 서비스에서 사용할, 상영관에 따른 리뷰 목록 조회를 위한 외부 서비스 전용 함수
+     * @param auditoriumId  상영관 ID
+     */
+    @Override
+    public List<AuditoriumHashTagResponse> loadReviewHashTagsByAuditoriumId(String auditoriumId) {
+
+        /// 상영관 존재 예외처리는 해당 서비스에서 진행
+        Auditorium auditorium = theaterService.getAuditorium(auditoriumId);
+
+        /// DB 조회
+        List<ReviewHashTagWithCount> withCounts = repository.findByAuditorium_Id(auditorium.getId());
+
+        return AuditoriumHashTagResponse.from(withCounts);
+    }
+
+    // ========================
+    //  삭제 함수
+    // ========================
+
+    /**
+     * 외부 의존성
+     * @param reviewId  수정 또는 삭제하는 리뷰
+     */
+    @Override
+    public void deleteReviewHashTagByReviewId(Long reviewId) {
+
+        /// 리뷰ID 바탕으로 삭제 구현
+        repository.deleteByReviewId(reviewId);
+
+    }
+
+    // ========================
+    //  외부 함수
+    // ========================
 
     /**
      * 리뷰 서비스에서 해시태그를 조회를 위해 사용할 로직
@@ -81,21 +129,10 @@ public class ReviewHashTagService implements ReviewHashTagUseCase {
         return repository.findByReview_IdIn(reviewIds);
     }
 
+    // ========================
+    //  공통 함수
+    // ========================
 
-    /**
-     * 외부 의존성
-     * @param reviewId  수정 또는 삭제하는 리뷰
-     */
-    @Override
-    public void deleteReviewHashTagByReviewId(Long reviewId) {
-
-        /// 리뷰ID 바탕으로 삭제 구현
-        repository.deleteByReviewId(reviewId);
-
-    }
-
-
-    /// 공통 함수 생성
     /**
      * ReviewHashTag 를 만드는 함수 입니다.
      * @param review    리뷰 엔티티

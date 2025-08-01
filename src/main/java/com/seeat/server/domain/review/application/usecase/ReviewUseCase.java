@@ -1,6 +1,5 @@
 package com.seeat.server.domain.review.application.usecase;
 
-import com.seeat.server.domain.best.application.dto.response.BestReviewListResponse;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
@@ -20,31 +19,50 @@ import java.util.List;
  */
 public interface ReviewUseCase {
 
-    /// 리뷰 작성
+    // ========================
+    //  저장 함수
+    // ========================
+
     List<Review> createReview(ReviewRequest request, Long userId) throws IOException;
 
-    /// 리뷰 조회
-    // 리뷰 상세 조회
+    // ========================
+    //  조회 함수
+    // ========================
+    /// 상세 조회
     ReviewDetailResponse loadReview(Long reviewId);
 
-    // 리뷰 목록 조회
+    /// 리뷰 목록 조회
     SliceResponse<ReviewListResponse> loadReviewsBySeatId(String seatId, PageRequest pageRequest);
 
-    SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(String seatId, PageRequest pageRequest);
+    /// 상영관 바탕 리뷰 목록 조회
+    SliceResponse<ReviewListResponse> loadReviewsByAuditoriumId(String auditoriumId, PageRequest pageRequest);
 
-    // 나의 후기 목록 조회하기
-    SliceResponse<ReviewListResponse> loadMyReviews(Long userId, PageRequest pageRequest);
+    // ========================
+    //  수정 함수
+    // ========================
 
     /// 리뷰 수정
     void updateReview(Long reviewId, ReviewUpdateRequest request, Long userId) throws IOException;
 
+    // ========================
+    //  삭제 함수
+    // ========================
+
     /// 리뷰 삭제
     void deleteReview(Long reviewId, Long userId) throws IOException;
+
+    // ========================
+    //  외부 함수
+    // ========================
+
+    /// 리뷰 예외처리
+    Review getReview(Long reviewId);
 
     /// 외부 의존성을 위한 유즈 케이스
     Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Long> reviews);
 
-    Review getReview(Long reviewId);
+    /// 나의 후기 목록 조회하기
+    SliceResponse<ReviewListResponse> loadMyReviews(Long userId, PageRequest pageRequest);
 
 }
 
