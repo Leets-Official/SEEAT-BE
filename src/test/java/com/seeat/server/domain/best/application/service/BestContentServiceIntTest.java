@@ -466,7 +466,7 @@ class BestContentServiceIntTest {
                 .seatIds(List.of(seat1.getId()))
                 .content("test")
                 .movieTitle("ReviewTestTitle")
-                .photos(null)
+                .imageUrls(null)
                 .rating(rating)
                 .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                 .build();
@@ -478,7 +478,7 @@ class BestContentServiceIntTest {
                 .seatIds(List.of(seatId))
                 .content("test")
                 .movieTitle("ReviewTestTitle")
-                .photos(null)
+                .imageUrls(null)
                 .rating(rating)
                 .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                 .build();

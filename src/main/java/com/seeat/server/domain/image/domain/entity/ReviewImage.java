@@ -1,6 +1,7 @@
-package com.seeat.server.domain.review.domain.entity;
+package com.seeat.server.domain.image.domain.entity;
 
 import com.seeat.server.domain.BaseEntity;
+import com.seeat.server.domain.review.domain.entity.Review;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
