@@ -10,9 +10,11 @@ import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.SliceResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -69,7 +71,7 @@ public interface UserProfileControllerSpec {
             summary = "내가 작성한 리뷰 조회",
             description = "JWT 기반으로 리뷰 목록을 조회합니다."
     )
-    @GetMapping("/my")
+    @GetMapping("/reviews")
     ApiResponse<SliceResponse<ReviewListResponse>> getMyReviews(
             @AuthenticationPrincipal User user,
             PageRequest pageRequest);
@@ -79,6 +81,7 @@ public interface UserProfileControllerSpec {
      * @param user          유저
      * @param pageRequest   페이지
      */
+    @GetMapping("/bookmark")
     @Operation(
             description = "북마크 조회 API",
             summary = "북마크 조회 API 입니다."
@@ -86,4 +89,19 @@ public interface UserProfileControllerSpec {
     ApiResponse<SliceResponse<ReviewListResponse>> getBookmarksByUser(
             @AuthenticationPrincipal User user,
             PageRequest pageRequest);
+
+
+    /**
+     * 사용자 탈퇴 상태로 수정
+     *
+     * @param user 유저
+     */
+    @DeleteMapping
+    @Operation(
+            description = "사용자 탈퇴 API",
+            summary = "사용자 탈퇴 API 입니다."
+    )
+    ApiResponse<Void> deactivateUser(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal User user);
 }
