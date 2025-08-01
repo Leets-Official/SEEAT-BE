@@ -14,6 +14,7 @@ public interface UserAuditoriumRepository extends JpaRepository<UserAuditorium, 
     SELECT ua.auditorium
     FROM UserAuditorium ua
     WHERE ua.user.id = :userId
+    AND ua.user.isDelete = false
     """)
     List<Auditorium> findAuditoriumsByUserId(@Param("userId") Long userId);
 

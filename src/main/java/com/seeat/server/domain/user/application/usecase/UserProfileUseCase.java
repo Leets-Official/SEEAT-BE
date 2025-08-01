@@ -20,4 +20,7 @@ public interface UserProfileUseCase {
 
     // 등급 목록 조회
     List<UserGradeResponse> getUserGradeList();
+
+    // 사용자 탈퇴
+    void deactivateUser(Long userId);
 }

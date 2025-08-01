@@ -64,5 +64,6 @@ public interface ReviewUseCase {
     /// 나의 후기 목록 조회하기
     SliceResponse<ReviewListResponse> loadMyReviews(Long userId, PageRequest pageRequest);
 
+    Long countsReviewsByAuditoriumId(String auditoriumId);
 }
 
