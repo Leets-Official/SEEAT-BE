@@ -3,6 +3,7 @@ package com.seeat.server.security.jwt;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserGrade;
 import com.seeat.server.domain.user.domain.entity.UserRole;
+import com.seeat.server.domain.user.domain.entity.UserSocial;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.util.JwtConstants;
@@ -20,6 +21,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Key;
 import java.util.*;
@@ -87,8 +89,9 @@ public class JwtProvider {
     public String generateDevTokenWithMockUser(Long userId, String username, UserRole role) {
 
         /// 개발용 유저 실제 DB에 저장
-        User user = userRepository.findBySocialAndSocialId(KAKAO, "dev-" + userId)
-                .orElse(userRepository.save(createMockUser(userId, username, role)));
+        String cleanedId = ("dev-" + userId).trim();
+        User user = userRepository.findBySocialAndSocialId(KAKAO, cleanedId)
+                .orElseGet(() -> userRepository.save(createMockUser(userId, username, role)));
 
         Collection<GrantedAuthority> authorities = Collections.singletonList(
                 new SimpleGrantedAuthority(role.getRole())
