@@ -26,6 +26,11 @@ public class FeedbackService implements FeedbackUseCase{
         // 유저 예외처리
         User user = userService.getUser(userId);
 
+        // 만약 비어있다면,
+        if (request.getFeedbackContent() == null || request.getFeedbackContent().isEmpty()) {
+            throw new IllegalArgumentException(ErrorCode.INVALID_FEEDBACK_CONTENT.getMessage());
+        }
+
         // 객체 생성
         Feedback requestFeedback = Feedback.of(user, request.getFeedbackContent());
 
