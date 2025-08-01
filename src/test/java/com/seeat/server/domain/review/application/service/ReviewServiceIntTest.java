@@ -2,6 +2,7 @@ package com.seeat.server.domain.review.application.service;
 
 import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
+import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.review.domain.HashTagFixtures;
 import com.seeat.server.domain.review.domain.ReviewFixtures;
@@ -451,13 +452,16 @@ class ReviewServiceIntTest {
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             //when
-            SliceResponse<ReviewListResponse> response = sut.loadReviewsBySeatId(seat1.getId(), pageRequest);
+            SliceResponse<ReviewSeatListResponse> response = sut.loadReviewsBySeatId(seat1.getId(), pageRequest);
 
             //then
-            List<ReviewListResponse> responses = response.content();
-            Assertions.assertThat(responses).hasSize(2);
-            ReviewListResponse response1 = responses.get(0);
-            ReviewListResponse response2 = responses.get(1);
+            List<ReviewSeatListResponse> responses = response.content();
+            /// 싱글톤 리스트이기에 어차피 1개
+            ReviewSeatListResponse seatListResponse = responses.get(0);
+
+            Assertions.assertThat(seatListResponse.reviews()).hasSize(2);
+            ReviewListResponse response1 = seatListResponse.reviews().get(0);
+            ReviewListResponse response2 = seatListResponse.reviews().get(1);
 
             Assertions.assertThat(response1.content()).isEqualTo(review2.getContent());
             Assertions.assertThat(response2.content()).isEqualTo(review1.getContent());
