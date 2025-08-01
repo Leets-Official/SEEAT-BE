@@ -41,4 +41,7 @@ public interface TheaterUseCase {
 
 
     List<Seat> getSeat(List<String> seatIds);
+
+    Seat getSeatByName(String theater, String auditorium, String seat);
+
 }
