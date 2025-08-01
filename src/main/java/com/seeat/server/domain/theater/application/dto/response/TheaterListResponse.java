@@ -19,7 +19,10 @@ public record TheaterListResponse(
         String auditoriumId,
 
         @Schema(description = "영화관 이름", example = "CGV 왕십리")
-        String theaterName
+        String theaterName,
+
+        @Schema(description = "상영관 이름", example = "1관")
+        String auditoriumName
 ) {
 
     /// 정적 팩토리 메서드
@@ -27,6 +30,7 @@ public record TheaterListResponse(
         return TheaterListResponse.builder()
                 .auditoriumId(auditorium.getId())
                 .theaterName(auditorium.getTheater().getName())
+                .auditoriumName(auditorium.getName())
                 .build();
     }
 

@@ -33,6 +33,9 @@ public class Auditorium {
     @Enumerated(EnumType.STRING)
     private AuditoriumType type;
 
+    @Column(name = "image_url", length = 512)
+    private String imageUrl;
+
     private String screenSize;
 
     private String soundType;
