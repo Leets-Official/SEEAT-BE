@@ -5,7 +5,6 @@ import com.seeat.server.domain.manage.application.dto.request.FeedbackRequest;
 import com.seeat.server.domain.manage.domain.entity.Feedback;
 import com.seeat.server.domain.manage.domain.repository.FeedbackRepository;
 import com.seeat.server.domain.user.domain.entity.User;
-import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
