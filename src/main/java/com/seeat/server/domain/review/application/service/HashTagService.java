@@ -2,6 +2,7 @@ package com.seeat.server.domain.review.application.service;
 
 import com.seeat.server.domain.review.application.dto.response.HashTagResponse;
 import com.seeat.server.domain.review.application.usecase.HashTagUseCase;
+import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
 import com.seeat.server.domain.review.domain.entity.HashTag;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
@@ -25,6 +26,7 @@ public class HashTagService implements HashTagUseCase {
     private final HashTagRepository repository;
 
     // 외부 의존성
+    private final ReviewHashTagUseCase reviewHashTagUseCase;
     private final ReviewHashTagRepository reviewHashTagRepository;
 
     @Override
@@ -49,7 +51,7 @@ public class HashTagService implements HashTagUseCase {
                 .toList();
 
         // 해시태그 조회
-        List<ReviewHashTag> reviewHashTags = reviewHashTagRepository.findWithHashTagByReview_Ids(reviewIds);
+        List<ReviewHashTag> reviewHashTags = reviewHashTagUseCase.loadReviewHashTagsByReviewIds(reviewIds);
 
         // 리뷰 Id별 해시태그 모으기
         Map<Long, List<String>> reviewIdToTags = reviewHashTags.stream()

@@ -129,6 +129,20 @@ public class ReviewHashTagService implements ReviewHashTagUseCase {
         return repository.findByReview_IdIn(reviewIds);
     }
 
+    /**
+     * 리뷰 서비스에서 ID를 바탕으로 해시태그를 조회를 위해 사용할 로직
+     * fetch join을 사용하여 N+1 문제를 방지하며, ReviewHashTag와 HashTag를 함께 로딩합니다.
+     *
+     * @param reviewIds 해시태그를 조회할 리뷰 IDs
+     * @return List<ReviewHashTag> 응답
+     */
+    @Override
+    public List<ReviewHashTag> loadReviewHashTagsByReviewIds(List<Long> reviewIds){
+
+        return repository.findWithHashTagByReview_Ids(reviewIds);
+    }
+
+
     // ========================
     //  공통 함수
     // ========================
