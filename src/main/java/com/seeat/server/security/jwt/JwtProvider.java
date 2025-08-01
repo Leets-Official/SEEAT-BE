@@ -116,6 +116,7 @@ public class JwtProvider {
                 .role(role)
                 .grade(UserGrade.BRONZE)
                 .genres(List.of())
+                .isDelete(false)
                 .build();
     }
 
