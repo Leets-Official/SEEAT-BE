@@ -14,7 +14,4 @@ public interface HashTagUseCase {
     /// 조회
     List<HashTagResponse> loadAllHashTags();
 
-    // 리뷰별 해시태그 조회
-    List<List<String>> getHashTagsForReviews(List<Review> reviews);
-
 }

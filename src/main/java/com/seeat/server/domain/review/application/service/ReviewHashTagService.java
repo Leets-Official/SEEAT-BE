@@ -17,7 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 리뷰 해시태그 서비스
@@ -130,16 +133,29 @@ public class ReviewHashTagService implements ReviewHashTagUseCase {
     }
 
     /**
-     * 리뷰 서비스에서 ID를 바탕으로 해시태그를 조회를 위해 사용할 로직
-     * fetch join을 사용하여 N+1 문제를 방지하며, ReviewHashTag와 HashTag를 함께 로딩합니다.
+     * 리뷰 리스트에 대해 각 리뷰에 연결된 해시태그 이름들의 리스트 조회 로직
      *
-     * @param reviewIds 해시태그를 조회할 리뷰 IDs
-     * @return List<ReviewHashTag> 응답
+     * @param reviews 해시태그를 조회할 대상 리뷰 리스트
+     * @return 각 리뷰에 연결된 해시태그 이름 리스트 리스트 반환
      */
     @Override
-    public List<ReviewHashTag> loadReviewHashTagsByReviewIds(List<Long> reviewIds){
+    public List<List<String>> getHashTagsForReviews(List<Review> reviews){
+        // 리뷰 리스트
+        List<Long> reviewIds = reviews.stream()
+                .map(Review::getId)
+                .toList();
 
-        return repository.findWithHashTagByReview_Ids(reviewIds);
+        // 해시태그 조회
+        List<ReviewHashTag> reviewHashTags = repository.findWithHashTagByReview_Ids(reviewIds);
+
+        // 리뷰 Id별 해시태그 모으기
+        Map<Long, List<String>> reviewIdToTags = reviewHashTags.stream()
+                .collect(Collectors.groupingBy(rht -> rht.getReview().getId(),
+                        Collectors.mapping(rht -> rht.getHashTag().getName(), Collectors.toList())));
+
+        return reviews.stream()
+                .map(r -> reviewIdToTags.getOrDefault(r.getId(), Collections.emptyList()))
+                .collect(Collectors.toList());
     }
 
 

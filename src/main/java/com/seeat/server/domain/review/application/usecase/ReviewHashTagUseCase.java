@@ -26,8 +26,8 @@ public interface ReviewHashTagUseCase {
     /// 상영관의 정보에 따른 해시태그 목록 조회하기
     List<AuditoriumHashTagResponse> loadReviewHashTagsByAuditoriumId(String auditoriumId);
 
-    /// 리뷰 아이디로 해시태그 목록 조회하기
-    List<ReviewHashTag> loadReviewHashTagsByReviewIds(List<Long> reviewIds);
+    /// 리뷰별 해시태그 조회
+    List<List<String>> getHashTagsForReviews(List<Review> reviews);
 
     // ========================
     //  삭제 함수

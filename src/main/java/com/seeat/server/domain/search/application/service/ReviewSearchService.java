@@ -1,6 +1,6 @@
 package com.seeat.server.domain.search.application.service;
 
-import com.seeat.server.domain.review.application.usecase.HashTagUseCase;
+import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewLike;
 import com.seeat.server.domain.review.domain.repository.ReviewLikeRepository;
@@ -42,7 +42,7 @@ public class ReviewSearchService implements ReviewSearchUseCase {
     private final UserSearchRepository userSearchRepository;
     private final ReviewRepository reviewRepository;
     private final ReviewLikeRepository reviewLikeRepository;
-    private final HashTagUseCase hashTagService;
+    private final ReviewHashTagUseCase reviewHashTagService;
     private final RecentSearchRedisService recentSearchRedisService;
 
     /**
@@ -88,7 +88,7 @@ public class ReviewSearchService implements ReviewSearchUseCase {
 
         // 조회
         List<Review> reviewList = reviews.getContent();
-        List<List<String>> hashTags = hashTagService.getHashTagsForReviews(reviewList);
+        List<List<String>> hashTags = reviewHashTagService.getHashTagsForReviews(reviewList);
         List<ReviewLike> userReviewLikes = Collections.emptyList();
 
         // 비회원 좋아요 누른 것 false 처리
