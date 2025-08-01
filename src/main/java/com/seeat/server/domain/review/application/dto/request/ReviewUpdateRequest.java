@@ -42,7 +42,7 @@ public class ReviewUpdateRequest {
     /**
      * 사진 목록 (선택)
      */
-    @Schema(description = "수정할 리뷰 이미지들")
+    @Schema(description = "수정할 리뷰 이미지들", example = "[\"https://seeat-dev.s3.ap-northeast-2.amazonaws.com/sample/1.png\",\"https://seeat-dev.s3.ap-northeast-2.amazonaws.com/sample/3.png\"]")
     @Size(max = 5, message = "이미지는 최대 5개까지 가능합니다.")
     private List<String> images;
 

@@ -65,7 +65,7 @@ public class ReviewRequest {
     /**
      * 사진 목록 (선택)
      */
-    @Schema(description = "리뷰 이미지 주소들")
+    @Schema(description = "리뷰 이미지 주소들", example = "[\"https://seeat-dev.s3.ap-northeast-2.amazonaws.com/sample/2.png\",\"https://seeat-dev.s3.ap-northeast-2.amazonaws.com/sample/4.png\"]")
     @Size(max = 5, message = "이미지는 최대 5개까지 가능합니다.")
     private List<String> imageUrls;
 }
