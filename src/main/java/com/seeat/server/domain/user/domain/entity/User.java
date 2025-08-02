@@ -88,6 +88,10 @@ public class User extends BaseEntity {
         this.isDelete = true;
     }
 
+    // 사용자 등급 수정 메소드
+    public void updateGrade(UserGrade grade) { this.grade = grade; }
+    
+
     // 테스트 전용 메서드
     public void setUpdatedAt(LocalDateTime time) {
         super.setUpdatedAt(time);

@@ -33,9 +33,27 @@ public record UserInfoResponse(
         @Schema(description = "유저가 가입한 소셜 루트", example = "KAKAO")
         UserSocial social,
         @Schema(description = "유저가 선호하는 상영관 Id", example = "[\"1\", \"2\",\"3\"]")
-        List<AuditoriumResponse> auditoriums
+        List<AuditoriumResponse> auditoriums,
+        @Schema(description = "작성한 리뷰 개수", example = "1")
+        long reviewCount,
+        @Schema(description = "받은 좋아요 개수", example = "3")
+        long likeCount,
+
+        /**
+         * 레벨 1 → 레벨2 : 후기 2개 / 좋아요 5개
+         * 레벨2 → 레벨3: 후기 10개 / 좋아요 25개
+         * 레벨3 → 레벨4: 후기 40개 / 좋아요 100개
+         *
+         * (레벨 올라가는 후기/좋아요 개수는 이전 레벨에서 누른 것도 포함)
+         *
+         */
+        @Schema(description = "개수에 따른 경험치", example = "")
+        double levelExp
+
 ) {
-    public static UserInfoResponse from(User user ,List<Auditorium> auditoriums){
+    public static UserInfoResponse from(User user ,List<Auditorium> auditoriums,
+                                        long reviewCount, long likeCount, double levelExp){
+
         List<AuditoriumResponse> auditoriumResponses = auditoriums.stream()
                 .map(AuditoriumResponse::from)
                 .toList();
@@ -51,6 +69,9 @@ public record UserInfoResponse(
                 .genres(user.getGenres())
                 .social(user.getSocial())
                 .auditoriums(auditoriumResponses)
+                .reviewCount(reviewCount)
+                .likeCount(likeCount)
+                .levelExp(levelExp)
                 .build();
     }
 }
