@@ -1,6 +1,7 @@
 package com.seeat.server.domain.user.presentation;
 
 
+import com.seeat.server.domain.user.application.dto.response.UserNicknameResponse;
 import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
 import com.seeat.server.domain.user.domain.entity.UserRole;
@@ -52,6 +53,15 @@ public class UserController implements UserControllerSpec {
 
         return ApiResponse.created();
     }
+
+    @GetMapping
+    public ApiResponse<UserNicknameResponse> userDuplicateNickname(@RequestParam String nickname){
+
+        UserNicknameResponse response = userService.isNicknameDuplicated(nickname);
+
+        return ApiResponse.ok(response);
+    }
+
 
     /**
      * 로그아웃시 refreshToekn 쿠키, redis 삭제

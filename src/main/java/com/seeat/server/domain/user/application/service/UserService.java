@@ -3,6 +3,7 @@ package com.seeat.server.domain.user.application.service;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
+import com.seeat.server.domain.user.application.dto.response.UserNicknameResponse;
 import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserAuditorium;
@@ -54,6 +55,18 @@ public class UserService implements UserUseCase {
     public Optional<User> getUserByEmail(String email) {
         return repository.findByEmail(email);
     }
+
+    /**
+     * 닉네임 중복 확인 로직
+     *
+     * @param nickname 사용할 닉네임
+     * @return true, false
+     */
+    @Override
+    public UserNicknameResponse isNicknameDuplicated (String nickname){
+        return UserNicknameResponse.from(repository.existsByNickname(nickname));
+    }
+
 
     /**
      * 가입한 소셜 종류와 소셜 ID으로 최초 로그인인지 확인 로직

@@ -1,6 +1,7 @@
 package com.seeat.server.domain.user.application.usecase;
 
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
+import com.seeat.server.domain.user.application.dto.response.UserNicknameResponse;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
 import com.seeat.server.security.oauth2.application.dto.TempUserInfo;
@@ -14,6 +15,9 @@ public interface UserUseCase {
 
     // 이메일 중복 확인
     Optional<User> getUserByEmail(String email);
+
+    // 닉네임 중복 확인
+    UserNicknameResponse isNicknameDuplicated(String nickname);
 
     // 소셜ID, 소셜로 유저 가입유무확인
     Optional<User> getUserBySocialAndSocialId(UserSocial social, String socialId);
