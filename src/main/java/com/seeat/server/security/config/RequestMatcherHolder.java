@@ -33,6 +33,10 @@ public class RequestMatcherHolder {
             new RequestInfo(POST, "/api/v1/users/logout", USER),
             new RequestInfo(POST, "/api/v1/users/dev/long-token", null),
 
+            // 해시태그 관련
+            new RequestInfo(GET, "/api/v1/hashtag", null),
+            new RequestInfo(GET, "/api/v1/hashtag/**", null),
+
             // 마이페이지 관련
             new RequestInfo(GET, "/api/v1/profile", USER),
             new RequestInfo(PATCH, "/api/v1/profile", USER),
@@ -42,7 +46,16 @@ public class RequestMatcherHolder {
 
             // 리뷰 관련
             new RequestInfo(POST, "/api/v1/reviews/**", USER),
+            new RequestInfo(DELETE, "/api/v1/reviews/**", USER),
+            new RequestInfo(PATCH, "/api/v1/reviews/**", USER),
             new RequestInfo(GET, "/api/v1/reviews/**", null),
+
+            // 북마크 관련
+            new RequestInfo(POST, "/api/v1/bookmarks/**", USER),
+            new RequestInfo(DELETE, "/api/v1/bookmarks/**", USER),
+
+            // 요약 관련
+            new RequestInfo(GET, "/api/v1/summary/**", null),
 
             // 영화관 관련
             new RequestInfo(GET, "/api/v1/theaters/**", null),
