@@ -135,6 +135,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
             "FROM Review r " +
             "LEFT JOIN ReviewLike rl " +
             "ON rl.review.id = r.id " +
+            "AND rl.user.id != :userId " +
             "WHERE r.user.id = :userId")
     ReviewLikeCountResponse findReviewCountAndLikeCountByUserId(@Param("userId") Long userId);
 
