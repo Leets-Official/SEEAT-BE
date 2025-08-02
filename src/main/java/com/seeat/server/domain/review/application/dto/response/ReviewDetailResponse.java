@@ -3,10 +3,10 @@ package com.seeat.server.domain.review.application.dto.response;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.image.domain.entity.ReviewImage;
+import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.user.application.dto.response.UserResponse;
 import com.seeat.server.domain.image.application.dto.response.ReviewImageInfoResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -14,22 +14,30 @@ import java.util.List;
 
 /**
  * 리뷰 상세조회 응답 DTO
- *
- * @param movieSeatInfo 영화 및 좌석 정보 DTO
- * @param hashtags      해시태그 목록 DTO
- * @param title         후기 제목
- * @param content       리뷰 내용
- * @param rating        평점 (1~5)
- * @param user          작성자 정보 DTO
- * @param heartCount    좋아요 개수
- * @param imageInfo     이미지 목록 DTO
- * @param createdAt     리뷰 작성 시간
+ * @param movieTitle        영화 제목
+ * @param auditoriumName    상영관 이름
+ * @param seatInfo          좌석 정보 DTO
+ * @param hashtags          해시태그 목록 DTO
+ * @param title             후기 제목
+ * @param content           리뷰 내용
+ * @param rating            평점 (1~5)
+ * @param user              작성자 정보 DTO
+ * @param heartCount        좋아요 개수
+ * @param imageInfo         이미지 목록 DTO
+ * @param createdAt         리뷰 작성 시간
  */
 
 @Builder
 @Schema(name = "[응답][리뷰] 리뷰 상세 조회 Response",description = "리뷰 상세 조회에 대한 DTO 입니다.")
 public record ReviewDetailResponse(
-        ReviewSeatInfoResponse movieSeatInfo,
+
+        @Schema(description = "영화 제목", example = "어벤져스: 엔드게임")
+        String movieTitle,
+
+        @Schema(description = "상영관 이름", example = "CGV 용산아이파크몰 IMAX관")
+        String auditoriumName,
+
+        List<ReviewSeatInfoResponse> seatInfo,
 
         List<ReviewHashTagResponse> hashtags,
 
@@ -55,12 +63,17 @@ public record ReviewDetailResponse(
 
     public static ReviewDetailResponse from(
             Review review,
-            List<ReviewHashTag> hashTags, Long heartCount, List<ReviewImage> images
+            List<ReviewHashTag> hashTags, Long heartCount, List<ReviewImage> images, List<Seat> seats
     ) {
 
+        /// 좌석 정보
+        Seat seat = review.getSeat();
+
         return ReviewDetailResponse.builder()
-                .movieSeatInfo(ReviewSeatInfoResponse
-                        .from(review))
+                .movieTitle(review.getMovieTitle())
+                .auditoriumName(seat.getAuditorium().getTheater().getName() + " " + seat.getAuditorium().getName())
+                .seatInfo(ReviewSeatInfoResponse
+                        .from(seats))
                 .hashtags(ReviewHashTagResponse
                         .from(hashTags))
                 .title(review.getTitle())

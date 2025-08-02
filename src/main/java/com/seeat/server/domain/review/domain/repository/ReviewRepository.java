@@ -215,4 +215,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      */
     Slice<Review> searchReviewsWithFilters(ReviewSearchCondition condition, Pageable pageable);
 
+    /**
+     * 같이 작성된 리뷰 조회
+     * @param groupId   같이 작성된 그룹 ID
+     */
+    List<Review> findByGroupId(String groupId);
 }

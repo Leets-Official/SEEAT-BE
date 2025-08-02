@@ -70,31 +70,34 @@ public class ReviewService implements ReviewUseCase {
 
         /// 여러 개의 좌석도 동시 기입
 
-        // 좌석 예외 처리
+        /// 좌석 예외 처리
         List<Seat> seats = theaterService.getSeat(request.getSeatIds());
 
-        // 유저 예외처리
+        /// 유저 예외처리
         User user = userService.getUser(userId);
 
         List<Review> savedReviews = new ArrayList<>();
 
-        for (Seat seat : seats) {
-            // 리뷰 객체 생성
-            Review review = Review.of(user, seat, request.getMovieTitle(), request.getRating(), request.getContent(), request.getTitle());
+        /// 한 명의 유저가 여러개의 리뷰를 동시에 저장할 시
+        String groupId = UUID.randomUUID().toString();
 
-            // DB 저장
+        for (Seat seat : seats) {
+            /// 리뷰 객체 생성
+            Review review = Review.of(user, seat, request.getMovieTitle(), request.getRating(), request.getContent(), request.getTitle(), groupId);
+
+            /// DB 저장
             Review savedReview = repository.save(review);
 
-            // 이미지 저장
+            /// 이미지 저장
             if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
                 String thumbnail = imageService.saveReviewImage(savedReview, request.getImageUrls()).get(0);
                 savedReview.changeThumbnailUrl(thumbnail);
             }
 
-            // 해시태그 저장
+            /// 해시태그 저장
             hashTagService.createReviewHashTag(savedReview, request.getHashtags());
 
-            // 좌석 평점 업데이트
+            /// 좌석 평점 업데이트
             seatRatingService.saveSeatRating(savedReview, seat);
 
             savedReviews.add(savedReview);
@@ -122,13 +125,19 @@ public class ReviewService implements ReviewUseCase {
         /// 리뷰
         Review review = result.getReview();
 
+        /// 같이 작성된 좌석 조회
+        List<Review> reviews = repository.findByGroupId(review.getGroupId());
+        List<Seat> seats = reviews.stream()
+                .map(Review::getSeat)
+                .toList();
+
         /// ReviewId를 바탕으로 작성한 해시태그 조회
         List<ReviewHashTag> hashTags = hashTagService.getReviewHashTagByReview(review);
 
         /// 이미지 주소 조회
         List<ReviewImage> images = imageService.getReviewImagesByReview(review);
 
-        return ReviewDetailResponse.from(review, hashTags, result.getLikeCount(), images);
+        return ReviewDetailResponse.from(review, hashTags, result.getLikeCount(), images, seats);
     }
 
     /**
@@ -147,7 +156,7 @@ public class ReviewService implements ReviewUseCase {
         /// 좌석의 리뷰정보 조회
         SeatReviewStats stats = repository.findSeatReviewStats(seatId);
 
-        // Pageable 처리
+        /// Pageable 처리
         Pageable pageable = getPageable(pageRequest);
 
         /// 값 초기화
@@ -197,7 +206,7 @@ public class ReviewService implements ReviewUseCase {
         /// 상영관 존재 예외처리
         Auditorium auditorium = theaterService.getAuditorium(auditoriumId);
 
-        // Pageable 처리
+        /// Pageable 처리
         Pageable pageable = getPageable(pageRequest);
 
         /// 값 초기화
@@ -218,13 +227,13 @@ public class ReviewService implements ReviewUseCase {
                 reviews = repository.findByAuditorium_IdOrderByLatest(auditorium.getId(), pageable);
         }
 
-        // 리뷰 ID 목록 추출
+        /// 리뷰 ID 목록 추출
         List<Long> reviewIds = getLongs(reviews);
 
-        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        /// 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
         List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
 
-        // 결과
+        /// 결과
         SliceImpl<ReviewListResponse> slice = new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
 
         return SliceResponse.from(slice);
@@ -253,7 +262,7 @@ public class ReviewService implements ReviewUseCase {
         review.updateReview(request.getRating(), request.getContent(), request.getTitle());
 
         /// 이미지 있다면 이미지도 처리
-        // 이미지 저장
+        /// 이미지 저장
         if (request.getImages() != null && !request.getImages().isEmpty()) {
 
             /// 기존 이미지 삭제
@@ -326,15 +335,15 @@ public class ReviewService implements ReviewUseCase {
     @Override
     public Slice<ReviewListResponse> loadReviewsForBookmark(Slice<Long> reviews) {
 
-        // List 추출
+        /// List 추출
         List<Long> reviewIds = reviews.getContent();
 
         List<ReviewWithLikeCount> reviewsContent = repository.findByReviewIds(reviewIds);
 
-        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        /// 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
         List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviewsContent);
 
-        // 결과
+        /// 결과
         return new SliceImpl<>(result, reviews.getPageable(), reviews.hasNext());
     }
 
@@ -364,10 +373,10 @@ public class ReviewService implements ReviewUseCase {
         Slice<ReviewWithLikeCount> reviews = repository.findMyReviews(userId, pageable);
 
         /// DTO 변환
-        // 리뷰 ID 목록 추출
+        /// 리뷰 ID 목록 추출
         List<Long> reviewIds = getLongs(reviews);
 
-        // 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        /// 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
         List<ReviewListResponse> result = getReviewListResponses(reviewIds, reviews);
 
         /// Slice 객체 처리
@@ -420,14 +429,14 @@ public class ReviewService implements ReviewUseCase {
      */
     private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, List<ReviewWithLikeCount> reviews) {
 
-        // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        /// 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
         List<ReviewHashTag> allHashTags = hashTagService.getReviewHashTagByReviews(reviewIds);
 
-        // 리뷰 ID를 바탕으로 해시태그 매핑
+        /// 리뷰 ID를 바탕으로 해시태그 매핑
         Map<Long, List<ReviewHashTag>> mapping = allHashTags.stream()
                 .collect(Collectors.groupingBy(ht -> ht.getReview().getId()));
 
-        // DTO 변환
+        /// DTO 변환
         return reviews.stream()
                 .map(review -> ReviewListResponse.from(
                         review.getReview(),
@@ -444,14 +453,14 @@ public class ReviewService implements ReviewUseCase {
      */
     private List<ReviewListResponse> getReviewListResponses(List<Long> reviewIds, Slice<ReviewWithLikeCount> reviews) {
 
-        // 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
+        /// 추출된 리뷰 ID로 해시태그 한 번에 조회 (IN 쿼리)
         List<ReviewHashTag> allHashTags = hashTagService.getReviewHashTagByReviews(reviewIds);
 
-        // 리뷰 ID를 바탕으로 해시태그 매핑
+        /// 리뷰 ID를 바탕으로 해시태그 매핑
         Map<Long, List<ReviewHashTag>> mapping = allHashTags.stream()
                 .collect(Collectors.groupingBy(ht -> ht.getReview().getId()));
 
-        // DTO 변환
+        /// DTO 변환
         return reviews.stream()
                 .map(review -> ReviewListResponse.from(
                         review.getReview(),
