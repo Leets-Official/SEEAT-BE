@@ -24,9 +24,6 @@ public class HashTagService implements HashTagUseCase {
 
     private final HashTagRepository repository;
 
-    // 외부 의존성
-    private final ReviewHashTagRepository reviewHashTagRepository;
-
     @Override
     public List<HashTagResponse> loadAllHashTags() {
 
@@ -40,26 +37,5 @@ public class HashTagService implements HashTagUseCase {
         /// DTO 변환
         return HashTagResponse.from(hashTags);
     }
-
-    @Override
-    public List<List<String>> getHashTagsForReviews(List<Review> reviews){
-        // 리뷰 리스트
-        List<Long> reviewIds = reviews.stream()
-                .map(Review::getId)
-                .toList();
-
-        // 해시태그 조회
-        List<ReviewHashTag> reviewHashTags = reviewHashTagRepository.findWithHashTagByReview_Ids(reviewIds);
-
-        // 리뷰 Id별 해시태그 모으기
-        Map<Long, List<String>> reviewIdToTags = reviewHashTags.stream()
-                .collect(Collectors.groupingBy(rht -> rht.getReview().getId(),
-                        Collectors.mapping(rht -> rht.getHashTag().getName(), Collectors.toList())));
-
-        return reviews.stream()
-                .map(r -> reviewIdToTags.getOrDefault(r.getId(), Collections.emptyList()))
-                .collect(Collectors.toList());
-    }
-
 
 }
