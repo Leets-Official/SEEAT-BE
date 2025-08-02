@@ -1,7 +1,10 @@
 package com.seeat.server.domain.review.application.service;
 
 import com.seeat.server.domain.image.domain.entity.ReviewImage;
+import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
+import com.seeat.server.domain.review.application.dto.response.ReviewSeatInfoResponse;
+import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.review.domain.HashTagFixtures;
 import com.seeat.server.domain.review.domain.ReviewFixtures;
@@ -128,6 +131,7 @@ class ReviewServiceIntTest {
             //given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .imageUrls(null)
@@ -171,6 +175,7 @@ class ReviewServiceIntTest {
             // given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId(), seat2.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .imageUrls(null)
@@ -214,6 +219,7 @@ class ReviewServiceIntTest {
             //given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(5)
@@ -264,6 +270,7 @@ class ReviewServiceIntTest {
             //given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(3)
@@ -328,6 +335,7 @@ class ReviewServiceIntTest {
             // given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .rating(3)
@@ -354,6 +362,7 @@ class ReviewServiceIntTest {
             User fakeUser = UserFixtures.fakeUser();
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .imageUrls(null)
@@ -376,6 +385,7 @@ class ReviewServiceIntTest {
             //given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .imageUrls(null)
@@ -410,8 +420,7 @@ class ReviewServiceIntTest {
             Assertions.assertThat(response).isNotNull();
             Assertions.assertThat(response.content()).isEqualTo(review.getContent());
             Assertions.assertThat(response.rating()).isEqualTo(review.getRating());
-            Assertions.assertThat(response.movieSeatInfo().movieTitle()).isEqualTo(review.getMovieTitle());
-            Assertions.assertThat(response.movieSeatInfo().theaterName()).isEqualTo(review.getSeat().getAuditorium().getTheater().getName());
+            Assertions.assertThat(response.seatInfo().get(0)).isEqualTo(ReviewSeatInfoResponse.from(seat1));
         }
 
         /**
@@ -444,13 +453,16 @@ class ReviewServiceIntTest {
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             //when
-            SliceResponse<ReviewListResponse> response = sut.loadReviewsBySeatId(seat1.getId(), pageRequest);
+            SliceResponse<ReviewSeatListResponse> response = sut.loadReviewsBySeatId(seat1.getId(), pageRequest, ReviewSortType.LATEST);
 
             //then
-            List<ReviewListResponse> responses = response.content();
-            Assertions.assertThat(responses).hasSize(2);
-            ReviewListResponse response1 = responses.get(0);
-            ReviewListResponse response2 = responses.get(1);
+            List<ReviewSeatListResponse> responses = response.content();
+            /// 싱글톤 리스트이기에 어차피 1개
+            ReviewSeatListResponse seatListResponse = responses.get(0);
+
+            Assertions.assertThat(seatListResponse.reviews()).hasSize(2);
+            ReviewListResponse response1 = seatListResponse.reviews().get(0);
+            ReviewListResponse response2 = seatListResponse.reviews().get(1);
 
             Assertions.assertThat(response1.content()).isEqualTo(review2.getContent());
             Assertions.assertThat(response2.content()).isEqualTo(review1.getContent());
@@ -473,7 +485,7 @@ class ReviewServiceIntTest {
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             // when
-            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest);
+            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest, ReviewSortType.LATEST);
 
             // then
             List<ReviewListResponse> responses = response.content();
@@ -498,6 +510,7 @@ class ReviewServiceIntTest {
             //given
             var request = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test")
                     .movieTitle("ReviewTestTitle")
                     .imageUrls(null)
@@ -529,6 +542,7 @@ class ReviewServiceIntTest {
 
             var request1 = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test1")
                     .movieTitle("ReviewTestTitle1")
                     .imageUrls(null)
@@ -538,6 +552,7 @@ class ReviewServiceIntTest {
 
             var request2 = ReviewRequest.builder()
                     .seatIds(List.of(seat1.getId()))
+                    .title("review title")
                     .content("test2")
                     .movieTitle("ReviewTestTitle2")
                     .imageUrls(null)
@@ -553,7 +568,7 @@ class ReviewServiceIntTest {
             likeService.reviewLike(user2.getId(), sutReview1.get(0).getId());
 
             // when
-            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest);
+            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest, ReviewSortType.RATING_DESC);
 
             // then
             List<ReviewListResponse> contents = response.content();
@@ -774,10 +789,178 @@ class ReviewServiceIntTest {
         }
     }
 
+    @Nested
+    @DisplayName("좌석 기반 리뷰 목록 정렬 테스트")
+    class LoadReviewsBySeatIdSortTest {
+
+        @Test
+        @DisplayName("[happy] 최신순(LATEST) 정렬")
+        void loadReviewsBySeat_LATEST() {
+            //given
+            Review r1 = repository.save(ReviewFixtures.createReview(user1, seat1, 1, "first review"));  // 나중에 저장
+            Review r2 = repository.save(ReviewFixtures.createReview(user1, seat1, 4, "second review"));
+            Review r3 = repository.save(ReviewFixtures.createReview(user1, seat1, 5, "third review")); // 제일 먼저 저장
+            var pageRequest = PageRequest.builder().page(1).size(10).build();
+
+            //when
+            SliceResponse<ReviewSeatListResponse> response = sut.loadReviewsBySeatId(seat1.getId(), pageRequest, ReviewSortType.LATEST);
+
+            //then : 저장 역순으로 나와야 함
+            List<ReviewListResponse> result = response.content().get(0).reviews();
+            Assertions.assertThat(result.get(0).content()).isEqualTo("third review");
+            Assertions.assertThat(result.get(1).content()).isEqualTo("second review");
+            Assertions.assertThat(result.get(2).content()).isEqualTo("first review");
+        }
+
+        @Test
+        @DisplayName("[happy] 평점 내림차순(RATING_DESC) 정렬")
+        void loadReviewsBySeat_RATING_DESC() {
+            //given
+            repository.save(ReviewFixtures.createReview(user1, seat1, 3, "review 3"));
+            repository.save(ReviewFixtures.createReview(user1, seat1, 5, "review 5"));
+            repository.save(ReviewFixtures.createReview(user1, seat1, 1, "review 1"));
+            var pageRequest = PageRequest.builder().page(1).size(10).build();
+
+            //when
+            SliceResponse<ReviewSeatListResponse> response = sut.loadReviewsBySeatId(seat1.getId(), pageRequest, ReviewSortType.RATING_DESC);
+
+            //then : 5 → 3 → 1 순서
+            List<ReviewListResponse> result = response.content().get(0).reviews();
+            Assertions.assertThat(result.get(0).content()).isEqualTo("review 5");
+            Assertions.assertThat(result.get(1).content()).isEqualTo("review 3");
+            Assertions.assertThat(result.get(2).content()).isEqualTo("review 1");
+        }
+
+        @Test
+        @DisplayName("[happy] 평점 오름차순(RATING_ASC) 정렬")
+        void loadReviewsBySeat_RATING_ASC() {
+            //given
+            repository.save(ReviewFixtures.createReview(user1, seat1, 2, "review 2"));
+            repository.save(ReviewFixtures.createReview(user1, seat1, 4, "review 4"));
+            repository.save(ReviewFixtures.createReview(user1, seat1, 3, "review 3"));
+            var pageRequest = PageRequest.builder().page(1).size(10).build();
+
+            //when
+            SliceResponse<ReviewSeatListResponse> response = sut.loadReviewsBySeatId(seat1.getId(), pageRequest, ReviewSortType.RATING_ASC);
+
+            //then : 2 → 3 → 4 순
+            List<ReviewListResponse> result = response.content().get(0).reviews();
+            Assertions.assertThat(result.get(0).content()).isEqualTo("review 2");
+            Assertions.assertThat(result.get(1).content()).isEqualTo("review 3");
+            Assertions.assertThat(result.get(2).content()).isEqualTo("review 4");
+        }
+
+        @Test
+        @DisplayName("[happy] 좋아요 내림차순(LIKES) 정렬")
+        void loadReviewsBySeat_LIKES() {
+            //given
+            Review r1 = repository.save(ReviewFixtures.createReview(user1, seat1, 5, "review A")); // 좋아요 1
+            Review r2 = repository.save(ReviewFixtures.createReview(user1, seat1, 4, "review B")); // 좋아요 3
+            Review r3 = repository.save(ReviewFixtures.createReview(user1, seat1, 3, "review C")); // 좋아요 2
+
+            likeService.reviewLike(user1.getId(), r2.getId());
+            likeService.reviewLike(user2.getId(), r2.getId());
+            likeService.reviewLike(user2.getId(), r3.getId());
+            likeService.reviewLike(user1.getId(), r3.getId());
+
+            likeService.reviewLike(user1.getId(), r1.getId());
+
+            // r2(2명), r3(2명), r1(1명) → r2, r3, r1(동점시 저장순 or id순)
+            var pageRequest = PageRequest.builder().page(1).size(10).build();
+
+            //when
+            SliceResponse<ReviewSeatListResponse> response = sut.loadReviewsBySeatId(seat1.getId(), pageRequest, ReviewSortType.LIKES);
+
+            //then
+            List<ReviewListResponse> result = response.content().get(0).reviews();
+            Assertions.assertThat(result.get(0).heartCount()).isGreaterThanOrEqualTo(result.get(1).heartCount());
+            Assertions.assertThat(result.get(0).heartCount()).isGreaterThanOrEqualTo(result.get(2).heartCount());
+        }
+    }
+
+
+    @Nested
+    @DisplayName("상영관 기반 리뷰 목록 정렬 테스트")
+    class LoadReviewsByAuditoriumIdSortTest {
+
+        @Test
+        @DisplayName("[happy] 최신순(LATEST) 정렬")
+        void loadReviewsByAuditorium_LATEST() {
+            Review r1 = repository.save(ReviewFixtures.createReview(user1, seat1, 2, "oldest"));
+            Review r2 = repository.save(ReviewFixtures.createReview(user1, seat1, 3, "middle"));
+            Review r3 = repository.save(ReviewFixtures.createReview(user1, seat1, 1, "latest"));
+            var pageRequest = PageRequest.builder().page(1).size(10).build();
+
+            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest, ReviewSortType.LATEST);
+
+            List<ReviewListResponse> result = response.content();
+            Assertions.assertThat(result.get(0).content()).isEqualTo("latest");
+            Assertions.assertThat(result.get(1).content()).isEqualTo("middle");
+            Assertions.assertThat(result.get(2).content()).isEqualTo("oldest");
+        }
+
+        @Test
+        @DisplayName("[happy] 평점 내림차순(RATING_DESC) 정렬")
+        void loadReviewsByAuditorium_RATING_DESC() {
+            repository.save(ReviewFixtures.createReview(user1, seat1, 1, "r1"));
+            repository.save(ReviewFixtures.createReview(user1, seat1, 5, "r5"));
+            repository.save(ReviewFixtures.createReview(user1, seat1, 3, "r3"));
+            var pageRequest = PageRequest.builder().page(1).size(10).build();
+
+            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest, ReviewSortType.RATING_DESC);
+
+            List<ReviewListResponse> result = response.content();
+            Assertions.assertThat(result.get(0).content()).isEqualTo("r5");
+            Assertions.assertThat(result.get(1).content()).isEqualTo("r3");
+            Assertions.assertThat(result.get(2).content()).isEqualTo("r1");
+        }
+
+        @Test
+        @DisplayName("[happy] 평점 오름차순(RATING_ASC) 정렬")
+        void loadReviewsByAuditorium_RATING_ASC() {
+            repository.save(ReviewFixtures.createReview(user1, seat1, 2, "r2"));
+            repository.save(ReviewFixtures.createReview(user1, seat1, 5, "r5"));
+            repository.save(ReviewFixtures.createReview(user1, seat1, 3, "r3"));
+            var pageRequest = PageRequest.builder().page(1).size(10).build();
+
+            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest, ReviewSortType.RATING_ASC);
+
+            List<ReviewListResponse> result = response.content();
+            Assertions.assertThat(result.get(0).content()).isEqualTo("r2");
+            Assertions.assertThat(result.get(1).content()).isEqualTo("r3");
+            Assertions.assertThat(result.get(2).content()).isEqualTo("r5");
+        }
+
+        @Test
+        @DisplayName("[happy] 좋아요 내림차순(LIKES) 정렬")
+        void loadReviewsByAuditorium_LIKES() {
+            Review r1 = repository.save(ReviewFixtures.createReview(user1, seat1, 2, "AAA"));
+            Review r2 = repository.save(ReviewFixtures.createReview(user1, seat1, 2, "BBB"));
+            Review r3 = repository.save(ReviewFixtures.createReview(user1, seat1, 2, "CCC"));
+            likeService.reviewLike(user1.getId(), r3.getId());
+            likeService.reviewLike(user2.getId(), r3.getId());
+            likeService.reviewLike(user1.getId(), r2.getId());
+
+            var pageRequest = PageRequest.builder().page(1).size(10).build();
+
+            SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest, ReviewSortType.LIKES);
+
+            List<ReviewListResponse> result = response.content();
+            Assertions.assertThat(result.get(0).content()).isEqualTo("CCC");
+            Assertions.assertThat(result.get(0).heartCount()).isEqualTo(2L);
+            Assertions.assertThat(result.get(1).content()).isEqualTo("BBB");
+            Assertions.assertThat(result.get(1).heartCount()).isEqualTo(1L);
+            Assertions.assertThat(result.get(2).content()).isEqualTo("AAA");
+            Assertions.assertThat(result.get(2).heartCount()).isEqualTo(0L);
+        }
+    }
+
+
 
     private ReviewRequest getReviewRequest(Seat seat, double rating) {
         return ReviewRequest.builder()
                 .seatIds(List.of(seat.getId()))
+                .title("review title")
                 .content("test1")
                 .movieTitle("ReviewTestTitle1")
                 .imageUrls(null)

@@ -2,6 +2,7 @@ package com.seeat.server.domain.review.application.dto.response;
 
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewHashTagWithCount;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * @param count         개수
  */
 @Builder
+@Schema(name = "[응답][상영관] 상영관 해시태그 Response",description = "상영관에서 자주 사용되는 해시태그 목록에 대한 DTO 입니다.")
 public record AuditoriumHashTagResponse(
         Long hashTagId,
         String hashTagName,

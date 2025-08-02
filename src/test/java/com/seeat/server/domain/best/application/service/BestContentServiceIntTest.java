@@ -464,6 +464,7 @@ class BestContentServiceIntTest {
     private ReviewRequest getReviewRequest(double rating) {
         return ReviewRequest.builder()
                 .seatIds(List.of(seat1.getId()))
+                .title("review title")
                 .content("test")
                 .movieTitle("ReviewTestTitle")
                 .imageUrls(null)
@@ -476,6 +477,7 @@ class BestContentServiceIntTest {
 
         return ReviewRequest.builder()
                 .seatIds(List.of(seatId))
+                .title("review title")
                 .content("test")
                 .movieTitle("ReviewTestTitle")
                 .imageUrls(null)

@@ -35,6 +35,8 @@ public class BestReviewSnapshot extends BaseEntity {
 
     private String theaterName;
 
+    private String title;
+
     private String content;
 
     private Long userId;
@@ -54,6 +56,7 @@ public class BestReviewSnapshot extends BaseEntity {
             String thumbnailUrl,
             String movieTitle,
             String theaterName,
+            String title,
             String content,
             Long userId,
             String nickname,
@@ -67,6 +70,7 @@ public class BestReviewSnapshot extends BaseEntity {
                 .thumbnailUrl(thumbnailUrl)
                 .movieTitle(movieTitle)
                 .theaterName(theaterName)
+                .title(title)
                 .content(content)
                 .userId(userId)
                 .nickname(nickname)

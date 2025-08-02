@@ -3,6 +3,7 @@ package com.seeat.server.domain.review.application.dto.response;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.user.application.dto.response.UserResponse;
+import com.seeat.server.global.util.DateFormatUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -14,8 +15,6 @@ import java.util.List;
  * @param reviewId      리뷰 아이디
  * @param thumbnailUrl  썸네일 이미지
  * @param hashtags      해시태그 목록 DTO
- * @param movieTitle    영화 제목
- * @param theaterName   영화관 제목
  * @param content       리뷰 내용
  * @param user          유저 관련 DTO
  * @param heartCount    좋아요(하트) 수
@@ -33,11 +32,9 @@ public record ReviewListResponse(
 
         List<ReviewHashTagResponse> hashtags,
 
-        @Schema(description = "영화 제목", example = "어벤져스: 엔드게임")
-        String movieTitle,
 
-        @Schema(description = "영화관 이름", example = "CGV 용산아이파크몰")
-        String theaterName,
+        @Schema(description = "리뷰 제목", example = "용아맥은 전설이다!")
+        String title,
 
         @Schema(description = "리뷰 내용", example = "액션이 뛰어나고 스토리가 감동적이었습니다.")
         String content,
@@ -45,7 +42,15 @@ public record ReviewListResponse(
         UserResponse user,
 
         @Schema(description = "좋아요(하트) 수", example = "250")
-        Long heartCount
+        Long heartCount,
+
+        @Schema(description = "작성일", example = "2025.08.02")
+        String createdAt,
+
+        @Schema(description = "리뷰 점수", example = "3.7")
+        Double rating
+
+
 ) {
 
     public static ReviewListResponse from(Review review, List<ReviewHashTag> hashTags, Long heartCount) {
@@ -55,12 +60,13 @@ public record ReviewListResponse(
                 .thumbnailUrl(review.getThumbnailUrl())
                 .hashtags(ReviewHashTagResponse
                         .from(hashTags))
-                .movieTitle(review.getMovieTitle())
-                .theaterName(review.getSeat().getAuditorium().getTheater().getName())
+                .title(review.getTitle())
                 .content(review.getContent())
                 .user(UserResponse
                         .from(review.getUser()))
                 .heartCount(heartCount)
+                .rating(review.getRating())
+                .createdAt(DateFormatUtil.formatDate(review.getCreatedAt()))
                 .build();
     }
 }

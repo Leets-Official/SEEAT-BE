@@ -1,6 +1,8 @@
 package com.seeat.server.domain.review.presentation;
 
+import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
+import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
@@ -68,10 +70,11 @@ public class ReviewController implements ReviewControllerSpec {
     @GetMapping("/auditorium/{auditoriumId}")
     public ApiResponse<SliceResponse<ReviewListResponse>> getReviewsByAuditorium(
             @PathVariable String auditoriumId,
+            @RequestParam(required = false) ReviewSortType sort,
             PageRequest pageRequest) {
 
         // 서비스 호출
-        SliceResponse<ReviewListResponse> response = reviewService.loadReviewsByAuditoriumId(auditoriumId, pageRequest);
+        SliceResponse<ReviewListResponse> response = reviewService.loadReviewsByAuditoriumId(auditoriumId, pageRequest, sort);
 
         // 결과 리턴
         return ApiResponse.ok(response);
@@ -84,12 +87,13 @@ public class ReviewController implements ReviewControllerSpec {
      * @return Page<ReviewListResponse> Page DTO
      */
     @GetMapping("/seat/{seatId}")
-    public ApiResponse<SliceResponse<ReviewListResponse>> getReviewsBySeat(
+    public ApiResponse<SliceResponse<ReviewSeatListResponse>> getReviewsBySeat(
             @PathVariable String seatId,
+            @RequestParam(required = false) ReviewSortType sort,
             PageRequest pageRequest) {
 
         // 서비스 호출
-        SliceResponse<ReviewListResponse> response = reviewService.loadReviewsBySeatId(seatId, pageRequest);
+        SliceResponse<ReviewSeatListResponse> response = reviewService.loadReviewsBySeatId(seatId, pageRequest, sort);
 
         // 결과 리턴
         return ApiResponse.ok(response);

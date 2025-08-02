@@ -24,6 +24,13 @@ public class ReviewRequest {
     private List<String> seatIds;
 
     /**
+     * 후기 제목
+     */
+    @NotBlank(message = "후기 제목은 필수입니다.")
+    @Schema(example = "용아맥은 전설이다!")
+    private String title;
+
+    /**
      * 영화 제목 또는 영화 ID
      */
     @NotBlank(message = "영화 제목은 필수입니다.")
@@ -51,14 +58,14 @@ public class ReviewRequest {
      * 해시태그 ID 목록 (필수)
      */
     @NotNull(message = "해시태그 목록은 필수입니다.")
-    @Size(min = 1, message = "최소 하나 이상의 해시태그가 필요합니다.")
-    @Schema(example = "[\"1\", \"2\",\"3\"]")
+    @Size(min = 1, max = 5, message = "1개~5개 사이의 해시태그가 필요합니다.")
+    @Schema(example = "[\"1\", \"7\",\"13\"]")
     private List<Long> hashtags;
 
     /**
      * 사진 목록 (선택)
      */
-    @Schema(description = "리뷰 이미지 주소들")
+    @Schema(description = "리뷰 이미지 주소들", example = "[\"https://seeat-dev.s3.ap-northeast-2.amazonaws.com/sample/2.png\",\"https://seeat-dev.s3.ap-northeast-2.amazonaws.com/sample/4.png\"]")
     @Size(max = 5, message = "이미지는 최대 5개까지 가능합니다.")
     private List<String> imageUrls;
 }

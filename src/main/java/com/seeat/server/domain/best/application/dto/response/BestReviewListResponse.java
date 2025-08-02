@@ -45,6 +45,9 @@ public record BestReviewListResponse(
         @Schema(description = "영화관 이름", example = "CGV 용산아이파크몰")
         String theaterName,
 
+        @Schema(description = "리뷰 제목", example = "용아맥은 전설이다!")
+        String title,
+
         @Schema(description = "리뷰 내용", example = "스토리가 아주 감동적이었어요!")
         String content,
 
@@ -76,6 +79,7 @@ public record BestReviewListResponse(
                 .hashtags(snapshot.getHashTags())
                 .movieTitle(snapshot.getMovieTitle())
                 .theaterName(snapshot.getTheaterName())
+                .title(snapshot.getTitle())
                 .content(snapshot.getContent())
                 .userId(snapshot.getUserId())
                 .nickname(snapshot.getNickname())
@@ -111,6 +115,7 @@ public record BestReviewListResponse(
                 .hashtags(hashtags)
                 .movieTitle(review.getMovieTitle())
                 .theaterName(review.getSeat().getAuditorium().getTheater().getName())
+                .title(review.getTitle())
                 .content(review.getContent())
                 .userId(user.getId())
                 .nickname(user.getNickname())
