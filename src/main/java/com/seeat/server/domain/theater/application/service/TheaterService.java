@@ -6,8 +6,10 @@ import com.seeat.server.domain.theater.application.dto.response.*;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.AuditoriumType;
 import com.seeat.server.domain.theater.domain.entity.Seat;
+import com.seeat.server.domain.theater.domain.entity.Theater;
 import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
 import com.seeat.server.domain.theater.domain.repository.SeatRepository;
+import com.seeat.server.domain.theater.domain.repository.TheaterRepository;
 import com.seeat.server.domain.theater.domain.repository.dto.AuditoriumWithScore;
 import com.seeat.server.domain.theater.domain.repository.dto.AuditoriumWithRating;
 import com.seeat.server.global.response.ErrorCode;
@@ -31,6 +33,7 @@ import static com.seeat.server.global.response.pageable.PageUtil.getPageable;
 @RequiredArgsConstructor
 public class TheaterService implements TheaterUseCase {
 
+    private final TheaterRepository theaterRepository;
     private final AuditoriumRepository auditoriumRepository;
     public final SeatRepository seatRepository;
 
@@ -128,6 +131,37 @@ public class TheaterService implements TheaterUseCase {
         }
 
         return seats;
+    }
+
+    @Override
+    public List<Seat> getSeatByName(String theaterName, String auditoriumName, List<String> seats) {
+
+        /// 영화관 예외 처리
+        Theater theater = theaterRepository.findByName(theaterName)
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_THEATER.getMessage()));
+
+
+        /// 상영관 예외 처리
+        Auditorium auditorium = auditoriumRepository.findByNameContainingIgnoreCaseAndTheater_Id(auditoriumName, theater.getId())
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_AUDITORIUM.getMessage()));
+
+        /// 결과 담을 리스트
+        List<Seat> seatList = new ArrayList<>();
+
+        for (String seatStr : seats) {
+            /// 좌석 행과 열 분리
+            String row = seatStr.substring(0, 1);
+            int column = Integer.parseInt(seatStr.substring(1));
+
+            /// 좌석 조회 및 예외 처리
+            Seat seat = seatRepository.findByRowAndColumnAndAuditorium_Id(row, column, auditorium.getId())
+                    .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_SEAT.getMessage()));
+
+            seatList.add(seat);
+        }
+
+        return seatList;
+
     }
 
 
