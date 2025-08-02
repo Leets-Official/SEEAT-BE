@@ -38,10 +38,8 @@ public interface TheaterUseCase {
     // 베스트 상영관 가져오기
     SliceResponse<BestAuditoriumListResponse> loadBestAuditoriums(PageRequest pageRequest);
 
-
-
     List<Seat> getSeat(List<String> seatIds);
 
-    Seat getSeatByName(String theater, String auditorium, String seat);
+    List<Seat> getSeatByName(String theater, String auditorium, List<String> seats);
 
 }
