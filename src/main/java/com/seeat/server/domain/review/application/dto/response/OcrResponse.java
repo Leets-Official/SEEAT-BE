@@ -25,9 +25,6 @@ public record OcrResponse(
         @Schema(description = "영화제목", example = "F1 더 무비")
         String title,
 
-        @Schema(description = "영화 상영 종류", example = "IMAX")
-        String movieType,
-
         @Schema(description = "상영관 ID", example = "13084")
         String auditoriumId,
 
@@ -43,11 +40,10 @@ public record OcrResponse(
 ) {
 
     /// 정적 팩토리 메서드
-    public static OcrResponse from(String theater, String title, String movieType, String auditoriumId, String auditoriumName, String seatId, String seatName) {
+    public static OcrResponse from(String theater, String title, String auditoriumId, String auditoriumName, String seatId, String seatName) {
         return OcrResponse.builder()
                 .theater(theater)
                 .title(title)
-                .movieType(movieType)
                 .auditoriumId(auditoriumId)
                 .auditoriumName(auditoriumName)
                 .seatId(seatId)

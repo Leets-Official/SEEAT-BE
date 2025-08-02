@@ -142,7 +142,7 @@ public class TheaterService implements TheaterUseCase {
 
 
         /// 상영관 예외 처리
-        Auditorium auditorium = auditoriumRepository.findByNameAndTheater_Id(auditoriumName, theater.getId())
+        Auditorium auditorium = auditoriumRepository.findByNameContainingIgnoreCaseAndTheater_Id(auditoriumName, theater.getId())
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_AUDITORIUM.getMessage()));
 
         /// 좌석 행과 열 분리

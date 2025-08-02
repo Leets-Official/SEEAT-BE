@@ -42,5 +42,5 @@ public interface AuditoriumRepository extends JpaRepository<Auditorium, String> 
 """)
     Slice<AuditoriumWithScore> findBestAuditoriums(Pageable pageable);
 
-    Optional<Auditorium> findByNameAndTheater_Id(String name, String theaterId);
+    Optional<Auditorium> findByNameContainingIgnoreCaseAndTheater_Id(String name, String theater_id);
 }

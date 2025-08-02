@@ -105,6 +105,8 @@ public enum ErrorCode {
     NO_IMAGE_REVIEW(3007, HttpStatus.BAD_REQUEST, "등록할 이미지가 없음에도 추가하고자 합니다."),
     TOO_MANY_IMAGES(3008, HttpStatus.BAD_REQUEST, "등록할 이미지가 5개 초과입니다."),
     NOT_GET_LANGCHAIN(3009,HttpStatus.NOT_IMPLEMENTED,"랭체인 서버에서 값을 받지 못했습니다."),
+    NOT_OCR_IMAGE(3010,HttpStatus.BAD_REQUEST,"파일이 첨부되지 않았습니다."),
+    BAD_OCR_IMAGE(3011,HttpStatus.BAD_REQUEST,"파일 확장자를 확인할 수 없습니다."),
 
     // ========================
     // 4000~4999 : 검색어 관련 에러
