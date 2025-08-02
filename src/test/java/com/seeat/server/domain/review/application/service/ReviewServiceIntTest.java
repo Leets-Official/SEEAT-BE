@@ -3,6 +3,7 @@ package com.seeat.server.domain.review.application.service;
 import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
+import com.seeat.server.domain.review.application.dto.response.ReviewSeatInfoResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.review.domain.HashTagFixtures;
@@ -419,8 +420,7 @@ class ReviewServiceIntTest {
             Assertions.assertThat(response).isNotNull();
             Assertions.assertThat(response.content()).isEqualTo(review.getContent());
             Assertions.assertThat(response.rating()).isEqualTo(review.getRating());
-            Assertions.assertThat(response.movieSeatInfo().movieTitle()).isEqualTo(review.getMovieTitle());
-            Assertions.assertThat(response.movieSeatInfo().theaterName()).isEqualTo(review.getSeat().getAuditorium().getTheater().getName());
+            Assertions.assertThat(response.seatInfo().get(0)).isEqualTo(ReviewSeatInfoResponse.from(seat1));
         }
 
         /**
