@@ -27,6 +27,19 @@ public class UserFixtures {
                 .build();
     }
 
+    public static User createUser(String email) {
+        return User.builder()
+                .email(email)
+                .socialId("test" + UUID.randomUUID())
+                .nickname("testNickname")
+                .grade(UserGrade.BRONZE)
+                .imageUrl("www.test.imageUrl")
+                .social(UserSocial.KAKAO)
+                .isDelete(false)
+                .genres(List.of(MovieGenre.ACTION, MovieGenre.ROMANCE, MovieGenre.DRAMA))
+                .build();
+    }
+
     public static User fakeUser() {
         return User.builder()
                 .id(999L)
