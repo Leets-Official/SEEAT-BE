@@ -1,8 +1,13 @@
 package com.seeat.server.security.jwt;
 
+import com.seeat.server.domain.theater.domain.entity.Auditorium;
+import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
 import com.seeat.server.domain.user.domain.entity.User;
+import com.seeat.server.domain.user.domain.entity.UserAuditorium;
 import com.seeat.server.domain.user.domain.entity.UserGrade;
 import com.seeat.server.domain.user.domain.entity.UserRole;
+import com.seeat.server.domain.user.domain.entity.UserSocial;
+import com.seeat.server.domain.user.domain.repository.UserAuditoriumRepository;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.util.JwtConstants;
@@ -20,6 +25,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Key;
 import java.util.*;
@@ -53,6 +59,8 @@ public class JwtProvider {
     private long devTokenExpiration;
 
     private final UserRepository userRepository;
+    private final UserAuditoriumRepository userAuditoriumRepository;
+    private final AuditoriumRepository auditoriumRepository;
 
     @PostConstruct
     protected void init() {
@@ -87,8 +95,15 @@ public class JwtProvider {
     public String generateDevTokenWithMockUser(Long userId, String username, UserRole role) {
 
         /// 개발용 유저 실제 DB에 저장
-        User user = userRepository.findBySocialAndSocialId(KAKAO, "dev-" + userId)
-                .orElse(userRepository.save(createMockUser(userId, username, role)));
+        String cleanedId = ("dev-" + userId).trim();
+        User user = userRepository.findBySocialAndSocialId(KAKAO, cleanedId)
+                .orElseGet(() -> userRepository.save(createMockUser(userId, username, role)));
+
+        // 상영관 저장
+        Auditorium auditorium = auditoriumRepository.findById("1001")
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_AUDITORIUM.getMessage()));
+        UserAuditorium userAuditorium = UserAuditorium.of(user, auditorium);
+        userAuditoriumRepository.save(userAuditorium);
 
         Collection<GrantedAuthority> authorities = Collections.singletonList(
                 new SimpleGrantedAuthority(role.getRole())
@@ -116,6 +131,7 @@ public class JwtProvider {
                 .role(role)
                 .grade(UserGrade.BRONZE)
                 .genres(List.of())
+                .isDelete(false)
                 .build();
     }
 
