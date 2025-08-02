@@ -1,9 +1,11 @@
 package com.seeat.server.domain.review.presentation.swagger;
 
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
+import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
+import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
@@ -62,8 +64,11 @@ public interface ReviewControllerSpec {
     )
     @GetMapping("/auditorium/{auditoriumId}")
     ApiResponse<SliceResponse<ReviewListResponse>> getReviewsByAuditorium(
-            @Parameter(description = "조회할 상영관ID",example = "13018")
+            @Parameter(description = "조회할 상영관ID", example = "13018")
             @PathVariable String auditoriumId,
+
+            @Parameter(description = "정렬할 값 (기본은 최신순)", example = "latest")
+            @RequestParam ReviewSortType sort,
             PageRequest pageRequest
     );
 
@@ -79,9 +84,12 @@ public interface ReviewControllerSpec {
             description = "좌석 ID로 리뷰 목록을 조회합니다."
     )
     @GetMapping("/seat/{seatId}")
-    ApiResponse<SliceResponse<ReviewListResponse>> getReviewsBySeat(
+    ApiResponse<SliceResponse<ReviewSeatListResponse>> getReviewsBySeat(
             @Parameter(description = "조회할 좌석ID", example = "13018A4")
             @PathVariable String seatId,
+
+            @Parameter(description = "정렬할 값 (기본은 최신순)", example = "latest")
+            @RequestParam ReviewSortType sort,
             PageRequest pageRequest
     );
 

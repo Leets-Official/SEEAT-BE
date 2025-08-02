@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
@@ -43,4 +42,5 @@ public interface AuditoriumRepository extends JpaRepository<Auditorium, String> 
 """)
     Slice<AuditoriumWithScore> findBestAuditoriums(Pageable pageable);
 
+    Optional<Auditorium> findByNameContainingIgnoreCaseAndTheater_Id(String name, String theater_id);
 }

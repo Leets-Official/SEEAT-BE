@@ -17,7 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 리뷰 해시태그 서비스
@@ -48,16 +51,24 @@ public class ReviewHashTagService implements ReviewHashTagUseCase {
     @Override
     public void createReviewHashTag(Review review, List<Long> hashTagIds) {
 
+        /// 해시태그가 6개 넘어가면 에러
+        if (hashTagIds.isEmpty() || hashTagIds.size() >= 6) {
+            throw new IllegalArgumentException(ErrorCode.INVALID_HASHTAG_SIZE.getMessage());
+        }
+
         // 해시태그 조회
         List<HashTag> hashTags = hashTagRepository.findByIdIn(hashTagIds);
 
-        // 각 파트별로 1개 이상의 해시태그를 작성해야합니다.
+        /// 동반인 제외, 각 파트별로 1개 이상의 해시태그를 작성해야합니다.
         boolean isValid = Arrays.stream(HashTagType.values())
+                .filter(type -> type != HashTagType.COMPANION)
                 .allMatch(type -> hashTags.stream()
-                                .map(HashTag::getType)
-                                .filter(t -> t == type)
-                                .count() >= 1);
+                        .map(HashTag::getType)
+                        .filter(t -> t == type)
+                        .count() >= 1);
 
+
+        /// 필수 조건이 안맞으면 에러 발생
         if (!isValid) {
             throw new IllegalArgumentException(ErrorCode.INVALID_HASHTAG.getMessage());
         }
@@ -128,6 +139,33 @@ public class ReviewHashTagService implements ReviewHashTagUseCase {
     public List<ReviewHashTag> getReviewHashTagByReviews(List<Long> reviewIds) {
         return repository.findByReview_IdIn(reviewIds);
     }
+
+    /**
+     * 리뷰 리스트에 대해 각 리뷰에 연결된 해시태그 이름들의 리스트 조회 로직
+     *
+     * @param reviews 해시태그를 조회할 대상 리뷰 리스트
+     * @return 각 리뷰에 연결된 해시태그 이름 리스트 리스트 반환
+     */
+    @Override
+    public List<List<String>> getHashTagsForReviews(List<Review> reviews){
+        // 리뷰 리스트
+        List<Long> reviewIds = reviews.stream()
+                .map(Review::getId)
+                .toList();
+
+        // 해시태그 조회
+        List<ReviewHashTag> reviewHashTags = repository.findWithHashTagByReview_Ids(reviewIds);
+
+        // 리뷰 Id별 해시태그 모으기
+        Map<Long, List<String>> reviewIdToTags = reviewHashTags.stream()
+                .collect(Collectors.groupingBy(rht -> rht.getReview().getId(),
+                        Collectors.mapping(rht -> rht.getHashTag().getName(), Collectors.toList())));
+
+        return reviews.stream()
+                .map(r -> reviewIdToTags.getOrDefault(r.getId(), Collections.emptyList()))
+                .collect(Collectors.toList());
+    }
+
 
     // ========================
     //  공통 함수

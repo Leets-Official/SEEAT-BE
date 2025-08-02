@@ -1,10 +1,11 @@
 package com.seeat.server.domain.search.application.service;
 
-import com.seeat.server.domain.review.application.usecase.HashTagUseCase;
+import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewLike;
 import com.seeat.server.domain.review.domain.repository.ReviewLikeRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
+import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
 import com.seeat.server.domain.search.application.dto.request.ReviewSearchCondition;
 import com.seeat.server.domain.search.application.dto.response.ReviewSearchResponse;
 import com.seeat.server.domain.search.application.usecase.ReviewSearchUseCase;
@@ -20,6 +21,7 @@ import com.seeat.server.global.response.pageable.PageUtil;
 import com.seeat.server.global.response.pageable.SliceResponse;
 import com.seeat.server.global.service.RecentSearchRedisService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
@@ -42,7 +44,7 @@ public class ReviewSearchService implements ReviewSearchUseCase {
     private final UserSearchRepository userSearchRepository;
     private final ReviewRepository reviewRepository;
     private final ReviewLikeRepository reviewLikeRepository;
-    private final HashTagUseCase hashTagService;
+    private final ReviewHashTagUseCase reviewHashTagService;
     private final RecentSearchRedisService recentSearchRedisService;
 
     /**
@@ -81,14 +83,14 @@ public class ReviewSearchService implements ReviewSearchUseCase {
         }
 
         // 페이징 처리
-        org.springframework.data.domain.PageRequest pageable = PageUtil.getPageable(pageRequest);
+        Pageable pageable = PageUtil.getPageable(pageRequest);
 
         // 커스텀 레포로 조회
         Slice<Review> reviews = reviewRepository.searchReviewsWithFilters(condition, pageable);
 
         // 조회
         List<Review> reviewList = reviews.getContent();
-        List<List<String>> hashTags = hashTagService.getHashTagsForReviews(reviewList);
+        List<List<String>> hashTags = reviewHashTagService.getHashTagsForReviews(reviewList);
         List<ReviewLike> userReviewLikes = Collections.emptyList();
 
         // 비회원 좋아요 누른 것 false 처리
@@ -97,11 +99,11 @@ public class ReviewSearchService implements ReviewSearchUseCase {
         }
 
         // 좋아요 수 조회
-        List<Object[]> likeCounts = reviewLikeRepository.countLikesByReviewIn(reviewList);
+        List<ReviewWithLikeCount> likeCounts = reviewLikeRepository.countLikesByReviewIn(reviewList);
         Map<Long, Long> likeCountMap = likeCounts.stream()
                 .collect(Collectors.toMap(
-                        obj -> (Long) obj[0],
-                        obj -> (Long) obj[1]
+                        rlc -> rlc.getReview().getId(),
+                        ReviewWithLikeCount::getLikeCount
                 ));
 
         // DTO 변환

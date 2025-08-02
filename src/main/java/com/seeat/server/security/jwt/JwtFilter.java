@@ -131,6 +131,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
+        // 검색 API 경로는 필터를 무조건 타도록 false 반환
+        String path = request.getRequestURI();
+
+        if (path.startsWith("/api/v1/search")) {
+            return false; // 필터 타게 함
+        }
 
         /// requestMatcherHolder 통해 필터와 시큐리티를 한번에 해결, true 이면 필터 자체를 타지 않는다.
         /// ex) 개발용 토큰 자체에 필터를 타지 않도록 설정하여, 401,403 에러가 발생하지 않도록 설정

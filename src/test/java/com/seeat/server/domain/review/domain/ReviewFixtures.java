@@ -14,6 +14,7 @@ public class ReviewFixtures {
     public static Review fakeReview(User user, Seat seat) {
         return Review.builder()
                 .id(1L)
+                .title("Title")
                 .content("testContent1")
                 .movieTitle("testTitle1")
                 .rating(1)
@@ -24,6 +25,7 @@ public class ReviewFixtures {
 
     public static Review createReview(User user, Seat seat) {
         return Review.builder()
+                .title("Title")
                 .content("testContent1")
                 .movieTitle("testTitle1")
                 .rating(1)
@@ -35,6 +37,7 @@ public class ReviewFixtures {
 
     public static Review createReview(User user, Seat seat, int rating) {
         return Review.builder()
+                .title("Title")
                 .content("testContent2")
                 .movieTitle("testTitle2")
                 .rating(rating)
@@ -46,6 +49,7 @@ public class ReviewFixtures {
 
     public static Review createReview(User user, Seat seat, int rating, String content) {
         return Review.builder()
+                .title("Title")
                 .content(content)
                 .movieTitle("testTitle2")
                 .rating(rating)
@@ -57,6 +61,7 @@ public class ReviewFixtures {
 
     public static Review createReview(User user, Seat seat, int rating, String content, String title) {
         return Review.builder()
+                .title(title)
                 .content(content)
                 .movieTitle(title)
                 .rating(rating)

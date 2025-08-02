@@ -14,6 +14,12 @@ import java.util.List;
 public class ReviewUpdateRequest {
 
     /**
+     * 후기 제목
+     */
+    @Schema(example = "용아맥은 전설이다!")
+    private String title;
+
+    /**
      * 평점 (1~5)
      */
     @Schema(example = "3.2")
@@ -30,13 +36,14 @@ public class ReviewUpdateRequest {
     /**
      * 해시태그 ID 목록 (필수)
      */
-    @Schema(example = "[\"1\", \"2\",\"3\"]")
+    @Size(min = 1, max = 5, message = "1개~5개 사이의 해시태그가 필요합니다.")
+    @Schema(example = "[\"1\", \"7\",\"13\"]")
     private List<Long> hashtags;
 
     /**
      * 사진 목록 (선택)
      */
-    @Schema(description = "수정할 리뷰 이미지들")
+    @Schema(description = "수정할 리뷰 이미지들", example = "[\"https://seeat-dev.s3.ap-northeast-2.amazonaws.com/sample/1.png\",\"https://seeat-dev.s3.ap-northeast-2.amazonaws.com/sample/3.png\"]")
     @Size(max = 5, message = "이미지는 최대 5개까지 가능합니다.")
     private List<String> images;
 

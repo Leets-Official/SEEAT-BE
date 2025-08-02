@@ -97,7 +97,8 @@ public enum ErrorCode {
     // 3000~3999 : 리뷰 관련 에러
     // ========================
     NOT_REVIEW(3000, HttpStatus.NOT_FOUND, "해당하는 리뷰가 존재하지 않습니다."),
-    INVALID_HASHTAG(3001, HttpStatus.BAD_REQUEST, "모든 해시태그 항목(음향, 동반인, 관람환경)을 최소 1개 이상 작성해야 합니다."),
+    INVALID_HASHTAG(3001, HttpStatus.BAD_REQUEST, "필수 해시태그 항목(음향, 동반인)을 최소 1개 이상 작성해야 합니다."),
+    INVALID_HASHTAG_SIZE(30011, HttpStatus.BAD_REQUEST, "해시태그 항목이 최소 1개 이상 5개 이하로 작성해야 합니다."),
     DUPLICATE_BOOKMARK(3002, HttpStatus.CONFLICT, "해당하는 리뷰를 이미 북마크 했습니다"),
     DUPLICATE_REVIEW(3003, HttpStatus.CONFLICT, "해당하는 리뷰를 이미 좋아요 했습니다"),
     NOT_OWN_BOOKMARK(3004, HttpStatus.CONFLICT, "추가되어있지 않은 북마크를 삭제할 수 없습니다."),
@@ -106,6 +107,8 @@ public enum ErrorCode {
     NO_IMAGE_REVIEW(3007, HttpStatus.BAD_REQUEST, "등록할 이미지가 없음에도 추가하고자 합니다."),
     TOO_MANY_IMAGES(3008, HttpStatus.BAD_REQUEST, "등록할 이미지가 5개 초과입니다."),
     NOT_GET_LANGCHAIN(3009,HttpStatus.NOT_IMPLEMENTED,"랭체인 서버에서 값을 받지 못했습니다."),
+    NOT_OCR_IMAGE(3010,HttpStatus.BAD_REQUEST,"파일이 첨부되지 않았습니다."),
+    BAD_OCR_IMAGE(3011,HttpStatus.BAD_REQUEST,"파일 확장자를 확인할 수 없습니다."),
 
     // ========================
     // 4000~4999 : 검색어 관련 에러
