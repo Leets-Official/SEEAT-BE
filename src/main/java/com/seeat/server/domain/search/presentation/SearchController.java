@@ -70,8 +70,8 @@ public class SearchController implements SearchControllerSpec {
             service.deleteSearch(searchId, user.getId());
         }
 
-        // 200 리턴
-        return ApiResponse.ok(null);
+        // 삭제 성공 응답
+        return ApiResponse.deleted();
     }
 
     /**
