@@ -16,9 +16,7 @@ public record UserNicknameResponse(
     public static UserNicknameResponse from(boolean duplicated){
         return UserNicknameResponse.builder()
                 .duplicated(duplicated)
-                .message(duplicated
-                        ? "닉네임이 사용 중입니다. 다른 닉네임을 사용해주세요."
-                        : "닉네임 사용 가능합니다.")
+                .message("닉네임 사용 가능합니다.")
                 .build();
     }
 }

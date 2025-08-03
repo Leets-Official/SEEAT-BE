@@ -83,6 +83,9 @@ public enum ErrorCode {
     /** 최초 로그인 추가 정보 필요 */
     FIRST_LOGIN(1200, HttpStatus.NOT_FOUND, "최초 로그인유저이기에 추가정보기입이 필요합니다."),
 
+    /** 중복 확인 **/
+    DUPLICATED_NICKNAME(1300,HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
+
     // ========================
     // 2000~2999 : 영화관 관련 에러
     // ========================
