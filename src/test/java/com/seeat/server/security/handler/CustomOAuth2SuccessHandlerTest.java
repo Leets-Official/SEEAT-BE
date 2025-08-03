@@ -1,5 +1,6 @@
 package com.seeat.server.security.handler;
 
+import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
 import com.seeat.server.global.util.RedisKeyUtil;
 import com.seeat.server.security.jwt.service.TokenService;
@@ -62,7 +63,9 @@ public class CustomOAuth2SuccessHandlerTest {
         CustomUserInfo principal = mock(CustomUserInfo.class);
         given(authentication.getPrincipal()).willReturn(principal);
         given(principal.getStatus()).willReturn(CustomUserInfo.UserStatus.EXISTING_USER);
-        given(principal.getId()).willReturn(1L);
+        User user = mock(User.class);
+        given(principal.getUser()).willReturn(user);
+
 
         // 프로퍼티 설정
         ReflectionTestUtils.setField(successHandler, "frontLocalUrl", "http://localhost:3000");
@@ -73,7 +76,7 @@ public class CustomOAuth2SuccessHandlerTest {
         successHandler.onAuthenticationSuccess(request, response, authentication);
 
         // Then
-        verify(tokenService).generateTokensAndSetHeaders(authentication, response, 1L);
+        verify(tokenService).generateTokensAndSetHeaders(response, user);
         verify(redirectStrategy).sendRedirect(request, response, "http://localhost:3000/home");
     }
 
@@ -137,9 +140,11 @@ public class CustomOAuth2SuccessHandlerTest {
     void dev_profile_uses_dev_url() throws Exception {
         // Given
         CustomUserInfo principal = mock(CustomUserInfo.class);
+        User user = mock(User.class);
         given(authentication.getPrincipal()).willReturn(principal);
         given(principal.getStatus()).willReturn(CustomUserInfo.UserStatus.EXISTING_USER);
-        given(principal.getId()).willReturn(1L);
+        given(principal.getUser()).willReturn(user);
+
 
         // 프로퍼티 설정 (dev 환경)
         ReflectionTestUtils.setField(successHandler, "frontLocalUrl", "http://localhost:3000");
@@ -150,7 +155,7 @@ public class CustomOAuth2SuccessHandlerTest {
         successHandler.onAuthenticationSuccess(request, response, authentication);
 
         // Then
-        verify(tokenService).generateTokensAndSetHeaders(authentication, response, 1L);
+        verify(tokenService).generateTokensAndSetHeaders(response, user);
         verify(redirectStrategy).sendRedirect(request, response, "http://dev.example.com/home");
     }
 }
