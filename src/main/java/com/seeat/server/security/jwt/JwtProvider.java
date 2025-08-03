@@ -92,6 +92,24 @@ public class JwtProvider {
                 .compact();
     }
 
+    // User 객체를 받아서 토큰을 생성하는 공통 메서드
+    public String generateToken(User user, long tokenValidTime) {
+
+        String authoritiesStr = "USER";
+
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + tokenValidTime);
+
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim(JwtConstants.AUTHORITIES_KEY, authoritiesStr)
+                .claim(JwtConstants.USER_ID_KEY, user.getId())
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+    }
+
     public String generateDevTokenWithMockUser(Long userId, String username, UserRole role) {
 
         /// 개발용 유저 실제 DB에 저장
@@ -142,6 +160,14 @@ public class JwtProvider {
 
     public String generateRefreshToken(Authentication authentication) {
         return generateToken(authentication, refreshTokenValidTime);
+    }
+
+    public String generateAccessToken(User user) {
+        return generateToken(user, accessTokenValidTime);
+    }
+
+    public String generateRefreshToken(User user) {
+        return generateToken(user, refreshTokenValidTime);
     }
 
     public boolean validateToken(String token) {
