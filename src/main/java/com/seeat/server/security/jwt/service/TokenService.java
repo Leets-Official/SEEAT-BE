@@ -1,5 +1,6 @@
 package com.seeat.server.security.jwt.service;
 
+import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.service.RedisService;
@@ -42,11 +43,11 @@ public class TokenService {
     private boolean sslEnabled;
 
 
-    public void generateTokensAndSetHeaders(Authentication authentication, HttpServletResponse response, Long userId) {
-        String accessToken = jwtProvider.generateAccessToken(authentication);
-        String refreshToken = jwtProvider.generateRefreshToken(authentication);
+    public void generateTokensAndSetHeaders(HttpServletResponse response, User user) {
+        String accessToken = jwtProvider.generateAccessToken(user);
+        String refreshToken = jwtProvider.generateRefreshToken(user);
 
-        redisService.setRefreshToken(userId, refreshToken, Duration.ofMillis(refreshTokenExpiration));
+        redisService.setRefreshToken(user.getId(), refreshToken, Duration.ofMillis(refreshTokenExpiration));
 
         response.setHeader(HttpHeaders.AUTHORIZATION, JwtConstants.TOKEN_TYPE + " " + accessToken);
 

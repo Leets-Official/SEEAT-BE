@@ -44,7 +44,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         try {
             switch (userInfo.getStatus()) {
                 case EXISTING_USER -> {
-                    tokenService.generateTokensAndSetHeaders(authentication, response, userInfo.getId());
+                    tokenService.generateTokensAndSetHeaders(response, userInfo.getUser());
                     redirectStrategy.sendRedirect(request, response, frontUrl + "/home");
                 }
                 case NEW_USER -> {
