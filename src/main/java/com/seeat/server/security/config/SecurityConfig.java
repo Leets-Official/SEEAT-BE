@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import static com.seeat.server.domain.user.domain.entity.UserRole.ADMIN;
 import static com.seeat.server.domain.user.domain.entity.UserRole.USER;
@@ -33,11 +34,14 @@ public class SecurityConfig {
     private final JwtFailureHandler jwtFailureHandler;
     private final JwtDeniedHandler jwtDeniedHandler;
     private final RequestMatcherHolder requestMatcherHolder;
+    private final CorsConfigurationSource corsConfigurationSource;
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(requestMatcherHolder.getRequestMatchersByMinRole(null))
