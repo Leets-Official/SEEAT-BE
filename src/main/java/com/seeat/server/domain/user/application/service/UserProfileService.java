@@ -1,6 +1,8 @@
 package com.seeat.server.domain.user.application.service;
 
 import com.seeat.server.domain.image.application.usecase.ImageUseCase;
+import com.seeat.server.domain.review.application.dto.response.ReviewLikeCountResponse;
+import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
@@ -33,6 +35,7 @@ public class UserProfileService implements UserProfileUseCase {
 
     // 외부 의존성
     private final UserAuditoriumRepository userAuditoriumRepository;
+    private final ReviewRepository reviewRepository;
     private final TheaterUseCase theaterService;
 
     /// 이미지 서비스 추가
@@ -53,7 +56,23 @@ public class UserProfileService implements UserProfileUseCase {
         // 상영관 n+1 방지 fetch join, 예외 처리
         List<Auditorium> auditorium = getAuditoriums(userId);
 
-        return UserInfoResponse.from(user, auditorium);
+        // 리뷰, 좋아요 수 가져오기
+        ReviewLikeCountResponse countResponse = reviewRepository.findReviewCountAndLikeCountByUserId(userId);
+        long reviewCount = countResponse.reviewCount();
+        long likeCount = countResponse.likeCount();
+
+        // 경험치 계산
+        double levelExp = calculateLevelExp(user.getGrade(), reviewCount, likeCount);
+
+        // 리뷰 개수와 좋아요 개수에 따라 등급 수정
+        UserGrade grade = calculateUserGrade(reviewCount, likeCount);
+
+        // 다르면 등급 수정
+        if (user.getGrade() != grade){
+            user.updateGrade(grade);
+        }
+
+        return UserInfoResponse.from(user, auditorium, reviewCount, likeCount, levelExp);
     }
 
     /**
@@ -128,6 +147,55 @@ public class UserProfileService implements UserProfileUseCase {
 
         // 더티체킹으로 변경
         user.deactivateUser();
+    }
+
+    /**
+     * 등급 계산 로직
+     */
+    private UserGrade calculateUserGrade(long reviewCount, long likeCount) {
+        if (reviewCount >= 40 && likeCount >= 100) {
+            return UserGrade.PLATINUM;
+        } else if (reviewCount >= 10 && likeCount >= 25) {
+            return UserGrade.GOLD;
+        } else if (reviewCount >= 2 && likeCount >= 5) {
+            return UserGrade.SILVER;
+        } else {
+            return UserGrade.BRONZE;
+        }
+    }
+
+    /**
+     * 경험치 계산 로직
+     * @param grade 유저 등급
+     * @param reviewCount 리뷰 개수
+     * @param likeCount 좋아요 개수
+     * @return 경험치
+     */
+    private double calculateLevelExp(UserGrade grade, long reviewCount, long likeCount) {
+        double reviewRate;
+        double likeRate;
+
+        // 등급 별 경험치 계산법
+        switch (grade) {
+            case BRONZE -> {
+                reviewRate = Math.min((double) reviewCount / 2, 1.0);
+                likeRate = Math.min((double) likeCount / 5, 1.0);
+            }
+            case SILVER -> {
+                reviewRate = Math.min((double) reviewCount / 10, 1.0);
+                likeRate = Math.min((double) likeCount / 25, 1.0);
+            }
+            case GOLD -> {
+                reviewRate = Math.min((double) reviewCount / 40, 1.0);
+                likeRate = Math.min((double) likeCount / 100, 1.0);
+            }
+            case PLATINUM -> {
+                return 100.0;
+            }
+            default -> throw new IllegalArgumentException(ErrorCode.NOT_GRADE.getMessage());
+        }
+
+        return (reviewRate + likeRate) / 2 * 100;
     }
 
 
