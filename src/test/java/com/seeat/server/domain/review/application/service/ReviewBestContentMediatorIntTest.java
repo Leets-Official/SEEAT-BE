@@ -1,8 +1,12 @@
 package com.seeat.server.domain.review.application.service;
 
 import com.seeat.server.domain.best.application.dto.response.BestReviewListResponse;
+import com.seeat.server.domain.hashtag.domain.entity.HashTag;
+import com.seeat.server.domain.hashtag.domain.entity.HashTagType;
+import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.usecase.ReviewBestContentMediatorUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
+import com.seeat.server.domain.review.domain.HashTagFixtures;
 import com.seeat.server.domain.review.domain.ReviewFixtures;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.hashtag.domain.repository.HashTagRepository;
@@ -66,11 +70,19 @@ class ReviewBestContentMediatorIntTest {
     @Autowired
     private ReviewLikeUseCase likeService;
 
+    @Autowired
+    private ReviewService reviewService;
+
+
     private Seat seat1;
     private Seat seat2;
     private User user1;
+    private User user2;
     private Theater theater;
     private Auditorium auditorium;
+    private HashTag hashTag1;
+    private HashTag hashTag2;
+    private HashTag hashTag3;
 
     /**
      * 각 테스트 실행 전 공통으로 필요한 영화관, 상영관, 좌석, 유저 데이터를 준비합니다.
@@ -82,6 +94,11 @@ class ReviewBestContentMediatorIntTest {
         seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
         seat2 = seatRepository.save(SeatFixtures.createSeat2(auditorium));
         user1 = userRepository.save(UserFixtures.createUser());
+        user2 = userRepository.save(UserFixtures.createUser());
+        hashTag1 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.SOUND, "음향이 좋아요"));
+        hashTag2 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.COMPANION, "혼자 관람했어요"));
+        hashTag3 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.ENVIRONMENT, "좌석이 넓어요"));
+
     }
 
     @Nested
@@ -90,15 +107,19 @@ class ReviewBestContentMediatorIntTest {
 
         @Test
         @DisplayName("[happy] 인기순정렬_기본케이스")
-        public void loadPopular() {
+        public void loadPopular() throws IOException {
 
             //given
             PageRequest pageRequest = PageRequest.builder().page(1).size(8).build();
-            Review review1 = repository.save(ReviewFixtures.createReview(user1, seat1));
-            Review review2 = repository.save(ReviewFixtures.createReview(user1, seat2));
+
+            var request1 = getReviewRequest(List.of(seat1, seat2), 1);
+            Review review1 = reviewService.createReview(request1, user1.getId());
+
+            var request2 = getReviewRequest(List.of(seat1, seat2), 5);
+            Review review2 = reviewService.createReview(request1, user2.getId());
 
             // 좋아요 추가
-            likeService.reviewLike(user1.getId(), review1.getId());
+            likeService.reviewLike(user2.getId(), review1.getId());
 
             //when
             SliceResponse<BestReviewListResponse> response = sut.getBestReviews(pageRequest);
@@ -118,11 +139,15 @@ class ReviewBestContentMediatorIntTest {
 
         @Test
         @DisplayName("[happy] 좋아요 수가 같은 경우 최신순 정렬")
-        void loadPopular_same_new() {
+        void loadPopular_same_new() throws IOException {
             // given
             PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();
-            Review older = repository.save(ReviewFixtures.createReview(user1, seat1)); // 먼저 저장, 좋아요 1개
-            Review newer = repository.save(ReviewFixtures.createReview(user1, seat2)); // 나중 저장, 좋아요 1개
+            var request1 = getReviewRequest(List.of(seat1, seat2), 1,"older");
+            var request2 = getReviewRequest(List.of(seat1, seat2), 5, "newer");
+
+            Review older = reviewService.createReview(request1, user1.getId());
+            Review newer = reviewService.createReview(request1, user2.getId());
+
             likeService.reviewLike(user1.getId(), older.getId());
             likeService.reviewLike(user1.getId(), newer.getId());
 
@@ -139,11 +164,15 @@ class ReviewBestContentMediatorIntTest {
 
         @Test
         @DisplayName("[happy] 여러 유저가 복수 개 리뷰에 좋아요를 누른 경우 합산 집계 및 순위정렬의 정확성")
-        void multiple_user_like() {
+        void multiple_user_like() throws IOException {
             // given
             PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();
-            Review revA = repository.save(ReviewFixtures.createReview(user1, seat1));
-            Review revB = repository.save(ReviewFixtures.createReview(user1, seat2));
+            var request1 = getReviewRequest(List.of(seat1, seat2), 1);
+            var request2 = getReviewRequest(List.of(seat1, seat2), 5);
+
+            Review revA = reviewService.createReview(request1, user1.getId());
+            Review revB = reviewService.createReview(request1, user2.getId());
+
             User user2 = userRepository.save(UserFixtures.createUser());
             User user3 = userRepository.save(UserFixtures.createUser());
 
@@ -181,6 +210,43 @@ class ReviewBestContentMediatorIntTest {
             Assertions.assertThat(contents).isEmpty();
         }
 
+    }
+
+
+    private ReviewRequest getReviewRequest(List<Seat> seats, double rating) {
+
+        /// 좌석 번호
+        List<String> seatIds = seats.stream()
+                .map(Seat::getId)
+                .toList();
+
+        return ReviewRequest.builder()
+                .seatIds(seatIds)
+                .title("review title")
+                .content("test1")
+                .movieTitle("ReviewTestTitle1")
+                .imageUrls(null)
+                .rating(rating)
+                .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                .build();
+    }
+
+    private ReviewRequest getReviewRequest(List<Seat> seats, double rating, String content) {
+
+        /// 좌석 번호
+        List<String> seatIds = seats.stream()
+                .map(Seat::getId)
+                .toList();
+
+        return ReviewRequest.builder()
+                .seatIds(seatIds)
+                .title("review title")
+                .content(content)
+                .movieTitle("ReviewTestTitle1")
+                .imageUrls(null)
+                .rating(rating)
+                .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                .build();
     }
 
 }

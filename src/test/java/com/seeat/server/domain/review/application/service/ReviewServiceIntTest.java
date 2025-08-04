@@ -19,6 +19,7 @@ import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
+import com.seeat.server.domain.review.domain.repository.ReviewSeatRepository;
 import com.seeat.server.domain.theater.domain.AuditoriumFixtures;
 import com.seeat.server.domain.theater.domain.SeatFixtures;
 import com.seeat.server.domain.theater.domain.TheaterFixtures;
@@ -44,9 +45,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -82,6 +85,9 @@ class ReviewServiceIntTest {
 
     @Autowired
     private ReviewHashTagRepository reviewHashTagRepository;
+
+    @Autowired
+    private ReviewSeatRepository reviewSeatRepository;
 
     /// 좋아요 의존성 추가
     @Autowired
@@ -129,15 +135,7 @@ class ReviewServiceIntTest {
         @DisplayName("[happy] 이미지 없이 로그인한 유저 리뷰 정상 생성")
         void createReviewByUser_happy() throws IOException {
             //given
-            var request = ReviewRequest.builder()
-                    .seatIds(List.of(seat1.getId()))
-                    .title("review title")
-                    .content("test")
-                    .movieTitle("ReviewTestTitle")
-                    .imageUrls(null)
-                    .rating(5)
-                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
-                    .build();
+            var request = getReviewRequest(List.of(seat1, seat2), 5);
 
             //when
             sut.createReview(request, user1.getId());
@@ -146,15 +144,25 @@ class ReviewServiceIntTest {
             /// 리뷰 체크
             List<Review> reviews = repository.findAll();
 
-            // 1. 개수 검증
+            // 개수 검증
             Assertions.assertThat(reviews).hasSize(1);
 
-            // 2. 리뷰와 정보들이 일치하는지 검증
+            // 리뷰와 정보들이 일치하는지 검증
             Review review = reviews.get(0);
+
             Assertions.assertThat(review.getContent()).isEqualTo(request.getContent());
             Assertions.assertThat(review.getRating()).isEqualTo(request.getRating());
-            Assertions.assertThat(review.getSeat().getId()).isEqualTo(seat1.getId());
-            Assertions.assertThat(review.getSeat().getAuditorium().getTheater().getName()).isEqualTo("Test Theater");
+
+            /// 좌석이 실제로 저장되는거지
+            List<ReviewSeat> seats = reviewSeatRepository.findByReview(review);
+            List<String> seatIds = seats.stream()
+                    .map(seat -> seat.getSeat().getId())
+                    .toList();
+
+            /// 포함하는지 체크
+            Assertions.assertThat(seatIds).hasSameElementsAs(List.of(seat1.getId(), seat2.getId()));
+
+            Assertions.assertThat(seats.get(0).getSeat().getAuditorium().getTheater().getName()).isEqualTo("Test Theater");
 
             /// 해시태그 체크
             List<ReviewHashTag> reviewHashTags = reviewHashTagRepository.findByReview(review);
@@ -173,41 +181,42 @@ class ReviewServiceIntTest {
         @DisplayName("[happy] 이미지 없이 로그인한 유저 리뷰 좌석 2개에 동시 생성 정상 생성")
         void createReviewByUser_happy_multiple_seat() throws IOException {
             // given
-            var request = ReviewRequest.builder()
-                    .seatIds(List.of(seat1.getId(), seat2.getId()))
-                    .title("review title")
-                    .content("test")
-                    .movieTitle("ReviewTestTitle")
-                    .imageUrls(null)
-                    .rating(5)
-                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
-                    .build();
+            var request = getReviewRequest(List.of(seat1, seat2), 5);
 
             // when
-            sut.createReview(request, user1.getId());
+            Review review1 = sut.createReview(request, user1.getId());
 
             // then
-            List<Review> reviews = repository.findAll();
-            Assertions.assertThat(reviews).hasSize(2);
+            Review savedReview = repository.findById(review1.getId()).get();
 
-            for (Review review : reviews) {
-                Assertions.assertThat(review.getContent()).isEqualTo(request.getContent());
-                Assertions.assertThat(review.getRating()).isEqualTo(request.getRating());
-                Assertions.assertThat(List.of(seat1.getId(), seat2.getId())).contains(review.getSeat().getId());
-                Assertions.assertThat(review.getSeat().getAuditorium().getTheater().getName())
-                        .isEqualTo("Test Theater");
+            Assertions.assertThat(savedReview).isNotNull();
 
-                List<ReviewHashTag> reviewHashTags = reviewHashTagRepository.findByReview(review);
-                Assertions.assertThat(reviewHashTags).hasSize(3);
+            // 좌석 조회(다대다)
+            List<ReviewSeat> seats = reviewSeatRepository.findByReview(savedReview);
+            List<String> seatIds = seats.stream()
+                    .map(rs -> rs.getSeat().getId())
+                    .toList();
 
-                List<Long> actualHashTagIds = reviewHashTags.stream()
-                        .map(rht -> rht.getHashTag().getId())
-                        .toList();
+            Assertions.assertThat(savedReview.getContent()).isEqualTo(request.getContent());
+            Assertions.assertThat(savedReview.getRating()).isEqualTo(request.getRating());
+            Assertions.assertThat(seatIds).hasSameElementsAs(List.of(seat1.getId(), seat2.getId()));
 
-                Assertions.assertThat(actualHashTagIds)
-                        .containsExactlyInAnyOrderElementsOf(request.getHashtags());
-            }
+            // 좌석 중 하나의 극장명으로 검증 (보통 동일 극장)
+            String theaterName = seats.get(0).getSeat().getAuditorium().getTheater().getName();
+            Assertions.assertThat(theaterName).isEqualTo("Test Theater");
+
+            // 해시태그 체크
+            List<ReviewHashTag> reviewHashTags = reviewHashTagRepository.findByReview(savedReview);
+            Assertions.assertThat(reviewHashTags).hasSize(3);
+
+            List<Long> actualHashTagIds = reviewHashTags.stream()
+                    .map(rht -> rht.getHashTag().getId())
+                    .toList();
+
+            Assertions.assertThat(actualHashTagIds)
+                    .containsExactlyInAnyOrderElementsOf(request.getHashtags());
         }
+
 
 
         /**
@@ -231,7 +240,7 @@ class ReviewServiceIntTest {
             sut.createReview(request, user1.getId());
 
             //then
-            /// 리뷰 체크
+            // 리뷰 체크
             List<Review> reviews = repository.findAll();
 
             // 1. 개수 검증
@@ -241,15 +250,17 @@ class ReviewServiceIntTest {
             Review review = reviews.get(0);
             Assertions.assertThat(review.getContent()).isEqualTo(request.getContent());
             Assertions.assertThat(review.getRating()).isEqualTo(request.getRating());
-            Assertions.assertThat(review.getSeat().getId()).isEqualTo(seat1.getId());
-            Assertions.assertThat(review.getSeat().getAuditorium().getTheater().getName()).isEqualTo("Test Theater");
 
-            /// 해시태그 체크
+            // 좌석 다대다 검증
+            List<ReviewSeat> reviewSeats = reviewSeatRepository.findByReview(review);
+            Assertions.assertThat(reviewSeats).hasSize(1);
+            Assertions.assertThat(reviewSeats.get(0).getSeat().getId()).isEqualTo(seat1.getId());
+            Assertions.assertThat(reviewSeats.get(0).getSeat().getAuditorium().getTheater().getName()).isEqualTo("Test Theater");
+
+            // 해시태그 체크
             List<ReviewHashTag> reviewHashTags = reviewHashTagRepository.findByReview(review);
-            // 1. 개수 검증
             Assertions.assertThat(reviewHashTags).hasSize(3);
 
-            // 2. 실제 연결된 해시태그 ID와 요청한 해시태그 ID가 일치하는지 검증
             List<Long> actualHashTagIds = reviewHashTags.stream()
                     .map(rht -> rht.getHashTag().getId())
                     .toList();
@@ -258,8 +269,9 @@ class ReviewServiceIntTest {
 
             // 이미지 검증
             String thumbnailUrl = review.getThumbnailUrl();
-            Assertions.assertThat(thumbnailUrl.contains("file1.jpg"));
+            Assertions.assertThat(thumbnailUrl).contains("file1.jpg");
         }
+
 
         /**
          * 정상적인 유저가 이미지 3 장을 통해 리뷰를 생성하는 경우를 검증합니다.
@@ -282,7 +294,7 @@ class ReviewServiceIntTest {
             sut.createReview(request, user1.getId());
 
             //then
-            /// 리뷰 체크
+            // 리뷰 체크
             List<Review> reviews = repository.findAll();
 
             // 1. 개수 검증
@@ -292,26 +304,26 @@ class ReviewServiceIntTest {
             Review review = reviews.get(0);
             Assertions.assertThat(review.getContent()).isEqualTo(request.getContent());
             Assertions.assertThat(review.getRating()).isEqualTo(request.getRating());
-            Assertions.assertThat(review.getSeat().getId()).isEqualTo(seat1.getId());
-            Assertions.assertThat(review.getSeat().getAuditorium().getTheater().getName()).isEqualTo("Test Theater");
 
-            /// 해시태그 체크
+            // 좌석·극장 정보의 다대다 검증
+            List<ReviewSeat> reviewSeats = reviewSeatRepository.findByReview(review);
+            Assertions.assertThat(reviewSeats).hasSize(1);
+            Assertions.assertThat(reviewSeats.get(0).getSeat().getId()).isEqualTo(seat1.getId());
+            Assertions.assertThat(reviewSeats.get(0).getSeat().getAuditorium().getTheater().getName()).isEqualTo("Test Theater");
+
+            // 해시태그 체크
             List<ReviewHashTag> reviewHashTags = reviewHashTagRepository.findByReview(review);
-            // 1. 개수 검증
             Assertions.assertThat(reviewHashTags).hasSize(3);
-
-            // 2. 실제 연결된 해시태그 ID와 요청한 해시태그 ID가 일치하는지 검증
             List<Long> actualHashTagIds = reviewHashTags.stream()
                     .map(rht -> rht.getHashTag().getId())
                     .toList();
             Assertions.assertThat(actualHashTagIds)
                     .containsExactlyInAnyOrderElementsOf(request.getHashtags());
 
-            //3. 미지 검증
-            List<ReviewImage> reviewImages = imageRepository.findByReview(review);
+            // 이미지 검증
+            List<ReviewImage> reviewImages = imageRepository.findByReview_Id(review.getId());
             Assertions.assertThat(reviewImages).hasSize(3);
 
-            // 파일명 포함 여부 확인
             List<String> storedFileNames = reviewImages.stream()
                     .map(ReviewImage::getImageUrl)
                     .toList();
@@ -323,8 +335,8 @@ class ReviewServiceIntTest {
 
             // 썸네일 검사
             assertThat(review.getThumbnailUrl()).isEqualTo(storedFileNames.stream().findFirst().get());
-
         }
+
 
         /**
          * 정상적인 유저가 이미지 6 장을 통해 에러가 발생합니다..
@@ -409,18 +421,29 @@ class ReviewServiceIntTest {
          */
         @Test
         @DisplayName("[happy] 리뷰 상세 조회")
-        void loadReview_happy() {
+        void loadReview_happy() throws IOException {
             //given
-            Review review = repository.save(ReviewFixtures.createReview(user1, seat1));
+            var request = getReviewRequest(List.of(seat1, seat2), 5);
+
+            Review review1 = sut.createReview(request, user1.getId());
 
             //when
-            ReviewDetailResponse response = sut.loadReview(review.getId());
+            ReviewDetailResponse response = sut.loadReview(review1.getId());
 
             //then
             Assertions.assertThat(response).isNotNull();
-            Assertions.assertThat(response.content()).isEqualTo(review.getContent());
-            Assertions.assertThat(response.rating()).isEqualTo(review.getRating());
-            Assertions.assertThat(response.seatInfo().get(0)).isEqualTo(ReviewSeatInfoResponse.from(seat1));
+            Assertions.assertThat(response.title()).isEqualTo(review1.getTitle());
+            Assertions.assertThat(response.content()).isEqualTo(review1.getContent());
+            Assertions.assertThat(response.rating()).isEqualTo(review1.getRating());
+            List<ReviewSeatInfoResponse> infoResponses = response.seatInfo();
+
+            List<String> seatIds = infoResponses.stream()
+                    .map(ReviewSeatInfoResponse::seatId)
+                    .toList();
+
+            /// 포함하는지 체크
+            Assertions.assertThat(seatIds).hasSameElementsAs(List.of(seat1.getId(), seat2.getId()));
+
         }
 
         /**
@@ -430,7 +453,7 @@ class ReviewServiceIntTest {
         @DisplayName("[unhappy] 존재하지 않는 리뷰 조회")
         void loadReview_unhappy_not_id() {
             //given
-            Review fakeReview = ReviewFixtures.fakeReview(user1, seat1);
+            Review fakeReview = ReviewFixtures.fakeReview(user1);
 
             // when & then
             Assertions.assertThatThrownBy(() -> sut.loadReview(fakeReview.getId()))
@@ -443,13 +466,17 @@ class ReviewServiceIntTest {
          */
         @Test
         @DisplayName("[happy] 좌석 기반_리뷰 목록 조회")
-        void loadReviews_happy_seat() {
+        void loadReviews_happy_seat() throws IOException {
             //given
             String firstReview = "첫번째 리뷰입니다.";
             String secondReview = "두번째 리뷰입니다.";
+            //given
+            var request1 = getReviewRequest(List.of(seat1, seat2), 5, firstReview);
+            var request2 = getReviewRequest(List.of(seat1, seat2), 5, secondReview);
 
-            Review review1 = repository.save(ReviewFixtures.createReview(user1, seat1, 5, firstReview));
-            Review review2 = repository.save(ReviewFixtures.createReview(user1, seat1, 3, secondReview));
+            Review review1 = sut.createReview(request1, user1.getId());
+            Review review2 = sut.createReview(request2, user2.getId());
+
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             //when
@@ -457,6 +484,7 @@ class ReviewServiceIntTest {
 
             //then
             List<ReviewSeatListResponse> responses = response.content();
+
             /// 싱글톤 리스트이기에 어차피 1개
             ReviewSeatListResponse seatListResponse = responses.get(0);
 
@@ -471,17 +499,23 @@ class ReviewServiceIntTest {
 
         @Test
         @DisplayName("[happy] 상영관 기반_리뷰 목록 조회")
-        void loadReviews_happy_theater() {
+        void loadReviews_happy_theater() throws IOException {
             // given
             String firstReview = "첫번째 리뷰입니다.";
             String secondReview = "두번째 리뷰입니다.";
             String thirdReview = "세번째 리뷰입니다.";
             String fourthReview = "네번째 리뷰입니다.";
 
-            Review review1 = repository.save(ReviewFixtures.createReview(user1, seat1, 1, firstReview));
-            Review review2 = repository.save(ReviewFixtures.createReview(user1, seat1, 2, secondReview));
-            Review review3 = repository.save(ReviewFixtures.createReview(user1, seat1, 3, thirdReview));
-            Review review4 = repository.save(ReviewFixtures.createReview(user1, seat1, 4, fourthReview));
+            var request1 = getReviewRequest(List.of(seat1), 1, firstReview);
+            var request2 = getReviewRequest(List.of(seat1), 2, secondReview);
+            var request3 = getReviewRequest(List.of(seat1, seat2), 3, thirdReview);
+            var request4 = getReviewRequest(List.of(seat2), 4, fourthReview);
+
+            Review review1 = sut.createReview(request1, user1.getId());
+            Review review2 = sut.createReview(request2, user2.getId());
+            Review review3 = sut.createReview(request3, user1.getId());
+            Review review4 = sut.createReview(request4, user2.getId());
+
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             // when
@@ -508,24 +542,16 @@ class ReviewServiceIntTest {
         public void happyLoad_Detail() throws IOException {
 
             //given
-            var request = ReviewRequest.builder()
-                    .seatIds(List.of(seat1.getId()))
-                    .title("review title")
-                    .content("test")
-                    .movieTitle("ReviewTestTitle")
-                    .imageUrls(null)
-                    .rating(5)
-                    .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
-                    .build();
+            var request = getReviewRequest(List.of(seat1), 1);
 
             //when
-            List<Review> sutReview = sut.createReview(request, user1.getId());
+            Review review = sut.createReview(request, user1.getId());
 
-            likeService.reviewLike(user1.getId(), sutReview.get(0).getId());
-            likeService.reviewLike(user2.getId(), sutReview.get(0).getId());
+            likeService.reviewLike(user1.getId(), review.getId());
+            likeService.reviewLike(user2.getId(), review.getId());
 
             //when
-            ReviewDetailResponse response = sut.loadReview(sutReview.get(0).getId());
+            ReviewDetailResponse response = sut.loadReview(review.getId());
 
             //then
             Assertions.assertThat(response).isNotNull();
@@ -560,12 +586,12 @@ class ReviewServiceIntTest {
                     .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
                     .build();
 
-            List<Review> sutReview1 = sut.createReview(request1, user1.getId());
-            List<Review> sutReview2 = sut.createReview(request2, user1.getId());
+            Review review1 = sut.createReview(request1, user1.getId());
+            Review review2 = sut.createReview(request2, user1.getId());
 
             // 1에게만 좋아요 누르기
-            likeService.reviewLike(user1.getId(), sutReview1.get(0).getId());
-            likeService.reviewLike(user2.getId(), sutReview1.get(0).getId());
+            likeService.reviewLike(user1.getId(), review1.getId());
+            likeService.reviewLike(user2.getId(), review1.getId());
 
             // when
             SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest, ReviewSortType.RATING_DESC);
@@ -593,8 +619,7 @@ class ReviewServiceIntTest {
             var request = getReviewRequest(seat1, 4);
 
             /// 생성
-            List<Review> reviews = sut.createReview(request, user1.getId());
-            Review review = reviews.get(0);
+            Review review = sut.createReview(request, user1.getId());
 
             /// 수정용 요청
             var newRequest = ReviewUpdateRequest.
@@ -616,7 +641,6 @@ class ReviewServiceIntTest {
 
             /// 기존내용 변경 여부
             Assertions.assertThat(savedReview.getMovieTitle()).isEqualTo(request.getMovieTitle());
-            Assertions.assertThat(savedReview.getSeat()).isEqualTo(seat1);
 
         }
 
@@ -629,8 +653,7 @@ class ReviewServiceIntTest {
             var request = getReviewRequest(seat1, 4);
 
             /// 생성
-            List<Review> reviews = sut.createReview(request, user1.getId());
-            Review review = reviews.get(0);
+            Review review = sut.createReview(request, user1.getId());
 
             /// 수정용 요청
             var newRequest = ReviewUpdateRequest.
@@ -660,7 +683,6 @@ class ReviewServiceIntTest {
 
             /// 기존내용 변경 여부
             Assertions.assertThat(savedReview.getMovieTitle()).isEqualTo(request.getMovieTitle());
-            Assertions.assertThat(savedReview.getSeat()).isEqualTo(seat1);
 
         }
 
@@ -674,8 +696,7 @@ class ReviewServiceIntTest {
             var request = getReviewRequest(seat1, 4);
 
             /// 생성
-            List<Review> reviews = sut.createReview(request, user1.getId());
-            Review review = reviews.get(0);
+            Review review = sut.createReview(request, user1.getId());
 
             /// 수정용 요청
             var newRequest = ReviewUpdateRequest.
@@ -700,8 +721,7 @@ class ReviewServiceIntTest {
             var request = getReviewRequest(seat1, 4);
 
             /// 생성
-            List<Review> reviews = sut.createReview(request, user1.getId());
-            Review review = reviews.get(0);
+            Review review = sut.createReview(request, user1.getId());
 
             /// 수정용 요청
             var newRequest = ReviewUpdateRequest.
@@ -725,26 +745,20 @@ class ReviewServiceIntTest {
         @DisplayName("[happy] 리뷰의 작성자는 정상적으로 삭제할 수 있습니다.")
         void happyDelete() throws IOException {
 
-            /// 요청
-            var request = getReviewRequest(seat1, 4);
-
             /// 생성
-            List<Review> reviews = sut.createReview(request, user1.getId());
-            Review review = reviews.get(0);
+            Review review = repository.save(ReviewFixtures.createReview(user1));
+            Long reviewId = review.getId();
 
             // when
             sut.deleteReview(review.getId(), user1.getId());
 
             // then
-            /// DB에 존재하는지 체크
-            assertTrue(repository.findById(review.getId()).isEmpty());
-
             /// 해시태그 존재하는지 체크
-            List<ReviewHashTag> hashTags = reviewHashTagRepository.findByReview_Id(review.getId());
+            List<ReviewHashTag> hashTags = reviewHashTagRepository.findByReview_Id(reviewId);
             Assertions.assertThat(hashTags).isEmpty();
 
             /// 이미지 존재하는지 체크
-            List<ReviewImage> images = imageRepository.findByReview(review);
+            List<ReviewImage> images = imageRepository.findByReview_Id(reviewId);
             Assertions.assertThat(images).isEmpty();
         }
 
@@ -758,8 +772,7 @@ class ReviewServiceIntTest {
             var request = getReviewRequest(seat1, 4);
 
             /// 생성
-            List<Review> reviews = sut.createReview(request, user1.getId());
-            Review review = reviews.get(0);
+            Review review = sut.createReview(request, user1.getId());
 
             // when & then
             assertThatThrownBy(() -> sut.deleteReview(review.getId(), attackedUserId))
@@ -778,8 +791,7 @@ class ReviewServiceIntTest {
             var request = getReviewRequest(seat1, 4);
 
             /// 생성
-            List<Review> reviews = sut.createReview(request, user1.getId());
-            Review review = reviews.get(0);
+            Review review = sut.createReview(request, user1.getId());
 
             // when & then
             assertThatThrownBy(() -> sut.deleteReview(review.getId(), attackedUserId))
@@ -795,11 +807,12 @@ class ReviewServiceIntTest {
 
         @Test
         @DisplayName("[happy] 최신순(LATEST) 정렬")
-        void loadReviewsBySeat_LATEST() {
+        void loadReviewsBySeat_LATEST() throws IOException {
             //given
-            Review r1 = repository.save(ReviewFixtures.createReview(user1, seat1, 1, "first review"));  // 나중에 저장
-            Review r2 = repository.save(ReviewFixtures.createReview(user1, seat1, 4, "second review"));
-            Review r3 = repository.save(ReviewFixtures.createReview(user1, seat1, 5, "third review")); // 제일 먼저 저장
+            sut.createReview(getReviewRequest(seat1, 1, "first review"), user1.getId());
+            sut.createReview(getReviewRequest(seat1, 4, "second review"), user1.getId());
+            sut.createReview(getReviewRequest(seat1, 5, "third review"), user1.getId());
+
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             //when
@@ -814,11 +827,12 @@ class ReviewServiceIntTest {
 
         @Test
         @DisplayName("[happy] 평점 내림차순(RATING_DESC) 정렬")
-        void loadReviewsBySeat_RATING_DESC() {
+        void loadReviewsBySeat_RATING_DESC() throws IOException {
             //given
-            repository.save(ReviewFixtures.createReview(user1, seat1, 3, "review 3"));
-            repository.save(ReviewFixtures.createReview(user1, seat1, 5, "review 5"));
-            repository.save(ReviewFixtures.createReview(user1, seat1, 1, "review 1"));
+            sut.createReview(getReviewRequest(seat1, 3, "review 3"), user1.getId());
+            sut.createReview(getReviewRequest(seat1, 5, "review 5"), user1.getId());
+            sut.createReview(getReviewRequest(seat1, 1, "review 1"), user1.getId());
+
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             //when
@@ -833,11 +847,11 @@ class ReviewServiceIntTest {
 
         @Test
         @DisplayName("[happy] 평점 오름차순(RATING_ASC) 정렬")
-        void loadReviewsBySeat_RATING_ASC() {
+        void loadReviewsBySeat_RATING_ASC() throws IOException {
             //given
-            repository.save(ReviewFixtures.createReview(user1, seat1, 2, "review 2"));
-            repository.save(ReviewFixtures.createReview(user1, seat1, 4, "review 4"));
-            repository.save(ReviewFixtures.createReview(user1, seat1, 3, "review 3"));
+            sut.createReview(getReviewRequest(seat1, 2, "review 2"), user1.getId());
+            sut.createReview(getReviewRequest(seat1, 4, "review 4"), user1.getId());
+            sut.createReview(getReviewRequest(seat1, 3, "review 3"), user1.getId());
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
             //when
@@ -852,18 +866,18 @@ class ReviewServiceIntTest {
 
         @Test
         @DisplayName("[happy] 좋아요 내림차순(LIKES) 정렬")
-        void loadReviewsBySeat_LIKES() {
+        void loadReviewsBySeat_LIKES() throws IOException {
             //given
-            Review r1 = repository.save(ReviewFixtures.createReview(user1, seat1, 5, "review A")); // 좋아요 1
-            Review r2 = repository.save(ReviewFixtures.createReview(user1, seat1, 4, "review B")); // 좋아요 3
-            Review r3 = repository.save(ReviewFixtures.createReview(user1, seat1, 3, "review C")); // 좋아요 2
 
-            likeService.reviewLike(user1.getId(), r2.getId());
-            likeService.reviewLike(user2.getId(), r2.getId());
-            likeService.reviewLike(user2.getId(), r3.getId());
-            likeService.reviewLike(user1.getId(), r3.getId());
+            Review review1 = sut.createReview(getReviewRequest(seat1, 5, "review A"), user1.getId());
+            Review review2 = sut.createReview(getReviewRequest(seat1, 4, "review B"), user1.getId());
+            Review review3 = sut.createReview(getReviewRequest(seat1, 3, "review C"), user1.getId());
 
-            likeService.reviewLike(user1.getId(), r1.getId());
+            likeService.reviewLike(user1.getId(), review2.getId());
+            likeService.reviewLike(user2.getId(), review2.getId());
+            likeService.reviewLike(user2.getId(), review3.getId());
+            likeService.reviewLike(user1.getId(), review3.getId());
+            likeService.reviewLike(user1.getId(), review1.getId());
 
             // r2(2명), r3(2명), r1(1명) → r2, r3, r1(동점시 저장순 or id순)
             var pageRequest = PageRequest.builder().page(1).size(10).build();
@@ -885,14 +899,18 @@ class ReviewServiceIntTest {
 
         @Test
         @DisplayName("[happy] 최신순(LATEST) 정렬")
-        void loadReviewsByAuditorium_LATEST() {
-            Review r1 = repository.save(ReviewFixtures.createReview(user1, seat1, 2, "oldest"));
-            Review r2 = repository.save(ReviewFixtures.createReview(user1, seat1, 3, "middle"));
-            Review r3 = repository.save(ReviewFixtures.createReview(user1, seat1, 1, "latest"));
+        void loadReviewsByAuditorium_LATEST() throws IOException {
+
+            // given
+            sut.createReview(getReviewRequest(seat1, 2, "oldest"), user1.getId());
+            sut.createReview(getReviewRequest(seat1, 3, "middle"), user1.getId());
+            sut.createReview(getReviewRequest(seat1, 1, "latest"), user1.getId());
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
+            // when
             SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest, ReviewSortType.LATEST);
 
+            // then
             List<ReviewListResponse> result = response.content();
             Assertions.assertThat(result.get(0).content()).isEqualTo("latest");
             Assertions.assertThat(result.get(1).content()).isEqualTo("middle");
@@ -901,30 +919,36 @@ class ReviewServiceIntTest {
 
         @Test
         @DisplayName("[happy] 평점 내림차순(RATING_DESC) 정렬")
-        void loadReviewsByAuditorium_RATING_DESC() {
-            repository.save(ReviewFixtures.createReview(user1, seat1, 1, "r1"));
-            repository.save(ReviewFixtures.createReview(user1, seat1, 5, "r5"));
-            repository.save(ReviewFixtures.createReview(user1, seat1, 3, "r3"));
+        void loadReviewsByAuditorium_RATING_DESC() throws IOException {
+            // given
+            sut.createReview(getReviewRequest(seat1, 2, "r1"), user1.getId());
+            sut.createReview(getReviewRequest(seat1, 3, "r5"), user1.getId());
+            sut.createReview(getReviewRequest(seat1, 1, "r3"), user1.getId());
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
+            // when
             SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest, ReviewSortType.RATING_DESC);
 
+            // then
             List<ReviewListResponse> result = response.content();
             Assertions.assertThat(result.get(0).content()).isEqualTo("r5");
-            Assertions.assertThat(result.get(1).content()).isEqualTo("r3");
-            Assertions.assertThat(result.get(2).content()).isEqualTo("r1");
+            Assertions.assertThat(result.get(1).content()).isEqualTo("r1");
+            Assertions.assertThat(result.get(2).content()).isEqualTo("r3");
         }
 
         @Test
         @DisplayName("[happy] 평점 오름차순(RATING_ASC) 정렬")
-        void loadReviewsByAuditorium_RATING_ASC() {
-            repository.save(ReviewFixtures.createReview(user1, seat1, 2, "r2"));
-            repository.save(ReviewFixtures.createReview(user1, seat1, 5, "r5"));
-            repository.save(ReviewFixtures.createReview(user1, seat1, 3, "r3"));
+        void loadReviewsByAuditorium_RATING_ASC() throws IOException {
+            // given
+            sut.createReview(getReviewRequest(seat1, 1, "r2"), user1.getId());
+            sut.createReview(getReviewRequest(seat1, 5, "r5"), user1.getId());
+            sut.createReview(getReviewRequest(seat1, 3, "r3"), user1.getId());
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
+            // when
             SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest, ReviewSortType.RATING_ASC);
 
+            // then
             List<ReviewListResponse> result = response.content();
             Assertions.assertThat(result.get(0).content()).isEqualTo("r2");
             Assertions.assertThat(result.get(1).content()).isEqualTo("r3");
@@ -933,18 +957,22 @@ class ReviewServiceIntTest {
 
         @Test
         @DisplayName("[happy] 좋아요 내림차순(LIKES) 정렬")
-        void loadReviewsByAuditorium_LIKES() {
-            Review r1 = repository.save(ReviewFixtures.createReview(user1, seat1, 2, "AAA"));
-            Review r2 = repository.save(ReviewFixtures.createReview(user1, seat1, 2, "BBB"));
-            Review r3 = repository.save(ReviewFixtures.createReview(user1, seat1, 2, "CCC"));
-            likeService.reviewLike(user1.getId(), r3.getId());
-            likeService.reviewLike(user2.getId(), r3.getId());
-            likeService.reviewLike(user1.getId(), r2.getId());
+        void loadReviewsByAuditorium_LIKES() throws IOException {
+            // given
+            Review review = sut.createReview(getReviewRequest(seat1, 2, "AAA"), user1.getId());
+            Review review1 = sut.createReview(getReviewRequest(seat1, 2, "BBB"), user1.getId());
+            Review review2 = sut.createReview(getReviewRequest(seat1, 2, "CCC"), user1.getId());
+
+            likeService.reviewLike(user1.getId(), review2.getId());
+            likeService.reviewLike(user2.getId(), review2.getId());
+            likeService.reviewLike(user1.getId(), review1.getId());
 
             var pageRequest = PageRequest.builder().page(1).size(10).build();
 
+            // when
             SliceResponse<ReviewListResponse> response = sut.loadReviewsByAuditoriumId(auditorium.getId(), pageRequest, ReviewSortType.LIKES);
 
+            // then
             List<ReviewListResponse> result = response.content();
             Assertions.assertThat(result.get(0).content()).isEqualTo("CCC");
             Assertions.assertThat(result.get(0).heartCount()).isEqualTo(2L);
@@ -957,11 +985,62 @@ class ReviewServiceIntTest {
 
 
 
+
+
+    /// 요청DTO 생성
     private ReviewRequest getReviewRequest(Seat seat, double rating) {
         return ReviewRequest.builder()
                 .seatIds(List.of(seat.getId()))
                 .title("review title")
                 .content("test1")
+                .movieTitle("ReviewTestTitle1")
+                .imageUrls(null)
+                .rating(rating)
+                .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                .build();
+    }
+
+    private ReviewRequest getReviewRequest(List<Seat> seats, double rating) {
+
+        /// 좌석 번호
+        List<String> seatIds = seats.stream()
+                .map(Seat::getId)
+                .toList();
+
+        return ReviewRequest.builder()
+                .seatIds(seatIds)
+                .title("review title")
+                .content("test1")
+                .movieTitle("ReviewTestTitle1")
+                .imageUrls(null)
+                .rating(rating)
+                .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                .build();
+    }
+
+    private ReviewRequest getReviewRequest(List<Seat> seats, double rating, String content) {
+
+        /// 좌석 번호
+        List<String> seatIds = seats.stream()
+                .map(Seat::getId)
+                .toList();
+
+        return ReviewRequest.builder()
+                .seatIds(seatIds)
+                .title("review title")
+                .content(content)
+                .movieTitle("ReviewTestTitle1")
+                .imageUrls(null)
+                .rating(rating)
+                .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                .build();
+    }
+
+    private ReviewRequest getReviewRequest(Seat seat, double rating, String content) {
+        return ReviewRequest.builder()
+                .seatIds(List.of(seat.getId()))
+                .title("test")
+                .content(content)
                 .movieTitle("ReviewTestTitle1")
                 .imageUrls(null)
                 .rating(rating)

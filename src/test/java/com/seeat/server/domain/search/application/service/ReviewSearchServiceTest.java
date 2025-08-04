@@ -89,9 +89,9 @@ public class ReviewSearchServiceTest {
             Auditorium auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
             Seat seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
 
-            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 5, "test content1", "test1"));
-            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 4, "test content2", "test2"));
-            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 3, "content3", "3"));
+            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, 5, "test content1", "test1"));
+            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, 4, "test content2", "test2"));
+            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, 3, "content3", "3"));
 
             ReviewSearchCondition condition = ReviewSearchCondition.builder()
                     .keyword(keyword)
@@ -128,9 +128,9 @@ public class ReviewSearchServiceTest {
             Auditorium auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
             Seat seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
 
-            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 5, "test content1", "test1"));
-            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 4, "test content2", "test2"));
-            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 3, "content3", "3"));
+            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, 5, "test content1", "test1"));
+            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, 4, "test content2", "test2"));
+            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, 3, "content3", "3"));
 
             ReviewSearchCondition condition = ReviewSearchCondition.builder()
                     .keyword(keyword)
@@ -168,9 +168,9 @@ public class ReviewSearchServiceTest {
             Auditorium auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
             Seat seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
 
-            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 5, "test content1", "test1"));
-            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 4, "test content2", "test2"));
-            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 3, "content3", "3"));
+            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, 5, "test content1", "test1"));
+            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, 4, "test content2", "test2"));
+            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, 3, "content3", "3"));
 
             ReviewSearchCondition condition = ReviewSearchCondition.builder()
                     .keyword(keyword)
@@ -208,9 +208,9 @@ public class ReviewSearchServiceTest {
             Auditorium auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
             Seat seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
 
-            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 5, "test content1", "test1"));
-            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 4, "test content2", "test2"));
-            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 3, "content3", "3"));
+            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, 5, "test content1", "test1"));
+            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, 4, "test content2", "test2"));
+            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, 3, "content3", "3"));
 
             ReviewLike like1 = reviewLikeRepository.save(ReviewLikeFixtures.stub(user, review1));
             ReviewLike like2 = reviewLikeRepository.save(ReviewLikeFixtures.stub(user, review1));
@@ -257,9 +257,9 @@ public class ReviewSearchServiceTest {
             Auditorium auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
             Seat seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
 
-            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 5, "test content1", "test1"));
-            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 4, "test content2", "test2"));
-            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 3, "content3", "3"));
+            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, 5, "test content1", "test1"));
+            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, 4, "test content2", "test2"));
+            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, 3, "content3", "3"));
 
             ReviewLike like1 = reviewLikeRepository.save(ReviewLikeFixtures.stub(user, review1));
             ReviewLike like2 = reviewLikeRepository.save(ReviewLikeFixtures.stub(user, review1));
@@ -299,9 +299,9 @@ public class ReviewSearchServiceTest {
             Auditorium auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
             Seat seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
 
-            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user1, seat1, 5, "test content1", "test1"));
-            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user1, seat1, 4, "test content2", "test2"));
-            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user1, seat1, 3, "content3", "3"));
+            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user1, 5, "test content1", "test1"));
+            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user1, 4, "test content2", "test2"));
+            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user1, 3, "content3", "3"));
 
             ReviewLike like1 = reviewLikeRepository.save(ReviewLikeFixtures.stub(user1, review1));
             ReviewLike like3 = reviewLikeRepository.save(ReviewLikeFixtures.stub(user1, review2));
@@ -351,9 +351,9 @@ public class ReviewSearchServiceTest {
             Auditorium auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
             Seat seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
 
-            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 5, "test content1", "test1"));
-            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 4, "test content2", "test2"));
-            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 3, "content3", "3"));
+            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, 5, "test content1", "test1"));
+            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, 4, "test content2", "test2"));
+            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, 3, "content3", "3"));
 
             ReviewSearchCondition condition = ReviewSearchCondition.builder()
                     .keyword(keyword)
@@ -394,9 +394,9 @@ public class ReviewSearchServiceTest {
             Seat seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium1));
             Seat seat2 = seatRepository.save(SeatFixtures.createSeat(auditorium2));
 
-            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 5, "test content1", "test1"));
-            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, seat2, 4, "test content2", "test2"));
-            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, seat2, 3, "content3", "3"));
+            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, 5, "test content1", "test1"));
+            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user,  4, "test content2", "test2"));
+            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user,  3, "content3", "3"));
 
             ReviewSearchCondition condition = ReviewSearchCondition.builder()
                     .keyword(keyword)
@@ -436,9 +436,9 @@ public class ReviewSearchServiceTest {
             Seat seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium1));
             Seat seat2 = seatRepository.save(SeatFixtures.createSeat(auditorium2));
 
-            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 5, "test content1", "test1"));
-            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, seat2, 4, "test content2", "test2"));
-            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, seat2, 3, "content3", "3"));
+            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, 5, "test content1", "test1"));
+            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user,  4, "test content2", "test2"));
+            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user,  3, "content3", "3"));
 
             ReviewSearchCondition condition = ReviewSearchCondition.builder()
                     .keyword(keyword)
@@ -480,9 +480,9 @@ public class ReviewSearchServiceTest {
             HashTag hashTag2 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.COMPANION, "부모와"));
             List<Long> hashTagIds = List.of(hashTag1.getId());
 
-            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 5, "test content1", "test1"));
-            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 4, "test content2", "test2"));
-            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 3, "content3", "3"));
+            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, 5, "test content1", "test1"));
+            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, 4, "test content2", "test2"));
+            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, 3, "content3", "3"));
 
             reviewHashTagRepository.save(ReviewHashTagFixtures.createReviewHashTag(review1, hashTag1));
             reviewHashTagRepository.save(ReviewHashTagFixtures.createReviewHashTag(review3, hashTag1));
@@ -527,9 +527,9 @@ public class ReviewSearchServiceTest {
             HashTag hashTag2 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.COMPANION, "부모와"));
             List<Long> hashTagIds = List.of(hashTag2.getId());
 
-            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 5, "test content1", "test1"));
-            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 4, "test content2", "test2"));
-            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, seat1, 3, "content3", "3"));
+            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user, 5, "test content1", "test1"));
+            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user, 4, "test content2", "test2"));
+            Review review3 = reviewRepository.save(ReviewFixtures.createReview(user, 3, "content3", "3"));
 
             reviewHashTagRepository.save(ReviewHashTagFixtures.createReviewHashTag(review1, hashTag1));
             reviewHashTagRepository.save(ReviewHashTagFixtures.createReviewHashTag(review3, hashTag1));
