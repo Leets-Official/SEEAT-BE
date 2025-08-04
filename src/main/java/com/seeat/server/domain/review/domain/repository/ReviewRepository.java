@@ -1,7 +1,7 @@
 package com.seeat.server.domain.review.domain.repository;
 
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.custom.ReviewRepositoryCustom;
+import com.seeat.server.domain.review.domain.repository.custom.ReviewRepositoryCustom;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewLikeCount;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewSeatStats;
