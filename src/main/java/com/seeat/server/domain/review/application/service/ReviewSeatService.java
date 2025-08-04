@@ -81,7 +81,7 @@ public class ReviewSeatService implements ReviewSeatUseCase {
 
     @Override
     public Map<Long, List<Seat>> loadSeatsByReviewIds(List<Long> reviewIds) {
-        List<ReviewSeat> result = repository.findByReview_IdIn((reviewIds));
+        List<ReviewSeat> result = repository.findByReview_IdIn(reviewIds);
 
         return result.stream()
                 .collect(
@@ -98,13 +98,13 @@ public class ReviewSeatService implements ReviewSeatUseCase {
     /**
      * 특정 리뷰에 연결된 모든 좌석 매핑을 해제(삭제)합니다.
      *
-     * @param review 리뷰 엔티티
+     * @param reviewId 삭제할 리뷰
      */
     @Override
-    public void disconnectSeats(Review review) {
+    public void disconnectSeats(Long reviewId) {
 
         /// 해당 좌석에 존재하는 행 전부 삭제하기
-        repository.deleteByReview(review);
+        repository.deleteByReviewId(reviewId);
 
     }
 

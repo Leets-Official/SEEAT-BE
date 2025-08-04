@@ -36,6 +36,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
         """)
     ReviewSeatStats findSeatReviewStats(@Param("seatId") String seatId);
 
+    // ========================
+    //  좌석별 함수 (다대다 매핑 사용)
+    // ========================
+
     /**
      * 좌석별 최신순(기본, 생성일자 내림차순) 리뷰 조회
      */
@@ -105,9 +109,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
 """)
     Slice<ReviewWithLikeCount> findBySeat_IdOrderByRatingAsc(@Param("seatId") String seatId, Pageable pageable);
 
-// ========================
-//  상영관별 함수 (다대다 매핑 사용)
-// ========================
+    // ========================
+    //  상영관별 함수 (다대다 매핑 사용)
+    // ========================
 
     /**
      * 상영관별 최신순(기본, 생성일자 내림차순) 리뷰 조회
@@ -201,20 +205,21 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
            COUNT(rl.user.id) AS likeCount
     FROM Review r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
     WHERE r.id = :id
     GROUP BY r
 """)
     Optional<ReviewWithLikeCount> findReviewAndCountById(@Param("id") Long id);
 
 
-
+    /**
+     * 북마크에서 사용되는 IDS들에 포함되는 리뷰 모두 가져오기
+     * @param reviewIds 리뷰 아이디들
+     */
     @Query("""
     SELECT r AS review,
-           COUNT( rl.user.id) AS likeCount
+           COUNT(rl.user.id) AS likeCount
     FROM Review r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
     WHERE r.id IN :reviewIds
     GROUP BY r
     ORDER BY COUNT(rl.user.id) DESC, r.createdAt DESC
@@ -233,10 +238,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
            COUNT(rl.user.id) AS likeCount
     FROM Review r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
     GROUP BY r
     ORDER BY COUNT(rl.user.id) DESC, r.createdAt DESC
-""")
+    """)
     Slice<ReviewWithLikeCount> findBestReviews(Pageable pageable);
 
 
@@ -251,7 +255,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
            COUNT(rl.user.id) AS likeCount
     FROM Review r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
     WHERE r.user.id = :userId
     GROUP BY r
     ORDER BY COUNT(rl.user.id) DESC, r.createdAt DESC
@@ -286,7 +289,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
            COUNT(rl.user.id) AS likeCount
     FROM Review r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id AND rl.user.id != :userId
-    LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
     WHERE r.user.id = :userId
     GROUP BY r
 """)

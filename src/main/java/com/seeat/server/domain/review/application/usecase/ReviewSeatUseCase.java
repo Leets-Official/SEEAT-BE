@@ -36,8 +36,8 @@ public interface ReviewSeatUseCase {
 
     /**
      * 리뷰를 해제하면 테이블에서 삭제하는 함수
-     * @param review    삭제하는 리뷰
+     * @param reviewId    삭제하는 리뷰
      */
-    void disconnectSeats(Review review);
+    void disconnectSeats(Long reviewId);
 
 }

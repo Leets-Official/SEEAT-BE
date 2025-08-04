@@ -71,8 +71,6 @@ public class ReviewService implements ReviewUseCase {
     @Override
     public Review createReview(ReviewRequest request, Long userId) throws IOException {
 
-        /// 여러 개의 좌석도 동시 기입
-
         /// 좌석 예외 처리
         List<Seat> seats = theaterService.getSeat(request.getSeatIds());
 
@@ -264,7 +262,7 @@ public class ReviewService implements ReviewUseCase {
         if (request.getImages() != null && !request.getImages().isEmpty()) {
 
             /// 기존 이미지 삭제
-            imageService.deleteReviewImage(review);
+            imageService.deleteReviewImage(reviewId);
 
             /// 새로운 이미지 추가
             String thumbnail = imageService.saveReviewImage(review, request.getImages()).get(0);
@@ -306,14 +304,17 @@ public class ReviewService implements ReviewUseCase {
         /// 해시태그 삭제
         hashTagService.deleteReviewHashTagByReviewId(review.getId());
 
-        /// DB 삭제
-        repository.deleteById(reviewId);
-
         /// 이미지 삭제
-        imageService.deleteReviewImage(review);
+        imageService.deleteReviewImage(reviewId);
+
+        /// 좌석 매핑도 삭제
+        reviewSeatService.disconnectSeats(reviewId);
 
         /// 인기 게시글이라면, 캐싱 초기화
         boolean checked = bestContentService.checkBestContentsByReviewId(reviewId);
+
+        /// DB 삭제
+        repository.deleteById(reviewId);
 
         if (checked) {
             /// 인기 게시글을 삭제 후, 다시 초기화 (리셋)
