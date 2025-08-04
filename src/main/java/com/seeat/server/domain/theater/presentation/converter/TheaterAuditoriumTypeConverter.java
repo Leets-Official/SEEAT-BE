@@ -1,4 +1,4 @@
-package com.seeat.server.domain.theater.presentation;
+package com.seeat.server.domain.theater.presentation.converter;
 
 import com.seeat.server.domain.theater.domain.entity.AuditoriumType;
 import com.seeat.server.global.response.ErrorCode;
