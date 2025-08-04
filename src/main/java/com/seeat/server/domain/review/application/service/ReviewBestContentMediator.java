@@ -74,7 +74,8 @@ public class ReviewBestContentMediator implements ReviewBestContentMediatorUseCa
                 .map(review -> BestReviewListResponse.from(
                         review.getReview(),
                         mapping.getOrDefault(review.getReview().getId(), List.of()),
-                        review.getLikeCount())
+                        review.getLikeCount(),
+                        review.getSeats())
                 )
                 .toList();
     }

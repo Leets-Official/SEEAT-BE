@@ -67,8 +67,8 @@ public record ReviewDetailResponse(
             List<ReviewHashTag> hashTags, Long heartCount, List<ReviewImage> images, List<Seat> seats
     ) {
 
-        /// 좌석 정보
-        Seat seat = review.getSeat();
+        /// 같은 상영관의 좌석이기에,
+        Seat seat = seats.get(0);
 
         return ReviewDetailResponse.builder()
                 .movieTitle(review.getMovieTitle())

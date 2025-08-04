@@ -5,6 +5,7 @@ import com.seeat.server.domain.image.application.usecase.ReviewImageUseCase;
 import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
 import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.hashtag.application.usecase.ReviewHashTagUseCase;
+import com.seeat.server.domain.review.application.usecase.ReviewSeatUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.hashtag.domain.entity.ReviewHashTag;
@@ -55,6 +56,7 @@ public class ReviewService implements ReviewUseCase {
     private final UserUseCase userService;
     private final SeatRatingUseCase seatRatingService;
     private final BestContentUseCase bestContentService;
+    private final ReviewSeatUseCase reviewSeatService;
 
     // ========================
     //  저장 함수
@@ -62,11 +64,12 @@ public class ReviewService implements ReviewUseCase {
     /**
      * 리뷰 저장을 위한 로직
      * 테스트를 위해서 반환값이 존재하는 것입니다.
+     *
      * @param request 리뷰를 위한 DTO
      * @param userId  리뷰를 작성할 유저 id (@AuthenticationPrincipal)
      */
     @Override
-    public List<Review> createReview(ReviewRequest request, Long userId) throws IOException {
+    public Review createReview(ReviewRequest request, Long userId) throws IOException {
 
         /// 여러 개의 좌석도 동시 기입
 
@@ -76,34 +79,32 @@ public class ReviewService implements ReviewUseCase {
         /// 유저 예외처리
         User user = userService.getUser(userId);
 
-        List<Review> savedReviews = new ArrayList<>();
+        /// 리뷰 객체 생성
+        Review review = Review.of(user, request.getMovieTitle(), request.getRating(), request.getContent(), request.getTitle());
+
+        /// DB 저장
+        Review savedReview = repository.save(review);
+
+        /// 이미지 저장
+        if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
+            String thumbnail = imageService.saveReviewImage(savedReview, request.getImageUrls()).get(0);
+            savedReview.changeThumbnailUrl(thumbnail);
+        }
+
+        /// 해시태그 저장
+        hashTagService.createReviewHashTag(savedReview, request.getHashtags());
 
         /// 한 명의 유저가 여러개의 리뷰를 동시에 저장할 시
-        String groupId = UUID.randomUUID().toString();
-
         for (Seat seat : seats) {
-            /// 리뷰 객체 생성
-            Review review = Review.of(user, seat, request.getMovieTitle(), request.getRating(), request.getContent(), request.getTitle(), groupId);
-
-            /// DB 저장
-            Review savedReview = repository.save(review);
-
-            /// 이미지 저장
-            if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
-                String thumbnail = imageService.saveReviewImage(savedReview, request.getImageUrls()).get(0);
-                savedReview.changeThumbnailUrl(thumbnail);
-            }
-
-            /// 해시태그 저장
-            hashTagService.createReviewHashTag(savedReview, request.getHashtags());
 
             /// 좌석 평점 업데이트
             seatRatingService.saveSeatRating(savedReview, seat);
 
-            savedReviews.add(savedReview);
+            /// 여러개와 좌석을 매핑
+            reviewSeatService.connectSeats(seat, savedReview);
         }
 
-        return savedReviews;
+        return savedReview;
     }
 
     // ========================
@@ -126,10 +127,7 @@ public class ReviewService implements ReviewUseCase {
         Review review = result.getReview();
 
         /// 같이 작성된 좌석 조회
-        List<Review> reviews = repository.findByGroupId(review.getGroupId());
-        List<Seat> seats = reviews.stream()
-                .map(Review::getSeat)
-                .toList();
+        List<Seat> seats = result.getSeats();
 
         /// ReviewId를 바탕으로 작성한 해시태그 조회
         List<ReviewHashTag> hashTags = hashTagService.getReviewHashTagByReview(review);

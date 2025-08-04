@@ -25,28 +25,31 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @param seatId 조회할 좌석 ID
      */
     @Query("""
-                SELECT s AS seat,
-                       COUNT(r) AS reviewCount,
-                       AVG(r.rating) AS averageRating
-                FROM Seat s
-                LEFT JOIN Review r ON r.seat = s
-                WHERE s.id = :seatId
-                GROUP BY s
-            """)
+            SELECT s AS seat,
+                   COUNT(rs.review) AS reviewCount,
+                   AVG(r.rating) AS averageRating
+            FROM Seat s
+            LEFT JOIN ReviewSeat rs ON rs.seat = s
+            LEFT JOIN Review r ON rs.review = r
+            WHERE s.id = :seatId
+            GROUP BY s
+        """)
     ReviewSeatStats findSeatReviewStats(@Param("seatId") String seatId);
-
-    // ========================
-    //  좌석별 함수
-    // ========================
 
     /**
      * 좌석별 최신순(기본, 생성일자 내림차순) 리뷰 조회
      */
-    @Query("SELECT r AS review, COUNT(rl) AS likeCount "
-            + "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id "
-            + "WHERE r.seat.id = :seatId "
-            + "GROUP BY r "
-            + "ORDER BY r.createdAt DESC")
+    @Query("""
+    SELECT r AS review,
+           COUNT(rl) AS likeCount,
+           COLLECT( rs.seat) AS seats
+    FROM ReviewSeat rs
+    JOIN Review r ON rs.review = r
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+    WHERE rs.seat.id = :seatId
+    GROUP BY r
+    ORDER BY r.createdAt DESC
+""")
     Slice<ReviewWithLikeCount> findBySeat_IdOrderByLatest(@Param("seatId") String seatId, Pageable pageable);
 
     /**
@@ -55,11 +58,17 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @param pageable  페이징 정보
      * @return 리뷰와 좋아요 수
      */
-    @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
-            "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
-            "WHERE r.seat.id = :seatId " +
-            "GROUP BY r " +
-            "ORDER BY COUNT(rl) DESC, r.createdAt DESC")
+    @Query("""
+    SELECT r AS review,
+           COUNT(rl) AS likeCount,
+           COLLECT( rs.seat) AS seats
+    FROM ReviewSeat rs
+    JOIN Review r ON rs.review = r
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+    WHERE rs.seat.id = :seatId
+    GROUP BY r
+    ORDER BY COUNT(rl) DESC, r.createdAt DESC
+""")
     Slice<ReviewWithLikeCount> findBySeat_IdOrderByLikesDesc(@Param("seatId") String seatId, Pageable pageable);
 
     /**
@@ -68,11 +77,17 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @param pageable  페이징 정보
      * @return 리뷰와 좋아요 수
      */
-    @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
-            "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
-            "WHERE r.seat.id = :seatId " +
-            "GROUP BY r " +
-            "ORDER BY r.rating DESC, r.createdAt DESC")
+    @Query("""
+    SELECT r AS review,
+           COUNT(rl) AS likeCount,
+           COLLECT( rs.seat) AS seats
+    FROM ReviewSeat rs
+    JOIN Review r ON rs.review = r
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+    WHERE rs.seat.id = :seatId
+    GROUP BY r
+    ORDER BY r.rating DESC, r.createdAt DESC
+""")
     Slice<ReviewWithLikeCount> findBySeat_IdOrderByRatingDesc(@Param("seatId") String seatId, Pageable pageable);
 
     /**
@@ -81,25 +96,37 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @param pageable  페이징 정보
      * @return 리뷰와 좋아요 수
      */
-    @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
-            "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
-            "WHERE r.seat.id = :seatId " +
-            "GROUP BY r " +
-            "ORDER BY r.rating ASC, r.createdAt DESC")
+    @Query("""
+    SELECT r AS review,
+           COUNT(rl) AS likeCount,
+           COLLECT( rs.seat) AS seats
+    FROM ReviewSeat rs
+    JOIN Review r ON rs.review = r
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+    WHERE rs.seat.id = :seatId
+    GROUP BY r
+    ORDER BY r.rating ASC, r.createdAt DESC
+""")
     Slice<ReviewWithLikeCount> findBySeat_IdOrderByRatingAsc(@Param("seatId") String seatId, Pageable pageable);
 
-    // ========================
-    //  상영관별 함수
-    // ========================
+// ========================
+//  상영관별 함수 (다대다 매핑 사용)
+// ========================
 
     /**
      * 상영관별 최신순(기본, 생성일자 내림차순) 리뷰 조회
      */
-    @Query("SELECT r AS review, COUNT(rl) AS likeCount "
-            + "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id "
-            + "WHERE r.seat.auditorium.id = :auditoriumId "
-            + "GROUP BY r "
-            + "ORDER BY r.createdAt DESC")
+    @Query("""
+    SELECT r AS review,
+           COUNT(rl) AS likeCount,
+           COLLECT( rs.seat) AS seats
+    FROM ReviewSeat rs
+    JOIN Review r ON rs.review = r
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+    WHERE rs.seat.auditorium.id = :auditoriumId
+    GROUP BY r
+    ORDER BY r.createdAt DESC
+""")
     Slice<ReviewWithLikeCount> findByAuditorium_IdOrderByLatest(@Param("auditoriumId") String auditoriumId, Pageable pageable);
 
     /**
@@ -108,11 +135,17 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @param pageable     페이징 정보
      * @return 리뷰와 좋아요 수
      */
-    @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
-            "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
-            "WHERE r.seat.auditorium.id = :auditoriumId " +
-            "GROUP BY r " +
-            "ORDER BY COUNT(rl) DESC, r.createdAt DESC")
+    @Query("""
+    SELECT r AS review,
+           COUNT(rl) AS likeCount,
+           COLLECT( rs.seat) AS seats
+    FROM ReviewSeat rs
+    JOIN Review r ON rs.review = r
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+    WHERE rs.seat.auditorium.id = :auditoriumId
+    GROUP BY r
+    ORDER BY COUNT(rl) DESC, r.createdAt DESC
+""")
     Slice<ReviewWithLikeCount> findByAuditorium_IdOrderByLikesDesc(@Param("auditoriumId") String auditoriumId, Pageable pageable);
 
     /**
@@ -121,11 +154,17 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @param pageable     페이징 정보
      * @return 리뷰와 좋아요 수
      */
-    @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
-            "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
-            "WHERE r.seat.auditorium.id = :auditoriumId " +
-            "GROUP BY r " +
-            "ORDER BY r.rating DESC, r.createdAt DESC")
+    @Query("""
+    SELECT r AS review,
+           COUNT(rl) AS likeCount,
+           COLLECT( rs.seat) AS seats
+    FROM ReviewSeat rs
+    JOIN Review r ON rs.review = r
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+    WHERE rs.seat.auditorium.id = :auditoriumId
+    GROUP BY r
+    ORDER BY r.rating DESC, r.createdAt DESC
+""")
     Slice<ReviewWithLikeCount> findByAuditorium_IdOrderByRatingDesc(@Param("auditoriumId") String auditoriumId, Pageable pageable);
 
     /**
@@ -134,11 +173,17 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @param pageable     페이징 정보
      * @return 리뷰와 좋아요 수
      */
-    @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
-            "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
-            "WHERE r.seat.auditorium.id = :auditoriumId " +
-            "GROUP BY r " +
-            "ORDER BY r.rating ASC, r.createdAt DESC")
+    @Query("""
+    SELECT r AS review,
+           COUNT(rl) AS likeCount,
+           COLLECT( rs.seat) AS seats
+    FROM ReviewSeat rs
+    JOIN Review r ON rs.review = r
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+    WHERE rs.seat.auditorium.id = :auditoriumId
+    GROUP BY r
+    ORDER BY r.rating ASC, r.createdAt DESC
+""")
     Slice<ReviewWithLikeCount> findByAuditorium_IdOrderByRatingAsc(@Param("auditoriumId") String auditoriumId, Pageable pageable);
 
     /**
@@ -146,9 +191,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @param auditoriumId  상영관
      * @return   boolean
      */
-    @Query("SELECT COUNT(r) " +
-            "FROM Review r "+
-            "WHERE r.seat.auditorium.id = :auditoriumId")
+    @Query("""
+   SELECT COUNT(DISTINCT rs.review)
+   FROM ReviewSeat rs
+   WHERE rs.seat.auditorium.id = :auditoriumId
+    """)
     Long countByAuditoriumId(@Param("auditoriumId") String auditoriumId);
 
 
@@ -157,18 +204,31 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @param id    리뷰 ID
      * @return Optional<ReviewWithLikeCount>
      */
-    @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
-            "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
-            "WHERE r.id = :id " +
-            "GROUP BY r ")
+    @Query("""
+    SELECT r AS review,
+           COUNT(rl.user.id) AS likeCount,
+           COLLECT(rs.seat) AS seats
+    FROM Review r
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+    LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
+    WHERE r.id = :id
+    GROUP BY r
+""")
     Optional<ReviewWithLikeCount> findReviewAndCountById(@Param("id") Long id);
 
 
-    @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
-            "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
-            "WHERE r.id IN :reviewIds " +
-            "GROUP BY r " +
-            "ORDER BY COUNT(rl) DESC, r.createdAt DESC")
+
+    @Query("""
+    SELECT r AS review,
+           COUNT( rl.user.id) AS likeCount,
+           COLLECT(rs.seat) AS seats
+    FROM Review r
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+    LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
+    WHERE r.id IN :reviewIds
+    GROUP BY r
+    ORDER BY COUNT(rl.user.id) DESC, r.createdAt DESC
+    """)
     List<ReviewWithLikeCount> findByReviewIds(@Param("reviewIds") List<Long> reviewIds);
 
     /**
@@ -178,10 +238,16 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @param pageable 페이지네이션 정보
      * @return 좋아요 수가 많은 순으로 정렬된 리뷰 목록
      */
-    @Query("SELECT r AS review, COUNT(rl) AS likeCount " +
-            "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
-            "GROUP BY r "+
-            "ORDER BY COUNT(rl) DESC, r.createdAt DESC")
+    @Query("""
+    SELECT r AS review,
+           COUNT(rl.user.id) AS likeCount,
+           COLLECT(rs.seat) AS seats
+    FROM Review r
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+    LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
+    GROUP BY r
+    ORDER BY COUNT(rl.user.id) DESC, r.createdAt DESC
+""")
     Slice<ReviewWithLikeCount> findBestReviews(Pageable pageable);
 
 
@@ -191,12 +257,17 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @param pageable 페이징
      * @return Slice<ReviewWithLikeCount>
      */
-    @Query(
-            "SELECT r AS review, COUNT(rl) AS likeCount " +
-                    "FROM Review r LEFT JOIN ReviewLike rl ON rl.review.id = r.id " +
-                    "WHERE r.user.id = :userId " +
-                    "GROUP BY r " +
-                    "ORDER BY COUNT(rl) DESC, r.createdAt DESC ")
+    @Query("""
+    SELECT r AS review,
+           COUNT(rl.user.id) AS likeCount,
+           COLLECT(rs.seat) AS seats
+    FROM Review r
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+    LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
+    WHERE r.user.id = :userId
+    GROUP BY r
+    ORDER BY COUNT(rl.user.id) DESC, r.createdAt DESC
+""")
     Slice<ReviewWithLikeCount> findMyReviews(@Param("userId") Long userId, Pageable pageable);
 
 
@@ -222,17 +293,17 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @param userId 유저 Id
      * @return ReviewLikeCountResponse 응답
      */
-    @Query(" SELECT COUNT(DISTINCT r.id) as reviewCount,COUNT(rl.id) as likeCount " +
-            "FROM Review r " +
-            "LEFT JOIN ReviewLike rl " +
-            "ON rl.review.id = r.id " +
-            "AND rl.user.id != :userId " +
-            "WHERE r.user.id = :userId")
+    @Query("""
+    SELECT r AS review,
+           COUNT(rl.user.id) AS likeCount,
+           COLLECT(rs.seat) AS seats
+    FROM Review r
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id AND rl.user.id != :userId
+    LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
+    WHERE r.user.id = :userId
+    GROUP BY r
+""")
     ReviewLikeCount findReviewCountAndLikeCountByUserId(@Param("userId") Long userId);
-           
-    /**
-     * 같이 작성된 리뷰 조회
-     * @param groupId   같이 작성된 그룹 ID
-     */
-    List<Review> findByGroupId(String groupId);
+
+
 }
