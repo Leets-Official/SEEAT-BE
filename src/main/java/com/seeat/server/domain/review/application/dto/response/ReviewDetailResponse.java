@@ -6,6 +6,7 @@ import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.user.application.dto.response.UserResponse;
 import com.seeat.server.domain.image.application.dto.response.ReviewImageInfoResponse;
+import com.seeat.server.global.util.DateFormatUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -58,7 +59,7 @@ public record ReviewDetailResponse(
         Long heartCount,
 
         @Schema(description = "리뷰 작성 시간", example = "2025-07-24T14:35:00")
-        LocalDateTime createdAt
+        String createdAt
 ) {
 
     public static ReviewDetailResponse from(
@@ -83,7 +84,7 @@ public record ReviewDetailResponse(
                 .user(UserResponse
                         .from(review.getUser()))
                 .imageInfo(ReviewImageInfoResponse.from(images))
-                .createdAt(review.getCreatedAt())
+                .createdAt(DateFormatUtil.formatDate(review.getCreatedAt()))
                 .build();
     }
 }

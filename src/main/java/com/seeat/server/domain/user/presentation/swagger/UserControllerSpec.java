@@ -1,15 +1,14 @@
 package com.seeat.server.domain.user.presentation.swagger;
 
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
+import com.seeat.server.domain.user.application.dto.response.UserNicknameResponse;
 import com.seeat.server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -32,6 +31,19 @@ public interface UserControllerSpec {
             @RequestBody @Valid UserSignUpRequest request,
             @RequestHeader String tempUserKey
     ) throws IOException;
+
+    /**
+     * 사용자 닉네임 중복확인 API
+     *
+     * @param nickname 사용할 닉네임
+     * @return true(중복), false(사용가능)
+     */
+    @GetMapping
+    @Operation(
+            summary = "닉네임 중복 확인",
+            description = "true면 닉네임 중복, false면 닉네임 사용 가능한 닉네임 중복 확인 기능입니다."
+    )
+    ApiResponse<UserNicknameResponse> userDuplicateNickname(@RequestParam String nickname);
 
     /**
      * 로그아웃 API

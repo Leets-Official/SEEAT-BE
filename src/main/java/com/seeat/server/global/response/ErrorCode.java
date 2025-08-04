@@ -79,9 +79,13 @@ public enum ErrorCode {
     /** 유저 없음 */
     NOT_USER(1000, HttpStatus.NOT_FOUND, "해당하는 유저가 존재하지 않습니다."),
     NOT_TEMP_USER(1001, HttpStatus.NOT_FOUND, "임시 유저가 존재하지 않습니다."),
+    NOT_GRADE(1002, HttpStatus.NOT_FOUND, "등급이 존재하지 않습니다."),
 
     /** 최초 로그인 추가 정보 필요 */
     FIRST_LOGIN(1200, HttpStatus.NOT_FOUND, "최초 로그인유저이기에 추가정보기입이 필요합니다."),
+
+    /** 중복 확인 **/
+    DUPLICATED_NICKNAME(1300,HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
 
     // ========================
     // 2000~2999 : 영화관 관련 에러

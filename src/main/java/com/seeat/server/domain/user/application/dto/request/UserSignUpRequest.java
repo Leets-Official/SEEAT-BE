@@ -38,7 +38,7 @@ public class UserSignUpRequest {
      * 좋아하는 영화 장르
      */
     @NotNull(message = "좋아하는 영화 장르는 필수입니다.")
-    @Size(min = 1, message = "최소 하나 이상의 장르가 필요합니다.")
+    @Size(min = 1, max = 3, message = "1개~3개 사이의 장르가 필요합니다.")
     @Schema(description = "유저가 선호하는 영화 장르", example = "[\"ACTION\", \"COMEDY\",\"SF\"]")
     private List<MovieGenre> genres;
 

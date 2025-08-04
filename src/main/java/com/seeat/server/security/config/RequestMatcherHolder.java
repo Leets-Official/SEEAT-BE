@@ -30,6 +30,7 @@ public class RequestMatcherHolder {
 
             // 유저 관련
             new RequestInfo(POST, "/api/v1/users", null),
+            new RequestInfo(GET, "/api/v1/users", null),
             new RequestInfo(POST, "/api/v1/users/logout", USER),
             new RequestInfo(POST, "/api/v1/users/dev/long-token", null),
 

@@ -27,7 +27,7 @@ public record ReviewSeatInfoResponse(
     public static ReviewSeatInfoResponse from(Seat seat) {
         return ReviewSeatInfoResponse.builder()
                 .seatId(seat.getId())
-                .seatNumber(seat.getColumn() + seat.getRow())
+                .seatNumber(seat.getRow() + seat.getColumn())
                 .build();
     }
 

@@ -3,6 +3,7 @@ package com.seeat.server.domain.user.application.service;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
+import com.seeat.server.domain.user.application.dto.response.UserNicknameResponse;
 import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserAuditorium;
@@ -10,6 +11,7 @@ import com.seeat.server.domain.user.domain.entity.UserSocial;
 import com.seeat.server.domain.user.domain.repository.UserAuditoriumRepository;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.domain.image.application.usecase.ImageUseCase;
+import com.seeat.server.global.response.CustomException;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.service.RedisService;
 import com.seeat.server.global.util.JwtConstants;
@@ -54,6 +56,27 @@ public class UserService implements UserUseCase {
     public Optional<User> getUserByEmail(String email) {
         return repository.findByEmail(email);
     }
+
+    /**
+     * 닉네임 중복 확인 로직
+     *
+     * @param nickname 사용할 닉네임
+     * @return true, false
+     */
+    @Override
+    public UserNicknameResponse isNicknameDuplicated (String nickname){
+
+        Boolean response = repository.existsByNickname(nickname);
+
+        // 중복이면 에러처리
+        if (response){
+
+            throw new CustomException(ErrorCode.DUPLICATED_NICKNAME, null);
+        }
+
+        return UserNicknameResponse.from(repository.existsByNickname(nickname));
+    }
+
 
     /**
      * 가입한 소셜 종류와 소셜 ID으로 최초 로그인인지 확인 로직
