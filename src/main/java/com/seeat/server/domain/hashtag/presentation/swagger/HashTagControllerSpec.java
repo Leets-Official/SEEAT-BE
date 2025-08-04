@@ -1,7 +1,7 @@
-package com.seeat.server.domain.review.presentation.swagger;
+package com.seeat.server.domain.hashtag.presentation.swagger;
 
-import com.seeat.server.domain.review.application.dto.response.AuditoriumHashTagResponse;
-import com.seeat.server.domain.review.application.dto.response.HashTagResponse;
+import com.seeat.server.domain.hashtag.application.dto.response.AuditoriumHashTagResponse;
+import com.seeat.server.domain.hashtag.application.dto.response.HashTagResponse;
 import com.seeat.server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

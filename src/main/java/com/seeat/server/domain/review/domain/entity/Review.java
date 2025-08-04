@@ -1,7 +1,6 @@
 package com.seeat.server.domain.review.domain.entity;
 
 import com.seeat.server.domain.BaseEntity;
-import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.user.domain.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,8 +10,9 @@ import lombok.NoArgsConstructor;
 
 /**
  * 영화 리뷰 엔티티
- * - 리뷰 작성자(User), 좌석(Seat)과 연관
+ * - 리뷰 작성자(User)
  * - 영화 제목, 평점, 내용, 이미지 URL 저장
+ * - 좌석은 중간테이블로 설정하여 처리한다.
  */
 
 @Entity
@@ -29,12 +29,6 @@ public class Review extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Seat seat;
-
-    /// 같이 입력된 리뷰를 확인하기 위한 식별자
-    private String groupId;
-
     private String title;
 
     private String movieTitle;
@@ -46,17 +40,15 @@ public class Review extends BaseEntity {
     private String content;
 
     /// 정적 팩토리 메서드
-    public static Review of(User user, Seat seat, String movieTitle, double rating, String content, String title, String groupId) {
+    public static Review of(User user, String movieTitle, double rating, String content, String title) {
 
         return Review.builder()
                 .user(user)
-                .seat(seat)
                 .title(title)
                 .movieTitle(movieTitle)
                 .thumbnailUrl("thumbnailUrl")
                 .rating(rating)
                 .content(content)
-                .groupId(groupId)
                 .build();
     }
 

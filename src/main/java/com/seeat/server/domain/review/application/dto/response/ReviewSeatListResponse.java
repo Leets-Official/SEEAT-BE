@@ -1,6 +1,6 @@
 package com.seeat.server.domain.review.application.dto.response;
 
-import com.seeat.server.domain.review.domain.repository.dto.SeatReviewStats;
+import com.seeat.server.domain.review.domain.repository.dto.ReviewSeatStats;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -38,7 +38,7 @@ public record ReviewSeatListResponse(
 ) {
 
     /// 정적 팩토리 메서드
-    public static ReviewSeatListResponse from(SeatReviewStats stats, List<ReviewListResponse> reviews) {
+    public static ReviewSeatListResponse from(ReviewSeatStats stats, List<ReviewListResponse> reviews) {
 
         Seat seat = stats.getSeat();
 

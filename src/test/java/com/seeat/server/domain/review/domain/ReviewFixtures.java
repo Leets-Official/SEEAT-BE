@@ -11,7 +11,7 @@ import com.seeat.server.domain.user.domain.entity.User;
 
 public class ReviewFixtures {
 
-    public static Review fakeReview(User user, Seat seat) {
+    public static Review fakeReview(User user) {
         return Review.builder()
                 .id(1L)
                 .title("Title")
@@ -19,54 +19,49 @@ public class ReviewFixtures {
                 .movieTitle("testTitle1")
                 .rating(1)
                 .user(user)
-                .seat(seat)
                 .build();
     }
 
-    public static Review createReview(User user, Seat seat) {
+    public static Review createReview(User user) {
         return Review.builder()
                 .title("Title")
                 .content("testContent1")
                 .movieTitle("testTitle1")
                 .rating(1)
                 .user(user)
-                .seat(seat)
                 .thumbnailUrl("thumbnailUrl")
                 .build();
     }
 
-    public static Review createReview(User user, Seat seat, int rating) {
+    public static Review createReview(User user, int rating) {
         return Review.builder()
                 .title("Title")
                 .content("testContent2")
                 .movieTitle("testTitle2")
                 .rating(rating)
                 .user(user)
-                .seat(seat)
                 .thumbnailUrl("thumbnailUrl")
                 .build();
     }
 
-    public static Review createReview(User user, Seat seat, int rating, String content) {
+    public static Review createReview(User user, int rating, String content) {
         return Review.builder()
                 .title("Title")
                 .content(content)
                 .movieTitle("testTitle2")
                 .rating(rating)
                 .user(user)
-                .seat(seat)
                 .thumbnailUrl("thumbnailUrl")
                 .build();
     }
 
-    public static Review createReview(User user, Seat seat, int rating, String content, String title) {
+    public static Review createReview(User user, int rating, String content, String title) {
         return Review.builder()
                 .title(title)
                 .content(content)
                 .movieTitle(title)
                 .rating(rating)
                 .user(user)
-                .seat(seat)
                 .thumbnailUrl("thumbnailUrl")
                 .build();
     }

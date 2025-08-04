@@ -1,9 +1,11 @@
 package com.seeat.server.domain.best.application.dto.response;
 
 import com.seeat.server.domain.best.domain.entity.BestReviewSnapshot;
-import com.seeat.server.domain.review.domain.entity.HashTag;
+import com.seeat.server.domain.hashtag.domain.entity.HashTag;
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
+import com.seeat.server.domain.hashtag.domain.entity.ReviewHashTag;
+import com.seeat.server.domain.theater.domain.entity.Auditorium;
+import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.user.domain.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -98,7 +100,10 @@ public record BestReviewListResponse(
     }
 
     /// DB에서 직접 조회 정적 팩토리 메서드
-    public static BestReviewListResponse from(Review review, List<ReviewHashTag> hashTags, Long heartCount) {
+    public static BestReviewListResponse from(Review review, List<ReviewHashTag> hashTags, Long heartCount, List<Seat> seats) {
+
+        /// 좌석에 따른 상영관
+        Auditorium auditorium = seats.get(0).getAuditorium();
 
         /// 해시태그들 정리
         List<String> hashtags = hashTags.stream()
@@ -114,7 +119,7 @@ public record BestReviewListResponse(
                 .thumbnailUrl(review.getThumbnailUrl())
                 .hashtags(hashtags)
                 .movieTitle(review.getMovieTitle())
-                .theaterName(review.getSeat().getAuditorium().getTheater().getName())
+                .theaterName(auditorium.getTheater().getName() + auditorium.getName())
                 .title(review.getTitle())
                 .content(review.getContent())
                 .userId(user.getId())

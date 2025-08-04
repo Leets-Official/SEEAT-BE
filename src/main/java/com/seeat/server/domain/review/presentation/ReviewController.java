@@ -2,11 +2,13 @@ package com.seeat.server.domain.review.presentation;
 
 import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
+import com.seeat.server.domain.review.application.dto.response.ReviewSaveResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
+import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.presentation.swagger.ReviewControllerSpec;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
@@ -35,15 +37,18 @@ public class ReviewController implements ReviewControllerSpec {
      * @return 리뷰 작성 알림
      */
     @PostMapping()
-    public ApiResponse<Void> createReview(
+    public ApiResponse<ReviewSaveResponse> createReview(
             @RequestBody @Valid ReviewRequest request,
             @AuthenticationPrincipal User user) throws IOException {
 
         // 서비스 호출
-        reviewService.createReview(request, user.getId());
+        Review review = reviewService.createReview(request, user.getId());
+
+        // DTO 변환
+        ReviewSaveResponse response = ReviewSaveResponse.from(review);
 
         // 결과 리턴
-        return ApiResponse.created();
+        return ApiResponse.created(response);
     }
 
     /**

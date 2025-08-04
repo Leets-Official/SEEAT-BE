@@ -5,6 +5,7 @@ import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
+import com.seeat.server.domain.review.application.dto.response.ReviewSaveResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.global.response.pageable.PageRequest;
@@ -12,7 +13,7 @@ import com.seeat.server.global.response.pageable.SliceResponse;
 import org.springframework.data.domain.Slice;
 
 import java.io.IOException;
-import java.util.List;
+
 /**
  * [리뷰 인터페이스]
  * - 로그인한 유저만 좌석 후기를 작성 및 열람할 수 있습니다.
@@ -25,7 +26,7 @@ public interface ReviewUseCase {
     //  저장 함수
     // ========================
 
-    List<Review> createReview(ReviewRequest request, Long userId) throws IOException;
+    Review createReview(ReviewRequest request, Long userId) throws IOException;
 
     // ========================
     //  조회 함수

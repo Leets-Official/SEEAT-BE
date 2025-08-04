@@ -54,19 +54,13 @@ class ReviewLikeServiceIntTest {
     @Autowired
     private ReviewRepository reviewRepository;
 
-    private Seat seat;
     private User user;
-    private Theater theater;
-    private Auditorium auditorium;
     private Review review;
 
     @BeforeEach()
     void setUp() {
-        theater = theaterRepository.save(TheaterFixtures.createTheater());
-        auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
-        seat = seatRepository.save(SeatFixtures.createSeat(auditorium));
         user = userRepository.save(UserFixtures.createUser());
-        review = reviewRepository.save(ReviewFixtures.createReview(user, seat));
+        review = reviewRepository.save(ReviewFixtures.createReview(user));
     }
 
     @Nested

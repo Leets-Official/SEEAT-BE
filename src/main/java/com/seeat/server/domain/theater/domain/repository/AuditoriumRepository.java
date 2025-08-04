@@ -29,18 +29,24 @@ public interface AuditoriumRepository extends JpaRepository<Auditorium, String> 
     group by a
 """)
     Optional<AuditoriumWithRating> findAuditoriumWithRating(@Param("auditoriumId") String auditoriumId);
+
+
     @Query("""
     SELECT
         a AS auditorium,
-        COUNT(r) AS reviewCount,
+        COUNT(DISTINCT r.id) AS reviewCount,
         AVG(r.rating) AS avgRating,
-        (COUNT(r) * 0.3 + AVG(r.rating) * 0.7) AS score
+        (COUNT(DISTINCT r.id) * 0.3 + AVG(r.rating) * 0.7) AS score
     FROM Auditorium a
-    LEFT JOIN Review r ON r.seat.auditorium = a
+    LEFT JOIN Seat s ON s.auditorium = a
+    LEFT JOIN ReviewSeat rs ON rs.seat = s
+    LEFT JOIN Review r ON rs.review = r
     GROUP BY a.id
-    ORDER BY COUNT(r) * 0.3 + COALESCE(AVG(r.rating), 0) * 0.7 DESC
+    ORDER BY (COUNT(DISTINCT r.id) * 0.3 + COALESCE(AVG(r.rating), 0) * 0.7) DESC
 """)
     Slice<AuditoriumWithScore> findBestAuditoriums(Pageable pageable);
+
+
 
     Optional<Auditorium> findByNameContainingIgnoreCaseAndTheater_Id(String name, String theater_id);
 }

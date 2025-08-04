@@ -1,4 +1,4 @@
-package com.seeat.server.domain.review.presentation;
+package com.seeat.server.domain.review.presentation.converter;
 
 import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
 import com.seeat.server.global.response.ErrorCode;

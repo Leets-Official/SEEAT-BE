@@ -3,11 +3,13 @@ package com.seeat.server.domain.review.application.service;
 import com.seeat.server.domain.best.application.usecase.BestContentUseCase;
 import com.seeat.server.domain.image.application.usecase.ReviewImageUseCase;
 import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
+import com.seeat.server.domain.review.application.dto.response.ReviewSaveResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
-import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
+import com.seeat.server.domain.hashtag.application.usecase.ReviewHashTagUseCase;
+import com.seeat.server.domain.review.application.usecase.ReviewSeatUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
+import com.seeat.server.domain.hashtag.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
@@ -15,7 +17,7 @@ import com.seeat.server.domain.review.application.dto.request.ReviewUpdateReques
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
-import com.seeat.server.domain.review.domain.repository.dto.SeatReviewStats;
+import com.seeat.server.domain.review.domain.repository.dto.ReviewSeatStats;
 import com.seeat.server.domain.theater.application.usecase.SeatRatingUseCase;
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
@@ -55,6 +57,7 @@ public class ReviewService implements ReviewUseCase {
     private final UserUseCase userService;
     private final SeatRatingUseCase seatRatingService;
     private final BestContentUseCase bestContentService;
+    private final ReviewSeatUseCase reviewSeatService;
 
     // ========================
     //  저장 함수
@@ -62,13 +65,12 @@ public class ReviewService implements ReviewUseCase {
     /**
      * 리뷰 저장을 위한 로직
      * 테스트를 위해서 반환값이 존재하는 것입니다.
+     *
      * @param request 리뷰를 위한 DTO
      * @param userId  리뷰를 작성할 유저 id (@AuthenticationPrincipal)
      */
     @Override
-    public List<Review> createReview(ReviewRequest request, Long userId) throws IOException {
-
-        /// 여러 개의 좌석도 동시 기입
+    public Review createReview(ReviewRequest request, Long userId) throws IOException {
 
         /// 좌석 예외 처리
         List<Seat> seats = theaterService.getSeat(request.getSeatIds());
@@ -76,34 +78,32 @@ public class ReviewService implements ReviewUseCase {
         /// 유저 예외처리
         User user = userService.getUser(userId);
 
-        List<Review> savedReviews = new ArrayList<>();
+        /// 리뷰 객체 생성
+        Review review = Review.of(user, request.getMovieTitle(), request.getRating(), request.getContent(), request.getTitle());
+
+        /// DB 저장
+        Review savedReview = repository.save(review);
+
+        /// 이미지 저장
+        if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
+            String thumbnail = imageService.saveReviewImage(savedReview, request.getImageUrls()).get(0);
+            savedReview.changeThumbnailUrl(thumbnail);
+        }
+
+        /// 해시태그 저장
+        hashTagService.createReviewHashTag(savedReview, request.getHashtags());
 
         /// 한 명의 유저가 여러개의 리뷰를 동시에 저장할 시
-        String groupId = UUID.randomUUID().toString();
-
         for (Seat seat : seats) {
-            /// 리뷰 객체 생성
-            Review review = Review.of(user, seat, request.getMovieTitle(), request.getRating(), request.getContent(), request.getTitle(), groupId);
-
-            /// DB 저장
-            Review savedReview = repository.save(review);
-
-            /// 이미지 저장
-            if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
-                String thumbnail = imageService.saveReviewImage(savedReview, request.getImageUrls()).get(0);
-                savedReview.changeThumbnailUrl(thumbnail);
-            }
-
-            /// 해시태그 저장
-            hashTagService.createReviewHashTag(savedReview, request.getHashtags());
 
             /// 좌석 평점 업데이트
             seatRatingService.saveSeatRating(savedReview, seat);
 
-            savedReviews.add(savedReview);
+            /// 여러개와 좌석을 매핑
+            reviewSeatService.connectSeats(seat, savedReview);
         }
 
-        return savedReviews;
+        return savedReview;
     }
 
     // ========================
@@ -126,10 +126,7 @@ public class ReviewService implements ReviewUseCase {
         Review review = result.getReview();
 
         /// 같이 작성된 좌석 조회
-        List<Review> reviews = repository.findByGroupId(review.getGroupId());
-        List<Seat> seats = reviews.stream()
-                .map(Review::getSeat)
-                .toList();
+        List<Seat> seats = reviewSeatService.loadSeatsByReview(review);
 
         /// ReviewId를 바탕으로 작성한 해시태그 조회
         List<ReviewHashTag> hashTags = hashTagService.getReviewHashTagByReview(review);
@@ -154,7 +151,7 @@ public class ReviewService implements ReviewUseCase {
         Seat seat = theaterService.getSeat(seatId);
 
         /// 좌석의 리뷰정보 조회
-        SeatReviewStats stats = repository.findSeatReviewStats(seatId);
+        ReviewSeatStats stats = repository.findSeatReviewStats(seatId);
 
         /// Pageable 처리
         Pageable pageable = getPageable(pageRequest);
@@ -266,7 +263,7 @@ public class ReviewService implements ReviewUseCase {
         if (request.getImages() != null && !request.getImages().isEmpty()) {
 
             /// 기존 이미지 삭제
-            imageService.deleteReviewImage(review);
+            imageService.deleteReviewImage(reviewId);
 
             /// 새로운 이미지 추가
             String thumbnail = imageService.saveReviewImage(review, request.getImages()).get(0);
@@ -308,14 +305,17 @@ public class ReviewService implements ReviewUseCase {
         /// 해시태그 삭제
         hashTagService.deleteReviewHashTagByReviewId(review.getId());
 
-        /// DB 삭제
-        repository.deleteById(reviewId);
-
         /// 이미지 삭제
-        imageService.deleteReviewImage(review);
+        imageService.deleteReviewImage(reviewId);
+
+        /// 좌석 매핑도 삭제
+        reviewSeatService.disconnectSeats(reviewId);
 
         /// 인기 게시글이라면, 캐싱 초기화
         boolean checked = bestContentService.checkBestContentsByReviewId(reviewId);
+
+        /// DB 삭제
+        repository.deleteById(reviewId);
 
         if (checked) {
             /// 인기 게시글을 삭제 후, 다시 초기화 (리셋)

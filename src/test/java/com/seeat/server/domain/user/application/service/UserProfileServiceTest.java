@@ -1,9 +1,13 @@
 package com.seeat.server.domain.user.application.service;
 
-import com.seeat.server.domain.review.domain.ReviewFixtures;
+import com.seeat.server.domain.hashtag.domain.entity.HashTag;
+import com.seeat.server.domain.hashtag.domain.entity.HashTagType;
+import com.seeat.server.domain.hashtag.domain.repository.HashTagRepository;
+import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
+import com.seeat.server.domain.review.application.service.ReviewService;
+import com.seeat.server.domain.review.domain.HashTagFixtures;
 import com.seeat.server.domain.review.domain.ReviewLikeFixtures;
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewLike;
 import com.seeat.server.domain.review.domain.repository.ReviewLikeRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.theater.domain.AuditoriumFixtures;
@@ -78,30 +82,54 @@ public class UserProfileServiceTest {
     @Autowired
     private ReviewLikeRepository reviewLikeRepository;
 
+    @Autowired
+    private HashTagRepository hashTagRepository;
+
+    @Autowired
+    private ReviewService reviewService;
+
+    private Theater theater;
+    private Auditorium auditorium;
+    private Seat seat1;
+    private Seat seat2;
+    private User user1;
+    private User user2;
+    private User user3;
+    private User user4;
+    private HashTag hashTag1;
+    private HashTag hashTag2;
+    private HashTag hashTag3;
+
+
+    @BeforeEach
+    void setUp() throws IOException {
+        theater = theaterRepository.save(TheaterFixtures.createTheater());
+        auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
+        seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
+        seat2 = seatRepository.save(SeatFixtures.createSeat(auditorium));
+        user1 = repository.save(UserFixtures.createUser("user1@test.com"));
+        user2 = repository.save(UserFixtures.createUser("user2@test.com"));
+        user3 = repository.save(UserFixtures.createUser("user3@test.com"));
+        user4 = repository.save(UserFixtures.createUser("user4@test.com"));
+        hashTag1 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.SOUND, "해시태그 1"));
+        hashTag2 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.COMPANION, "해시태그 2"));
+        hashTag3 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.ENVIRONMENT, "해시태그 3"));
+    }
 
     @Nested
     @DisplayName("사용자 정보 조회 테스트")
     class getUserInfo{
+
         @Test
         @DisplayName("로그인한 유저 정보 정상 조회")
-        void getUserInfo_Success() {
+        void getUserInfo_Success() throws IOException {
             // given
-            User user1 = UserFixtures.createUser("user1@test.com");
-            User user2 = repository.save(UserFixtures.createUser("user2@test.com"));
-            User user3 = repository.save(UserFixtures.createUser("user3@test.com"));
-            User user4 = repository.save(UserFixtures.createUser("user4@test.com"));
-
-            Theater theater = TheaterFixtures.createTheater();
-            repository.save(user1);
-            theaterRepository.save(theater);
-            Auditorium auditorium = AuditoriumFixtures.createAuditorium(theater, "aud1");
-            auditoriumRepository.save(auditorium);
             userAuditoriumRepository.save(UserAuditorium.of(user1, auditorium));
-            Seat seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
 
-            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user1, seat1, 5, "test content1", "test1"));
-            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user1, seat1, 4, "test content2", "test2"));
+            Review review1 = reviewService.createReview(getReviewRequest(List.of(seat1, seat2), 5, "test-1"), user1.getId());
+            Review review2 = reviewService.createReview(getReviewRequest(List.of(seat1, seat2), 5, "test-1"), user1.getId());
 
+            /// 좋아요
             reviewLikeRepository.saveAll(List.of(
                     ReviewLikeFixtures.stub(user2, review1),
                     ReviewLikeFixtures.stub(user3, review1),
@@ -247,4 +275,22 @@ public class UserProfileServiceTest {
                 .containsExactly(UserGrade.BRONZE, UserGrade.SILVER, UserGrade.GOLD, UserGrade.PLATINUM);
     }
 
+
+    private ReviewRequest getReviewRequest(List<Seat> seats, double rating, String content) {
+
+        /// 좌석 번호
+        List<String> seatIds = seats.stream()
+                .map(Seat::getId)
+                .toList();
+
+        return ReviewRequest.builder()
+                .seatIds(seatIds)
+                .title("review title")
+                .content(content)
+                .movieTitle("ReviewTestTitle1")
+                .imageUrls(null)
+                .rating(rating)
+                .hashtags(List.of(hashTag1.getId(), hashTag2.getId(), hashTag3.getId()))
+                .build();
+    }
 }

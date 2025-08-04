@@ -1,7 +1,8 @@
 package com.seeat.server.domain.review.application.dto.response;
 
+import com.seeat.server.domain.hashtag.application.dto.response.ReviewHashTagResponse;
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
+import com.seeat.server.domain.hashtag.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.user.application.dto.response.UserResponse;
@@ -10,7 +11,6 @@ import com.seeat.server.global.util.DateFormatUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -67,8 +67,8 @@ public record ReviewDetailResponse(
             List<ReviewHashTag> hashTags, Long heartCount, List<ReviewImage> images, List<Seat> seats
     ) {
 
-        /// 좌석 정보
-        Seat seat = review.getSeat();
+        /// 같은 상영관의 좌석이기에,
+        Seat seat = seats.get(0);
 
         return ReviewDetailResponse.builder()
                 .movieTitle(review.getMovieTitle())

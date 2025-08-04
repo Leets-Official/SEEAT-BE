@@ -1,4 +1,4 @@
-package com.seeat.server.domain.review.domain.repository.dto;
+package com.seeat.server.domain.hashtag.domain.repository;
 
 public interface ReviewHashTagWithCount {
 

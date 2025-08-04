@@ -1,4 +1,4 @@
-package com.seeat.server.domain.review.domain.entity;
+package com.seeat.server.domain.hashtag.domain.entity;
 
 import com.seeat.server.domain.BaseEntity;
 import jakarta.persistence.*;

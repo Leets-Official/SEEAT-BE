@@ -1,6 +1,6 @@
 package com.seeat.server.domain.search.application.service;
 
-import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
+import com.seeat.server.domain.hashtag.application.usecase.ReviewHashTagUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.ReviewLike;
 import com.seeat.server.domain.review.domain.repository.ReviewLikeRepository;

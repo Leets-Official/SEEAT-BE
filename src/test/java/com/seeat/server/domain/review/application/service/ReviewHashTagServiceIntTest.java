@@ -1,15 +1,16 @@
 package com.seeat.server.domain.review.application.service;
 
-import com.seeat.server.domain.review.application.dto.response.AuditoriumHashTagResponse;
-import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
+import com.seeat.server.domain.hashtag.application.dto.response.AuditoriumHashTagResponse;
+import com.seeat.server.domain.hashtag.application.usecase.ReviewHashTagUseCase;
+import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.domain.HashTagFixtures;
 import com.seeat.server.domain.review.domain.ReviewFixtures;
-import com.seeat.server.domain.review.domain.entity.HashTag;
-import com.seeat.server.domain.review.domain.entity.HashTagType;
+import com.seeat.server.domain.hashtag.domain.entity.HashTag;
+import com.seeat.server.domain.hashtag.domain.entity.HashTagType;
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
-import com.seeat.server.domain.review.domain.repository.HashTagRepository;
-import com.seeat.server.domain.review.domain.repository.ReviewHashTagRepository;
+import com.seeat.server.domain.hashtag.domain.entity.ReviewHashTag;
+import com.seeat.server.domain.hashtag.domain.repository.HashTagRepository;
+import com.seeat.server.domain.hashtag.domain.repository.ReviewHashTagRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.theater.domain.AuditoriumFixtures;
 import com.seeat.server.domain.theater.domain.SeatFixtures;
@@ -45,6 +46,9 @@ class ReviewHashTagServiceIntTest {
 
     @Autowired
     private ReviewHashTagRepository repository;
+
+    @Autowired
+    private ReviewService reviewService;
 
     /// 기타 의존성
     @Autowired
@@ -84,7 +88,7 @@ class ReviewHashTagServiceIntTest {
         auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
         seat = seatRepository.save(SeatFixtures.createSeat(auditorium));
         user = userRepository.save(UserFixtures.createUser());
-        review = reviewRepository.save(ReviewFixtures.createReview(user, seat));
+        review = reviewRepository.save(ReviewFixtures.createReview(user));
         hashTag1 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.SOUND, "음향이 좋아요"));
         hashTag2 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.SOUND, "실감나는 음향이에요"));
         hashTag3 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.ENVIRONMENT, "좌석이 넓어요"));
@@ -102,7 +106,7 @@ class ReviewHashTagServiceIntTest {
         public void create_happy() throws Exception {
 
             //given
-            Review review = reviewRepository.save(ReviewFixtures.createReview(user, seat, 1));
+            Review review = reviewRepository.save(ReviewFixtures.createReview(user, 1));
 
             //when
             /// 저장 대상 해시태그 구성
@@ -135,12 +139,8 @@ class ReviewHashTagServiceIntTest {
         public void find_happy() throws Exception {
             // given
 
-            Review saved1 = reviewRepository.save(ReviewFixtures.createReview(user, seat, 1));
-            Review saved2 = reviewRepository.save(ReviewFixtures.createReview(user, seat, 2));
-
-            /// 저장 대상 해시태그 구성
-            sut.createReviewHashTag(saved1, List.of(hashTag1.getId(), hashTag3.getId(), hashTag5.getId()));
-            sut.createReviewHashTag(saved2, List.of(hashTag2.getId(), hashTag4.getId(), hashTag5.getId()));
+            Review review1 = reviewService.createReview(getReviewRequest(seat, List.of(hashTag1.getId(), hashTag3.getId(), hashTag5.getId())), user.getId());
+            Review review2 = reviewService.createReview(getReviewRequest(seat, List.of(hashTag2.getId(), hashTag4.getId(), hashTag5.getId())), user.getId());
 
             // when
             List<AuditoriumHashTagResponse> result = sut.loadReviewHashTagsByAuditoriumId(auditorium.getId());
@@ -160,6 +160,18 @@ class ReviewHashTagServiceIntTest {
             assertEquals(hashTag4.getName(), second.hashTagName());
             assertEquals(1, second.count());
         }
+    }
+
+    private ReviewRequest getReviewRequest(Seat seat,List<Long> hashTags) {
+        return ReviewRequest.builder()
+                .seatIds(List.of(seat.getId()))
+                .title("review title")
+                .content("test1")
+                .movieTitle("ReviewTestTitle1")
+                .imageUrls(null)
+                .rating(5)
+                .hashtags(hashTags)
+                .build();
     }
 
 

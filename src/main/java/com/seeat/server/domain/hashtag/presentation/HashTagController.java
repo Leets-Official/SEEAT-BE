@@ -1,10 +1,10 @@
-package com.seeat.server.domain.review.presentation;
+package com.seeat.server.domain.hashtag.presentation;
 
-import com.seeat.server.domain.review.application.dto.response.AuditoriumHashTagResponse;
-import com.seeat.server.domain.review.application.dto.response.HashTagResponse;
-import com.seeat.server.domain.review.application.usecase.HashTagUseCase;
-import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
-import com.seeat.server.domain.review.presentation.swagger.HashTagControllerSpec;
+import com.seeat.server.domain.hashtag.application.dto.response.AuditoriumHashTagResponse;
+import com.seeat.server.domain.hashtag.application.dto.response.HashTagResponse;
+import com.seeat.server.domain.hashtag.application.usecase.HashTagUseCase;
+import com.seeat.server.domain.hashtag.application.usecase.ReviewHashTagUseCase;
+import com.seeat.server.domain.hashtag.presentation.swagger.HashTagControllerSpec;
 import com.seeat.server.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -84,7 +84,7 @@ public class ReviewImageService implements ReviewImageUseCase {
     public List<ReviewImage> getReviewImagesByReview(Review review) {
 
         /// 리뷰에 해당하는 이미지 주소 순서대로 가져오기
-        List<ReviewImage> images = repository.findByReview(review);
+        List<ReviewImage> images = repository.findByReview_Id(review.getId());
 
         /// 순서대로 정렬한 내용 출력
         return images.stream()
@@ -96,13 +96,13 @@ public class ReviewImageService implements ReviewImageUseCase {
     /// 삭제하기
     /**
      * 리뷰에 존재하는 모든 이미지 삭제
-     * @param review    리뷰
+     * @param reviewId    리뷰
      */
     @Override
-    public void deleteReviewImage(Review review) throws IOException {
+    public void deleteReviewImage(Long reviewId) throws IOException {
 
         /// 리뷰에 해당하는 파일 이름 다 가져오기
-        List<ReviewImage> images = repository.findByReview(review);
+        List<ReviewImage> images = repository.findByReview_Id(reviewId);
 
         /// 파일 이름만 추출하기
         List<String> imagesList = images.stream()

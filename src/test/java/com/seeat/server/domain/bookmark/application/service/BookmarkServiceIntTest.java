@@ -50,38 +50,22 @@ class BookmarkServiceIntTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private AuditoriumRepository auditoriumRepository;
-
-    @Autowired
-    private TheaterRepository theaterRepository;
-
-    @Autowired
-    private SeatRepository seatRepository;
-
     /// 기타 의존성
     @Autowired
     private ReviewLikeUseCase likeService;
 
-    private Seat seat;
     private User user;
-    private Theater theater;
-    private Auditorium auditorium;
 
     @BeforeEach
     void setUp() {
-        theater = theaterRepository.save(TheaterFixtures.createTheater());
-        auditorium = auditoriumRepository.save(AuditoriumFixtures.createAuditorium(theater));
-        seat = seatRepository.save(SeatFixtures.createSeat(auditorium));
         user = userRepository.save(UserFixtures.createUser());
     }
 
     /**
      * 리뷰를 직접 생성하여 저장하고, 필요한 경우 해시태그 연관관계도 세팅한다.
      */
-    private Review saveReview(User user, Seat seat, String content, int rating) {
+    private Review saveReview(User user, String content, int rating) {
         Review review = Review.builder()
-                .seat(seat)
                 .user(user)
                 .title("title")
                 .content(content)
@@ -101,7 +85,7 @@ class BookmarkServiceIntTest {
         @DisplayName("[happy] 유저가 존재하는 리뷰를 바탕으로 북마크를 생성합니다")
         public void saveBookmark_user_happy() {
             //given
-            Review review = saveReview(user, seat, "test", 5);
+            Review review = saveReview(user, "test", 5);
 
             //when
             Bookmark bookmark = sut.createBookmark(review.getId(), user.getId());
@@ -127,7 +111,7 @@ class BookmarkServiceIntTest {
         @DisplayName("[unhappy] 유저가 없는 경우 예외 체크")
         public void createBookmark_user_throw_exception() {
             //given
-            Review review = saveReview(user, seat, "test", 5);
+            Review review = saveReview(user, "test", 5);
             Long nonUserId = 9999L;
 
 
@@ -146,7 +130,7 @@ class BookmarkServiceIntTest {
         @DisplayName("[happy] 추가한 북마크가 존재한다면, 정상적으로 목록 조회")
         public void loadBookmark_user_happy() {
             //given
-            Review review = saveReview(user, seat, "test", 5);
+            Review review = saveReview(user, "test", 5);
 
             sut.createBookmark(review.getId(), user.getId());
 
@@ -183,7 +167,7 @@ class BookmarkServiceIntTest {
         public void happyLoad_Like(){
 
             //given
-            Review review = saveReview(user, seat, "test", 5);
+            Review review = saveReview(user, "test", 5);
             PageRequest pageRequest = PageRequest.builder().page(1).size(10).build();
 
             // 좋아요 추가
@@ -209,7 +193,7 @@ class BookmarkServiceIntTest {
         @DisplayName("[happy] 내가 추가한 북마크라면, 정상적으로 삭제")
         public void deleteBookmark_user_happy() {
             //given
-            Review review = saveReview(user, seat, "delete test", 4);
+            Review review = saveReview(user, "delete test", 4);
 
             Bookmark bookmark = sut.createBookmark(review.getId(), user.getId());
 
@@ -226,7 +210,7 @@ class BookmarkServiceIntTest {
             //given
             User otherUser = userRepository.save(UserFixtures.createUser());
 
-            Review review = saveReview(user, seat, "delete test", 4);
+            Review review = saveReview(user, "delete test", 4);
 
             Bookmark bookmark = sut.createBookmark(review.getId(), user.getId());
 

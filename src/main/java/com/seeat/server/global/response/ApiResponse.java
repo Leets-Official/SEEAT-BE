@@ -30,6 +30,12 @@ public record ApiResponse<T>(
         return new ApiResponse<>(HttpStatus.CREATED, true, HttpStatus.CREATED.value(), "성공적으로 생성되었습니다.", null, null);
     }
 
+    // 데이터와 함께 생성 성공 응답 (201 Created)
+    public static <T> ApiResponse<T> created(T data) {
+        return new ApiResponse<>(HttpStatus.CREATED, true, HttpStatus.CREATED.value(), "성공적으로 생성되었습니다.", data, null);
+    }
+
+
     // 수정 성공 응답 (204 No Content)
     public static <T> ApiResponse<T> updated() {
         return new ApiResponse<>(HttpStatus.NO_CONTENT, true, HttpStatus.NO_CONTENT.value(), "성공적으로 수정되었습니다.", null, null);

@@ -21,7 +21,7 @@ public interface ReviewImageUseCase {
     List<ReviewImage> getReviewImagesByReview(Review review);
 
     /// 삭제
-    void deleteReviewImage(Review review) throws IOException;
+    void deleteReviewImage(Long reviewId) throws IOException;
 
 
 
