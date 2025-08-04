@@ -40,7 +40,20 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
                                         Authentication authentication) {
 
         CustomUserInfo userInfo = (CustomUserInfo) authentication.getPrincipal();
-        String frontUrl = getFrontUrl();
+
+        String origin = request.getHeader("Origin");
+
+        // 기본값을 frontDevUrl로 설정
+        String frontUrl = frontDevUrl;
+
+        if (origin != null) {
+            if (frontLocalUrl.equals(origin)) {
+                frontUrl = frontLocalUrl;
+            } else if (frontDevUrl.equals(origin)) {
+                frontUrl = frontDevUrl;
+            }
+        }
+
         try {
             switch (userInfo.getStatus()) {
                 case EXISTING_USER -> {
@@ -76,10 +89,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
             throw new RuntimeException(e);
         }
-    }
-
-    private String getFrontUrl() {
-        return "dev".equals(activeProfile) ? frontDevUrl : frontLocalUrl;
     }
 
 }
