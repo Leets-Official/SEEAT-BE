@@ -127,7 +127,7 @@ public class ReviewService implements ReviewUseCase {
         Review review = result.getReview();
 
         /// 같이 작성된 좌석 조회
-        List<Seat> seats = result.getSeats();
+        List<Seat> seats = reviewSeatService.loadSeatsByReview(review);
 
         /// ReviewId를 바탕으로 작성한 해시태그 조회
         List<ReviewHashTag> hashTags = hashTagService.getReviewHashTagByReview(review);

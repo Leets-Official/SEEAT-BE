@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 리뷰와 좌석 간의 다대다 관계를 처리하는 서비스 클래스입니다.
@@ -76,6 +77,22 @@ public class ReviewSeatService implements ReviewSeatUseCase {
                 .map(ReviewSeat::getReview)
                 .toList();
 
+    }
+
+    @Override
+    public Map<Long, List<Seat>> loadSeatsByReviewIds(List<Long> reviewIds) {
+        List<ReviewSeat> result = repository.findByReview_IdIn((reviewIds));
+
+        return result.stream()
+                .collect(
+                        java.util.stream.Collectors.groupingBy(
+                                rs -> rs.getReview().getId(),
+                                java.util.stream.Collectors.mapping(
+                                        ReviewSeat::getSeat,
+                                        java.util.stream.Collectors.toList()
+                                )
+                        )
+                );
     }
 
     /**

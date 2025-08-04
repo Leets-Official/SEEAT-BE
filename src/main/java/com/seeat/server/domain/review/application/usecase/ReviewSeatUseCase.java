@@ -3,6 +3,7 @@ package com.seeat.server.domain.review.application.usecase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 리뷰와 좌석 간의 다대다 관계를 처리하기 위한 UseCase 인터페이스입니다.
@@ -31,6 +32,7 @@ public interface ReviewSeatUseCase {
      */
     List<Review> loadReviewsBySeat(Seat seat);
 
+    Map<Long, List<Seat>> loadSeatsByReviewIds(List<Long> reviewIds);
 
     /**
      * 리뷰를 해제하면 테이블에서 삭제하는 함수

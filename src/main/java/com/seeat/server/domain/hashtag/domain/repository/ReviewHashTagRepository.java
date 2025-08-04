@@ -33,11 +33,19 @@ public interface ReviewHashTagRepository extends JpaRepository<ReviewHashTag, Lo
      * @param auditoriumId 상영관
      * @return List<Review>
      */
-    @Query("SELECT rh.hashTag.id as hashTagId, rh.hashTag.name as hashTagName, COUNT(rh) AS count " +
-            "FROM Review r LEFT JOIN ReviewHashTag rh ON rh.review.id = r.id " +
-            "WHERE r.seat.auditorium.id = :auditoriumId " +
-            "GROUP BY rh.hashTag.id, rh.hashTag.name " +
-            "ORDER BY COUNT(rh) DESC, rh.hashTag.id DESC")
+    @Query("""
+    SELECT rh.hashTag.id as hashTagId,
+           rh.hashTag.name as hashTagName,
+           COUNT(rh) AS count
+    FROM Auditorium a
+    LEFT JOIN Seat s ON s.auditorium = a
+    LEFT JOIN ReviewSeat rs ON rs.seat = s
+    LEFT JOIN Review r ON rs.review = r
+    LEFT JOIN ReviewHashTag rh ON rh.review = r
+    WHERE a.id = :auditoriumId
+    GROUP BY rh.hashTag.id, rh.hashTag.name
+    ORDER BY COUNT(rh) DESC, rh.hashTag.id DESC
+    """)
     List<ReviewHashTagWithCount> findByAuditorium_Id(@Param("auditoriumId") String auditoriumId);
 
 

@@ -26,4 +26,6 @@ public interface ReviewSeatRepository extends JpaRepository<ReviewSeat, Long> {
      * @param review    리뷰
      */
     void deleteByReview(Review review);
+
+    List<ReviewSeat> findByReview_IdIn(List<Long> reviewIds);
 }

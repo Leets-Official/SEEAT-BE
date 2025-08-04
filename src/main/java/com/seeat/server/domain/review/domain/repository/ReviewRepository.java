@@ -41,8 +41,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      */
     @Query("""
     SELECT r AS review,
-           COUNT(rl) AS likeCount,
-           COLLECT( rs.seat) AS seats
+           COUNT(rl) AS likeCount
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
@@ -60,8 +59,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      */
     @Query("""
     SELECT r AS review,
-           COUNT(rl) AS likeCount,
-           COLLECT( rs.seat) AS seats
+           COUNT(rl) AS likeCount
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
@@ -79,8 +77,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      */
     @Query("""
     SELECT r AS review,
-           COUNT(rl) AS likeCount,
-           COLLECT( rs.seat) AS seats
+           COUNT(rl) AS likeCount
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
@@ -98,8 +95,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      */
     @Query("""
     SELECT r AS review,
-           COUNT(rl) AS likeCount,
-           COLLECT( rs.seat) AS seats
+           COUNT(rl) AS likeCount
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
@@ -118,8 +114,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      */
     @Query("""
     SELECT r AS review,
-           COUNT(rl) AS likeCount,
-           COLLECT( rs.seat) AS seats
+           COUNT(rl) AS likeCount
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
@@ -137,8 +132,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      */
     @Query("""
     SELECT r AS review,
-           COUNT(rl) AS likeCount,
-           COLLECT( rs.seat) AS seats
+           COUNT(rl) AS likeCount
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
@@ -156,8 +150,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      */
     @Query("""
     SELECT r AS review,
-           COUNT(rl) AS likeCount,
-           COLLECT( rs.seat) AS seats
+           COUNT(rl) AS likeCount
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
@@ -175,8 +168,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      */
     @Query("""
     SELECT r AS review,
-           COUNT(rl) AS likeCount,
-           COLLECT( rs.seat) AS seats
+           COUNT(rl) AS likeCount
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
@@ -192,10 +184,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @return   boolean
      */
     @Query("""
-   SELECT COUNT(DISTINCT rs.review)
+   SELECT COUNT(rs.review)
    FROM ReviewSeat rs
    WHERE rs.seat.auditorium.id = :auditoriumId
-    """)
+   """)
     Long countByAuditoriumId(@Param("auditoriumId") String auditoriumId);
 
 
@@ -206,8 +198,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      */
     @Query("""
     SELECT r AS review,
-           COUNT(rl.user.id) AS likeCount,
-           COLLECT(rs.seat) AS seats
+           COUNT(rl.user.id) AS likeCount
     FROM Review r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
     LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
@@ -220,8 +211,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
 
     @Query("""
     SELECT r AS review,
-           COUNT( rl.user.id) AS likeCount,
-           COLLECT(rs.seat) AS seats
+           COUNT( rl.user.id) AS likeCount
     FROM Review r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
     LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
@@ -240,8 +230,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      */
     @Query("""
     SELECT r AS review,
-           COUNT(rl.user.id) AS likeCount,
-           COLLECT(rs.seat) AS seats
+           COUNT(rl.user.id) AS likeCount
     FROM Review r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
     LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
@@ -259,8 +248,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      */
     @Query("""
     SELECT r AS review,
-           COUNT(rl.user.id) AS likeCount,
-           COLLECT(rs.seat) AS seats
+           COUNT(rl.user.id) AS likeCount
     FROM Review r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
     LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
@@ -295,15 +283,14 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      */
     @Query("""
     SELECT r AS review,
-           COUNT(rl.user.id) AS likeCount,
-           COLLECT(rs.seat) AS seats
+           COUNT(rl.user.id) AS likeCount
     FROM Review r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id AND rl.user.id != :userId
     LEFT JOIN ReviewSeat rs ON rs.review.id = r.id
     WHERE r.user.id = :userId
     GROUP BY r
 """)
-    ReviewLikeCount findReviewCountAndLikeCountByUserId(@Param("userId") Long userId);
+    Optional<ReviewLikeCount> findReviewCountAndLikeCountByUserId(@Param("userId") Long userId);
 
 
 }

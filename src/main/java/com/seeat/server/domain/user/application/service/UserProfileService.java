@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,10 +57,15 @@ public class UserProfileService implements UserProfileUseCase {
         // 상영관 n+1 방지 fetch join, 예외 처리
         List<Auditorium> auditorium = getAuditoriums(userId);
 
+        Long reviewCount = 0L;
+        Long likeCount = 0L;
+
         // 리뷰, 좋아요 수 가져오기
-        ReviewLikeCount count = reviewRepository.findReviewCountAndLikeCountByUserId(userId);
-        Long reviewCount = count.getReviewCount();
-        Long likeCount = count.getLikeCount();
+        Optional<ReviewLikeCount> count = reviewRepository.findReviewCountAndLikeCountByUserId(userId);
+        if (count.isPresent()){
+            reviewCount = count.get().getReviewCount();
+            likeCount = count.get().getLikeCount();
+        }
 
         // 경험치 계산
         double levelExp = calculateLevelExp(user.getGrade(), reviewCount, likeCount);
