@@ -26,7 +26,7 @@ public interface ReviewUseCase {
     //  저장 함수
     // ========================
 
-    ReviewSaveResponse createReview(ReviewRequest request, Long userId) throws IOException;
+    Review createReview(ReviewRequest request, Long userId) throws IOException;
 
     // ========================
     //  조회 함수

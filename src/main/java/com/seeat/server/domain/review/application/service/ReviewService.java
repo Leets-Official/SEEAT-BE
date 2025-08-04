@@ -70,7 +70,7 @@ public class ReviewService implements ReviewUseCase {
      * @param userId  리뷰를 작성할 유저 id (@AuthenticationPrincipal)
      */
     @Override
-    public ReviewSaveResponse createReview(ReviewRequest request, Long userId) throws IOException {
+    public Review createReview(ReviewRequest request, Long userId) throws IOException {
 
         /// 좌석 예외 처리
         List<Seat> seats = theaterService.getSeat(request.getSeatIds());
@@ -103,7 +103,7 @@ public class ReviewService implements ReviewUseCase {
             reviewSeatService.connectSeats(seat, savedReview);
         }
 
-        return ReviewSaveResponse.from(savedReview);
+        return savedReview;
     }
 
     // ========================
