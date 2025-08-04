@@ -15,7 +15,7 @@ import com.seeat.server.domain.review.application.dto.request.ReviewUpdateReques
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
-import com.seeat.server.domain.review.domain.repository.dto.SeatReviewStats;
+import com.seeat.server.domain.review.domain.repository.dto.ReviewSeatStats;
 import com.seeat.server.domain.theater.application.usecase.SeatRatingUseCase;
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
@@ -154,7 +154,7 @@ public class ReviewService implements ReviewUseCase {
         Seat seat = theaterService.getSeat(seatId);
 
         /// 좌석의 리뷰정보 조회
-        SeatReviewStats stats = repository.findSeatReviewStats(seatId);
+        ReviewSeatStats stats = repository.findSeatReviewStats(seatId);
 
         /// Pageable 처리
         Pageable pageable = getPageable(pageRequest);
