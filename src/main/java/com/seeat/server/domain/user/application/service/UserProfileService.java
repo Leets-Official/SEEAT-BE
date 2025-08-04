@@ -1,8 +1,8 @@
 package com.seeat.server.domain.user.application.service;
 
 import com.seeat.server.domain.image.application.usecase.ImageUseCase;
-import com.seeat.server.domain.review.application.dto.response.ReviewLikeCountResponse;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
+import com.seeat.server.domain.review.domain.repository.dto.ReviewLikeCount;
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
@@ -57,9 +57,9 @@ public class UserProfileService implements UserProfileUseCase {
         List<Auditorium> auditorium = getAuditoriums(userId);
 
         // 리뷰, 좋아요 수 가져오기
-        ReviewLikeCountResponse countResponse = reviewRepository.findReviewCountAndLikeCountByUserId(userId);
-        long reviewCount = countResponse.reviewCount();
-        long likeCount = countResponse.likeCount();
+        ReviewLikeCount count = reviewRepository.findReviewCountAndLikeCountByUserId(userId);
+        long reviewCount = count.reviewCount();
+        long likeCount = count.likeCount();
 
         // 경험치 계산
         double levelExp = calculateLevelExp(user.getGrade(), reviewCount, likeCount);

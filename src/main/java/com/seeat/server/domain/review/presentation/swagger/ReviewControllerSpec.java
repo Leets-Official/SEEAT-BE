@@ -103,7 +103,7 @@ public interface ReviewControllerSpec {
             summary = "리뷰 수정",
             description = "JWT를 기반으로 리뷰를 수정합니다."
     )
-    @PatchMapping(path = "/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(path = "/{reviewId}")
     ApiResponse<Void> updateReview(
 
             @Parameter(description = "수정할 리뷰ID", example = "1")

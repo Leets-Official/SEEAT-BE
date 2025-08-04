@@ -105,7 +105,7 @@ public class ReviewController implements ReviewControllerSpec {
      * @param request 수정 DTO
      * @param user    유저
      */
-    @PatchMapping(path = "/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(path = "/{reviewId}")
     public ApiResponse<Void> updateReview(
             @PathVariable Long reviewId,
             @RequestBody @Valid ReviewUpdateRequest request,
