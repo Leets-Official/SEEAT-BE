@@ -35,7 +35,8 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom{
         // 기본 Select review, seat, reviewLike
         StringBuilder jpql = new StringBuilder(
                 "SELECT r FROM Review r " +
-                        "JOIN r.seat s " +
+                        "JOIN ReviewSeat rs ON rs.review = r " +
+                        "JOIN Seat s ON s = rs.seat " +
                         "LEFT JOIN ReviewLike rl ON rl.review = r "
         );
 
