@@ -61,7 +61,7 @@ public class UserProfileService implements UserProfileUseCase {
         Long likeCount = 0L;
 
         // 리뷰, 좋아요 수 가져오기
-        Optional<ReviewLikeCount> count = reviewRepository.findReviewCountAndLikeCountByUserId(userId);
+        Optional<ReviewLikeCount> count = reviewRepository.findReviewAndLikeCountByUserId(userId);
         if (count.isPresent()){
             reviewCount = count.get().getReviewCount();
             likeCount = count.get().getLikeCount();
