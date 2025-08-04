@@ -40,12 +40,23 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
                                         Authentication authentication) {
 
         CustomUserInfo userInfo = (CustomUserInfo) authentication.getPrincipal();
-        String frontUrl = getFrontUrl();
+
+        String origin = request.getHeader("Origin");
+        String frontUrl = frontDevUrl;
+
+        if (origin != null) {
+            if (frontLocalUrl.equals(origin)) {
+                frontUrl = frontLocalUrl;
+            } else if (frontDevUrl.equals(origin)) {
+                frontUrl = frontDevUrl;
+            }
+        }
+
         try {
             switch (userInfo.getStatus()) {
                 case EXISTING_USER -> {
                     tokenService.generateTokensAndSetHeaders(response, userInfo.getUser());
-                    redirectStrategy.sendRedirect(request, response, frontUrl + "/home");
+                    response.sendRedirect(frontUrl + "/home");  // changed here
                 }
                 case NEW_USER -> {
                     String tempUserKey = RedisKeyUtil.generateOAuth2TempUserKey();
@@ -61,25 +72,18 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
                     String extraInfoUrl = frontUrl + "/extra-info?tempKey=" + tempUserKey;
 
-                    redirectStrategy.sendRedirect(request, response, extraInfoUrl);
+                    response.sendRedirect(extraInfoUrl);  // changed here
                 }
                 case EMAIL_DUPLICATE -> {
-
-                    redirectStrategy.sendRedirect(request, response, frontUrl + "/login/duplicate-email");
+                    response.sendRedirect(frontUrl + "/login/duplicate-email"); // changed here
                 }
                 default -> {
-                    // 처리할 수 없는 인증 상태 에러
                     throw new CustomException(ErrorCode.OAUTH2_UNKNOWN_STATUS, null);
                 }
             }
-        } catch (IOException e){
-
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String getFrontUrl() {
-        return "dev".equals(activeProfile) ? frontDevUrl : frontLocalUrl;
     }
 
 }
