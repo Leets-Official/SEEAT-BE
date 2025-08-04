@@ -2,6 +2,8 @@ package com.seeat.server.domain.manage.application.dto.response;
 
 import com.seeat.server.domain.manage.domain.entity.Feedback;
 import com.seeat.server.domain.user.application.dto.response.UserResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Builder;
 
 
@@ -14,7 +16,10 @@ import lombok.Builder;
 
 
 @Builder
+@Schema(name = "[응답][피드백] 피드백 상세 조회 Response",description = "피드백 상세 조회에 대한 DTO 입니다.")
 public record FeedbackDetailResponse(
+
+        @Schema(description = "피드백 내용", example = "메가박스 강남에 대한 정보가 틀린것 같아요!")
         String content,
         UserResponse user
 ) {
