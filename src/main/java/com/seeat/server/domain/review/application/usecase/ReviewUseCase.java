@@ -5,6 +5,7 @@ import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
 import com.seeat.server.domain.review.application.dto.response.ReviewDetailResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewListResponse;
+import com.seeat.server.domain.review.application.dto.response.ReviewSaveResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.global.response.pageable.PageRequest;
@@ -25,7 +26,7 @@ public interface ReviewUseCase {
     //  저장 함수
     // ========================
 
-    Review createReview(ReviewRequest request, Long userId) throws IOException;
+    ReviewSaveResponse createReview(ReviewRequest request, Long userId) throws IOException;
 
     // ========================
     //  조회 함수

@@ -42,10 +42,7 @@ public class ReviewController implements ReviewControllerSpec {
             @AuthenticationPrincipal User user) throws IOException {
 
         // 서비스 호출
-        Review review = reviewService.createReview(request, user.getId());
-
-        // DTO 변환
-        ReviewSaveResponse response = ReviewSaveResponse.from(review);
+        ReviewSaveResponse response = reviewService.createReview(request, user.getId());
 
         // 결과 리턴
         return ApiResponse.created(response);

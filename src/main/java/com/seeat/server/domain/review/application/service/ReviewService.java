@@ -3,6 +3,7 @@ package com.seeat.server.domain.review.application.service;
 import com.seeat.server.domain.best.application.usecase.BestContentUseCase;
 import com.seeat.server.domain.image.application.usecase.ReviewImageUseCase;
 import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
+import com.seeat.server.domain.review.application.dto.response.ReviewSaveResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.hashtag.application.usecase.ReviewHashTagUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewSeatUseCase;
@@ -69,7 +70,7 @@ public class ReviewService implements ReviewUseCase {
      * @param userId  리뷰를 작성할 유저 id (@AuthenticationPrincipal)
      */
     @Override
-    public Review createReview(ReviewRequest request, Long userId) throws IOException {
+    public ReviewSaveResponse createReview(ReviewRequest request, Long userId) throws IOException {
 
         /// 좌석 예외 처리
         List<Seat> seats = theaterService.getSeat(request.getSeatIds());
@@ -102,7 +103,7 @@ public class ReviewService implements ReviewUseCase {
             reviewSeatService.connectSeats(seat, savedReview);
         }
 
-        return savedReview;
+        return ReviewSaveResponse.from(savedReview);
     }
 
     // ========================
