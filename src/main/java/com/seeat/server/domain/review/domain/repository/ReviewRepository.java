@@ -1,8 +1,8 @@
 package com.seeat.server.domain.review.domain.repository;
 
-import com.seeat.server.domain.review.application.dto.response.ReviewLikeCountResponse;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.custom.ReviewRepositoryCustom;
+import com.seeat.server.domain.review.domain.repository.dto.ReviewLikeCount;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
 import com.seeat.server.domain.review.domain.repository.dto.SeatReviewStats;
 import com.seeat.server.domain.search.application.dto.request.ReviewSearchCondition;
@@ -222,13 +222,13 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @param userId 유저 Id
      * @return ReviewLikeCountResponse 응답
      */
-    @Query(" SELECT new com.seeat.server.domain.review.application.dto.response.ReviewLikeCountResponse(COUNT(DISTINCT r.id),COUNT(rl.id)) " +
+    @Query(" SELECT new com.seeat.server.domain.review.domain.repository.dto.ReviewLikeCount(COUNT(DISTINCT r.id),COUNT(rl.id)) " +
             "FROM Review r " +
             "LEFT JOIN ReviewLike rl " +
             "ON rl.review.id = r.id " +
             "AND rl.user.id != :userId " +
             "WHERE r.user.id = :userId")
-    ReviewLikeCountResponse findReviewCountAndLikeCountByUserId(@Param("userId") Long userId);
+    ReviewLikeCount findReviewCountAndLikeCountByUserId(@Param("userId") Long userId);
            
     /**
      * 같이 작성된 리뷰 조회
