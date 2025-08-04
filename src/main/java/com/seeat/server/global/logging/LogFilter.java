@@ -27,15 +27,15 @@ public class LogFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        /// 요청 로그 남기기
         String username = request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "anonymous";
         String httpMethod = request.getMethod();
         String uri = URLDecoder.decode(request.getRequestURI(), StandardCharsets.UTF_8);
 
-        log.info("[HTTP 요청 로깅]: [{}] {} - 사용자: {}", httpMethod, uri, username);
+        // Origin 헤더 가져오기
+        String origin = request.getHeader("Origin");
 
-        /// 로그 남기고 넘기기
+        log.info("[HTTP 요청 로깅]: [{}] {} - 사용자: {} - Origin: {}", httpMethod, uri, username, origin);
+
         filterChain.doFilter(request, response);
-
     }
 }
