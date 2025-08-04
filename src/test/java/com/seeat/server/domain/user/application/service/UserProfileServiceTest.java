@@ -1,12 +1,21 @@
 package com.seeat.server.domain.user.application.service;
 
+import com.seeat.server.domain.review.domain.ReviewFixtures;
+import com.seeat.server.domain.review.domain.ReviewLikeFixtures;
+import com.seeat.server.domain.review.domain.entity.Review;
+import com.seeat.server.domain.review.domain.entity.ReviewLike;
+import com.seeat.server.domain.review.domain.repository.ReviewLikeRepository;
+import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.theater.domain.AuditoriumFixtures;
+import com.seeat.server.domain.theater.domain.SeatFixtures;
 import com.seeat.server.domain.theater.domain.TheaterFixtures;
 import com.seeat.server.domain.theater.application.dto.response.AuditoriumResponse;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.MovieGenre;
+import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.theater.domain.entity.Theater;
 import com.seeat.server.domain.theater.domain.repository.AuditoriumRepository;
+import com.seeat.server.domain.theater.domain.repository.SeatRepository;
 import com.seeat.server.domain.theater.domain.repository.TheaterRepository;
 import com.seeat.server.domain.user.application.dto.request.UserInfoUpdateRequest;
 import com.seeat.server.domain.user.application.dto.response.UserGradeResponse;
@@ -60,6 +69,16 @@ public class UserProfileServiceTest {
     @Autowired
     private UserAuditoriumRepository userAuditoriumRepository;
 
+    @Autowired
+    private SeatRepository seatRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired
+    private ReviewLikeRepository reviewLikeRepository;
+
+
     @Nested
     @DisplayName("사용자 정보 조회 테스트")
     class getUserInfo{
@@ -67,30 +86,51 @@ public class UserProfileServiceTest {
         @DisplayName("로그인한 유저 정보 정상 조회")
         void getUserInfo_Success() {
             // given
-            User user = UserFixtures.createUser();
+            User user1 = UserFixtures.createUser("user1@test.com");
+            User user2 = repository.save(UserFixtures.createUser("user2@test.com"));
+            User user3 = repository.save(UserFixtures.createUser("user3@test.com"));
+            User user4 = repository.save(UserFixtures.createUser("user4@test.com"));
+
             Theater theater = TheaterFixtures.createTheater();
-            repository.save(user);
+            repository.save(user1);
             theaterRepository.save(theater);
             Auditorium auditorium = AuditoriumFixtures.createAuditorium(theater, "aud1");
             auditoriumRepository.save(auditorium);
-            userAuditoriumRepository.save(UserAuditorium.of(user, auditorium));
+            userAuditoriumRepository.save(UserAuditorium.of(user1, auditorium));
+            Seat seat1 = seatRepository.save(SeatFixtures.createSeat(auditorium));
+
+            Review review1 = reviewRepository.save(ReviewFixtures.createReview(user1, seat1, 5, "test content1", "test1"));
+            Review review2 = reviewRepository.save(ReviewFixtures.createReview(user1, seat1, 4, "test content2", "test2"));
+
+            reviewLikeRepository.saveAll(List.of(
+                    ReviewLikeFixtures.stub(user2, review1),
+                    ReviewLikeFixtures.stub(user3, review1),
+                    ReviewLikeFixtures.stub(user2, review1),
+                    ReviewLikeFixtures.stub(user3, review2),
+                    ReviewLikeFixtures.stub(user4, review2)
+            ));
 
 
             // when
-            UserInfoResponse response = sut.getUserInfo(user.getId());
+            UserInfoResponse response = sut.getUserInfo(user1.getId());
 
 
             // then
-            assertEquals(user.getId(), response.id());
-            assertEquals(user.getEmail(), response.email());
-            assertEquals(user.getSocialId(), response.socialId());
-            assertEquals(user.getUsername(), response.username());
-            assertEquals(user.getImageUrl(), response.imageUrl());
-            assertEquals(user.getNickname(), response.nickname());
-            assertEquals(user.getGenres(), response.genres());
-            assertEquals(user.getSocial(), response.social());
+            assertEquals(user1.getId(), response.id());
+            assertEquals(user1.getEmail(), response.email());
+            assertEquals(user1.getSocialId(), response.socialId());
+            assertEquals(user1.getUsername(), response.username());
+            assertEquals(user1.getImageUrl(), response.imageUrl());
+            assertEquals(user1.getNickname(), response.nickname());
+            assertEquals(user1.getGenres(), response.genres());
+            assertEquals(user1.getSocial(), response.social());
             List<AuditoriumResponse> auditoriumResponse = List.of(AuditoriumResponse.from(auditorium));
             assertEquals(auditoriumResponse, response.auditoriums());
+            assertEquals(2, response.reviewCount());
+            assertEquals(5, response.likeCount());
+            assertEquals(UserGrade.SILVER, response.grade());
+            double expectedExp = (Math.min((double) 2 / 2, 1.0) + Math.min((double) 5 / 5, 1.0)) / 2 * 100;
+            assertEquals(expectedExp, response.levelExp(), 0.0001);
         }
 
         @Test
