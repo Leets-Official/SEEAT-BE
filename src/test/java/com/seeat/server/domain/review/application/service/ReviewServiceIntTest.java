@@ -1,5 +1,8 @@
 package com.seeat.server.domain.review.application.service;
 
+import com.seeat.server.domain.hashtag.domain.entity.HashTag;
+import com.seeat.server.domain.hashtag.domain.entity.HashTagType;
+import com.seeat.server.domain.hashtag.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
@@ -9,8 +12,8 @@ import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.review.domain.HashTagFixtures;
 import com.seeat.server.domain.review.domain.ReviewFixtures;
 import com.seeat.server.domain.review.domain.entity.*;
-import com.seeat.server.domain.review.domain.repository.HashTagRepository;
-import com.seeat.server.domain.review.domain.repository.ReviewHashTagRepository;
+import com.seeat.server.domain.hashtag.domain.repository.HashTagRepository;
+import com.seeat.server.domain.hashtag.domain.repository.ReviewHashTagRepository;
 import com.seeat.server.domain.image.domain.repository.ReviewImageRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
@@ -35,13 +38,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.NoSuchElementException;
 

@@ -1,7 +1,7 @@
 package com.seeat.server.domain.review.domain;
 
-import com.seeat.server.domain.review.domain.entity.HashTag;
-import com.seeat.server.domain.review.domain.entity.HashTagType;
+import com.seeat.server.domain.hashtag.domain.entity.HashTag;
+import com.seeat.server.domain.hashtag.domain.entity.HashTagType;
 
 public class HashTagFixtures {
 

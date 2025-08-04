@@ -1,21 +1,15 @@
-package com.seeat.server.domain.review.application.service;
+package com.seeat.server.domain.hashtag.application.service;
 
-import com.seeat.server.domain.review.application.dto.response.HashTagResponse;
-import com.seeat.server.domain.review.application.usecase.HashTagUseCase;
-import com.seeat.server.domain.review.domain.entity.HashTag;
-import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
-import com.seeat.server.domain.review.domain.repository.HashTagRepository;
-import com.seeat.server.domain.review.domain.repository.ReviewHashTagRepository;
+import com.seeat.server.domain.hashtag.application.dto.response.HashTagResponse;
+import com.seeat.server.domain.hashtag.application.usecase.HashTagUseCase;
+import com.seeat.server.domain.hashtag.domain.entity.HashTag;
+import com.seeat.server.domain.hashtag.domain.repository.HashTagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional

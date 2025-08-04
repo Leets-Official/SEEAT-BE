@@ -1,6 +1,6 @@
-package com.seeat.server.domain.review.application.dto.response;
+package com.seeat.server.domain.hashtag.application.dto.response;
 
-import com.seeat.server.domain.review.domain.entity.HashTag;
+import com.seeat.server.domain.hashtag.domain.entity.HashTag;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import java.util.List;

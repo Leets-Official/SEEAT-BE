@@ -1,7 +1,6 @@
-package com.seeat.server.domain.review.application.usecase;
+package com.seeat.server.domain.hashtag.application.usecase;
 
-import com.seeat.server.domain.review.application.dto.response.HashTagResponse;
-import com.seeat.server.domain.review.domain.entity.Review;
+import com.seeat.server.domain.hashtag.application.dto.response.HashTagResponse;
 
 import java.util.List;
 

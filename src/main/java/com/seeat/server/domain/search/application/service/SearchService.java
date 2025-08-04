@@ -1,10 +1,5 @@
 package com.seeat.server.domain.search.application.service;
 
-import com.seeat.server.domain.review.application.usecase.HashTagUseCase;
-import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewLike;
-import com.seeat.server.domain.review.domain.repository.ReviewLikeRepository;
-import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.search.application.dto.request.ReviewSearchCondition;
 import com.seeat.server.domain.search.application.dto.response.ReviewSearchResponse;
 import com.seeat.server.domain.search.application.dto.response.SearchResponse;
@@ -12,30 +7,18 @@ import com.seeat.server.domain.search.application.usecase.RecentSearchUserCase;
 import com.seeat.server.domain.search.application.usecase.ReviewSearchUseCase;
 import com.seeat.server.domain.search.application.usecase.SearchUseCase;
 import com.seeat.server.domain.search.domain.entity.Search;
-import com.seeat.server.domain.search.domain.entity.SortType;
 import com.seeat.server.domain.search.domain.repository.SearchRepository;
 import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
-import com.seeat.server.domain.user.domain.entity.UserSearch;
-import com.seeat.server.domain.user.domain.repository.UserSearchRepository;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.response.pageable.PageRequest;
-import com.seeat.server.global.response.pageable.PageUtil;
 import com.seeat.server.global.response.pageable.SliceResponse;
-import com.seeat.server.global.service.RecentSearchRedisService;
-import com.seeat.server.global.util.RedisKeyUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
-import org.springframework.data.redis.core.ListOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional

@@ -1,7 +1,8 @@
 package com.seeat.server.domain.review.application.dto.response;
 
+import com.seeat.server.domain.hashtag.application.dto.response.ReviewHashTagResponse;
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
+import com.seeat.server.domain.hashtag.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.image.domain.entity.ReviewImage;
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import com.seeat.server.domain.user.application.dto.response.UserResponse;
@@ -10,7 +11,6 @@ import com.seeat.server.global.util.DateFormatUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**

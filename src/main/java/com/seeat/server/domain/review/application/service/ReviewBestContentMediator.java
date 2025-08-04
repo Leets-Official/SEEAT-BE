@@ -1,8 +1,9 @@
 package com.seeat.server.domain.review.application.service;
 
 import com.seeat.server.domain.best.application.dto.response.BestReviewListResponse;
+import com.seeat.server.domain.hashtag.application.service.ReviewHashTagService;
 import com.seeat.server.domain.review.application.usecase.ReviewBestContentMediatorUseCase;
-import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
+import com.seeat.server.domain.hashtag.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
 import com.seeat.server.global.response.pageable.PageRequest;

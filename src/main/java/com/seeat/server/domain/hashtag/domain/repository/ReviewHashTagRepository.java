@@ -1,8 +1,7 @@
-package com.seeat.server.domain.review.domain.repository;
+package com.seeat.server.domain.hashtag.domain.repository;
 
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
-import com.seeat.server.domain.review.domain.repository.dto.ReviewHashTagWithCount;
+import com.seeat.server.domain.hashtag.domain.entity.ReviewHashTag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

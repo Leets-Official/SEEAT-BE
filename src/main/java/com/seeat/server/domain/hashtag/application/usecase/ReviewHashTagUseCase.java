@@ -1,8 +1,8 @@
-package com.seeat.server.domain.review.application.usecase;
+package com.seeat.server.domain.hashtag.application.usecase;
 
-import com.seeat.server.domain.review.application.dto.response.AuditoriumHashTagResponse;
+import com.seeat.server.domain.hashtag.application.dto.response.AuditoriumHashTagResponse;
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
+import com.seeat.server.domain.hashtag.domain.entity.ReviewHashTag;
 
 import java.util.*;
 

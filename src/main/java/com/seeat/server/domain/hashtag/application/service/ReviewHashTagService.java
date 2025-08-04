@@ -1,14 +1,14 @@
-package com.seeat.server.domain.review.application.service;
+package com.seeat.server.domain.hashtag.application.service;
 
-import com.seeat.server.domain.review.application.dto.response.AuditoriumHashTagResponse;
-import com.seeat.server.domain.review.application.usecase.ReviewHashTagUseCase;
-import com.seeat.server.domain.review.domain.entity.HashTag;
-import com.seeat.server.domain.review.domain.entity.HashTagType;
+import com.seeat.server.domain.hashtag.application.dto.response.AuditoriumHashTagResponse;
+import com.seeat.server.domain.hashtag.application.usecase.ReviewHashTagUseCase;
+import com.seeat.server.domain.hashtag.domain.entity.HashTag;
+import com.seeat.server.domain.hashtag.domain.entity.HashTagType;
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
-import com.seeat.server.domain.review.domain.repository.HashTagRepository;
-import com.seeat.server.domain.review.domain.repository.ReviewHashTagRepository;
-import com.seeat.server.domain.review.domain.repository.dto.ReviewHashTagWithCount;
+import com.seeat.server.domain.hashtag.domain.entity.ReviewHashTag;
+import com.seeat.server.domain.hashtag.domain.repository.HashTagRepository;
+import com.seeat.server.domain.hashtag.domain.repository.ReviewHashTagRepository;
+import com.seeat.server.domain.hashtag.domain.repository.ReviewHashTagWithCount;
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.global.response.ErrorCode;

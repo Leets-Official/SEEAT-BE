@@ -1,9 +1,9 @@
 package com.seeat.server.domain.best.application.dto.response;
 
 import com.seeat.server.domain.best.domain.entity.BestReviewSnapshot;
-import com.seeat.server.domain.review.domain.entity.HashTag;
+import com.seeat.server.domain.hashtag.domain.entity.HashTag;
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.entity.ReviewHashTag;
+import com.seeat.server.domain.hashtag.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.user.domain.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

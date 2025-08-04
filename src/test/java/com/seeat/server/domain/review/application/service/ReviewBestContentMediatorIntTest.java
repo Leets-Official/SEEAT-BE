@@ -5,7 +5,7 @@ import com.seeat.server.domain.review.application.usecase.ReviewBestContentMedia
 import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.review.domain.ReviewFixtures;
 import com.seeat.server.domain.review.domain.entity.Review;
-import com.seeat.server.domain.review.domain.repository.HashTagRepository;
+import com.seeat.server.domain.hashtag.domain.repository.HashTagRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.theater.domain.AuditoriumFixtures;
 import com.seeat.server.domain.theater.domain.SeatFixtures;
