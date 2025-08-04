@@ -4,7 +4,7 @@ import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.review.domain.entity.custom.ReviewRepositoryCustom;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewLikeCount;
 import com.seeat.server.domain.review.domain.repository.dto.ReviewWithLikeCount;
-import com.seeat.server.domain.review.domain.repository.dto.SeatReviewStats;
+import com.seeat.server.domain.review.domain.repository.dto.ReviewSeatStats;
 import com.seeat.server.domain.search.application.dto.request.ReviewSearchCondition;
 import com.seeat.server.domain.user.domain.entity.User;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +33,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
                 WHERE s.id = :seatId
                 GROUP BY s
             """)
-    SeatReviewStats findSeatReviewStats(@Param("seatId") String seatId);
+    ReviewSeatStats findSeatReviewStats(@Param("seatId") String seatId);
 
     // ========================
     //  좌석별 함수
@@ -215,14 +215,14 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @return Slice<Review> 응답
      */
     Slice<Review> searchReviewsWithFilters(ReviewSearchCondition condition, Pageable pageable);
-           
+
     /**
      * 리뷰 개수와 하트 개수 조회
      *
      * @param userId 유저 Id
      * @return ReviewLikeCountResponse 응답
      */
-    @Query(" SELECT new com.seeat.server.domain.review.domain.repository.dto.ReviewLikeCount(COUNT(DISTINCT r.id),COUNT(rl.id)) " +
+    @Query(" SELECT COUNT(DISTINCT r.id) as reviewCount,COUNT(rl.id) as likeCount " +
             "FROM Review r " +
             "LEFT JOIN ReviewLike rl " +
             "ON rl.review.id = r.id " +
