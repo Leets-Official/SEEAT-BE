@@ -2,10 +2,18 @@ package com.seeat.server.domain.theater.domain.entity;
 
 public enum MovieGenre {
     ACTION,
-    COMEDY,
-    DRAMA,
     HORROR,
-    ROMANCE,
+    THRILLER,
+    COMEDY,
     SF,
-    THRILLER
+    ROMANCE,
+    FANTASY,
+    MYSTERY,
+    CRIME,
+    ADVENTURE,
+    WAR,
+    HISTORY,
+    MUSICAL,
+    ANIMATION,
+    DRAMA
 }

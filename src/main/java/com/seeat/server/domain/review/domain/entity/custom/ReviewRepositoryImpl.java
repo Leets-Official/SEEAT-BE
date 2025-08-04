@@ -46,8 +46,7 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom{
         }
 
         // 공통 WHERE 절 (영화 제목, 내용 검색)
-        // => 사용자 제목 추가
-        jpql.append("WHERE (r.movieTitle LIKE :keyword OR r.content LIKE :keyword) ");
+        jpql.append("WHERE (r.movieTitle LIKE :keyword OR r.content LIKE :keyword OR r.title LIKE :keyword) ");
 
         // 상영관 필터
         if (StringUtils.hasText(condition.getAuditoriumId())) {
