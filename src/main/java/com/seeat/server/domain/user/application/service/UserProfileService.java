@@ -58,8 +58,8 @@ public class UserProfileService implements UserProfileUseCase {
 
         // 리뷰, 좋아요 수 가져오기
         ReviewLikeCount count = reviewRepository.findReviewCountAndLikeCountByUserId(userId);
-        long reviewCount = count.reviewCount();
-        long likeCount = count.likeCount();
+        Long reviewCount = count.getReviewCount();
+        Long likeCount = count.getLikeCount();
 
         // 경험치 계산
         double levelExp = calculateLevelExp(user.getGrade(), reviewCount, likeCount);
