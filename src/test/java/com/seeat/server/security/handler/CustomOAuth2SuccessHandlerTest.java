@@ -9,18 +9,15 @@ import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import com.seeat.server.security.oauth2.application.dto.response.OAuth2UserInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.RedirectStrategy;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
@@ -29,12 +26,15 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CustomOAuth2SuccessHandlerTest {
-    @InjectMocks
+class CustomOAuth2SuccessHandlerTest {
+
     private CustomOAuth2SuccessHandler successHandler;
 
     @Mock
     private TokenService tokenService;
+
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Mock
     private HttpServletRequest request;
@@ -45,117 +45,94 @@ public class CustomOAuth2SuccessHandlerTest {
     @Mock
     private Authentication authentication;
 
-    @Mock
-    private RedisTemplate<String, Object> redisTemplate;
-
-    @Mock
-    private RedirectStrategy redirectStrategy;
-
     @BeforeEach
     void setUp() {
         successHandler = new CustomOAuth2SuccessHandler(redisTemplate, tokenService);
-        ReflectionTestUtils.setField(successHandler, "redirectStrategy", redirectStrategy);
+
+        // @Value 주입 필드 설정
+        ReflectionTestUtils.setField(successHandler, "frontLocalUrl", "http://localhost:3000");
+        ReflectionTestUtils.setField(successHandler, "frontDevUrl", "http://dev.example.com");
+        ReflectionTestUtils.setField(successHandler, "activeProfile", "local");
     }
 
     @Test
-    void existingUser_cookieSet_redirect() throws Exception {
+    void existingUser_shouldRedirectToHome_withTokenHeaders() throws Exception {
         // Given
         CustomUserInfo principal = mock(CustomUserInfo.class);
+        User user = mock(User.class);
         given(authentication.getPrincipal()).willReturn(principal);
         given(principal.getStatus()).willReturn(CustomUserInfo.UserStatus.EXISTING_USER);
-        User user = mock(User.class);
         given(principal.getUser()).willReturn(user);
-
-
-        // 프로퍼티 설정
-        ReflectionTestUtils.setField(successHandler, "frontLocalUrl", "http://localhost:3000");
-        ReflectionTestUtils.setField(successHandler, "frontDevUrl", "http://localhost:3001");
-        ReflectionTestUtils.setField(successHandler, "activeProfile", "local");
+        given(request.getHeader("Origin")).willReturn("http://localhost:3000");
 
         // When
         successHandler.onAuthenticationSuccess(request, response, authentication);
 
         // Then
         verify(tokenService).generateTokensAndSetHeaders(response, user);
-        verify(redirectStrategy).sendRedirect(request, response, "http://localhost:3000/home");
+        verify(response).sendRedirect("http://localhost:3000/home");
     }
 
     @Test
-    void newUser_extraInfo_redirect() throws Exception{
+    void newUser_shouldStoreTempUserInRedis_andRedirectToExtraInfo() throws Exception {
         // Given
         CustomUserInfo principal = mock(CustomUserInfo.class);
         OAuth2UserInfo oauth2UserInfo = mock(OAuth2UserInfo.class);
         ValueOperations<String, Object> valueOperations = mock(ValueOperations.class);
-        HttpSession session = mock(HttpSession.class);
-        String mockTempKey = "OAUTH2_TEMP_USER:test-key-123";
 
         given(authentication.getPrincipal()).willReturn(principal);
         given(principal.getStatus()).willReturn(CustomUserInfo.UserStatus.NEW_USER);
         given(principal.getTempUserInfo()).willReturn(oauth2UserInfo);
-        given(oauth2UserInfo.getEmail()).willReturn("test@test.com");
-        given(oauth2UserInfo.getProviderId()).willReturn("test1234");
         given(principal.getSocial()).willReturn(UserSocial.KAKAO);
+        given(oauth2UserInfo.getEmail()).willReturn("test@example.com");
+        given(oauth2UserInfo.getProviderId()).willReturn("12345");
         given(oauth2UserInfo.getNickname()).willReturn("nickname");
-
         given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(request.getHeader("Origin")).willReturn("http://localhost:3000");
 
+        String tempKey = "OAUTH2_TEMP_USER:test-key";
 
-        // 프로퍼티 설정
-        ReflectionTestUtils.setField(successHandler, "frontLocalUrl", "http://localhost:3000");
-        ReflectionTestUtils.setField(successHandler, "frontDevUrl", "http://localhost:3001");
-        ReflectionTestUtils.setField(successHandler, "activeProfile", "local");
-
-        try (MockedStatic<RedisKeyUtil> redisKeyUtilMock = mockStatic(RedisKeyUtil.class)) {
-            redisKeyUtilMock.when(RedisKeyUtil::generateOAuth2TempUserKey).thenReturn(mockTempKey);
+        try (MockedStatic<RedisKeyUtil> mockedStatic = mockStatic(RedisKeyUtil.class)) {
+            mockedStatic.when(RedisKeyUtil::generateOAuth2TempUserKey).thenReturn(tempKey);
 
             // When
             successHandler.onAuthenticationSuccess(request, response, authentication);
 
             // Then
-            verify(valueOperations).set(eq(mockTempKey), any(TempUserInfo.class), eq(Duration.ofMinutes(10)));
-            verify(redirectStrategy).sendRedirect(request, response, "http://localhost:3000/extra-info?tempKey=" + mockTempKey);
+            verify(valueOperations).set(eq(tempKey), any(TempUserInfo.class), eq(Duration.ofMinutes(10)));
+            verify(response).sendRedirect("http://localhost:3000/extra-info?tempKey=" + tempKey);
         }
     }
 
     @Test
-    void emailDuplicate_error_redirect() throws Exception{
+    void emailDuplicate_shouldRedirectToDuplicateEmailPage() throws Exception {
         // Given
         CustomUserInfo principal = mock(CustomUserInfo.class);
         given(authentication.getPrincipal()).willReturn(principal);
         given(principal.getStatus()).willReturn(CustomUserInfo.UserStatus.EMAIL_DUPLICATE);
-
-        // 프로퍼티 설정
-        ReflectionTestUtils.setField(successHandler, "frontLocalUrl", "http://localhost:3000");
-        ReflectionTestUtils.setField(successHandler, "frontDevUrl", "http://localhost:3001");
-        ReflectionTestUtils.setField(successHandler, "activeProfile", "local");
+        given(request.getHeader("Origin")).willReturn("http://localhost:3000");
 
         // When
         successHandler.onAuthenticationSuccess(request, response, authentication);
 
         // Then
-        verify(redirectStrategy).sendRedirect(request, response, "http://localhost:3000/login/duplicate-email");
+        verify(response).sendRedirect("http://localhost:3000/login/duplicate-email");
     }
 
     @Test
-    void dev_profile_uses_dev_url() throws Exception {
+    void noOriginHeader_shouldDefaultToDevUrl() throws Exception {
         // Given
         CustomUserInfo principal = mock(CustomUserInfo.class);
         User user = mock(User.class);
         given(authentication.getPrincipal()).willReturn(principal);
         given(principal.getStatus()).willReturn(CustomUserInfo.UserStatus.EXISTING_USER);
         given(principal.getUser()).willReturn(user);
-
-
-        // 프로퍼티 설정 (dev 환경)
-        ReflectionTestUtils.setField(successHandler, "frontLocalUrl", "http://localhost:3000");
-        ReflectionTestUtils.setField(successHandler, "frontDevUrl", "http://dev.example.com");
-        ReflectionTestUtils.setField(successHandler, "activeProfile", "dev");
+        given(request.getHeader("Origin")).willReturn(null); // no origin
 
         // When
         successHandler.onAuthenticationSuccess(request, response, authentication);
 
         // Then
-        verify(tokenService).generateTokensAndSetHeaders(response, user);
-        verify(redirectStrategy).sendRedirect(request, response, "http://dev.example.com/home");
+        verify(response).sendRedirect("http://dev.example.com/home");
     }
 }
