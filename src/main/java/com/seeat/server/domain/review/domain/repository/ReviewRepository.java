@@ -285,11 +285,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
      * @return ReviewLikeCountResponse 응답
      */
     @Query("""
-    SELECT COUNT(DISTINCT r.id) AS reviewCount,
-           COUNT(rl.id) AS likeCount
-    FROM Review r
-    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    WHERE r.user.id = :userId
+    SELECT
+      (SELECT COUNT(r) FROM Review r WHERE r.user.id = :userId) AS reviewCount,
+      (SELECT COUNT(rl) FROM ReviewLike rl WHERE rl.user.id = :userId) AS likeCount
     """)
     Optional<ReviewLikeCount> findReviewAndLikeCountByUserId(@Param("userId") Long userId);
 

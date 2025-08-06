@@ -113,23 +113,30 @@ public class JwtProvider {
     public String generateDevTokenWithMockUser(Long userId, String username, UserRole role) {
 
         /// 개발용 유저 실제 DB에 저장
+        // 개발용 유저 SocialId 구성
         String cleanedId = ("dev-" + userId).trim();
         User user = userRepository.findBySocialAndSocialId(KAKAO, cleanedId)
                 .orElseGet(() -> userRepository.save(createMockUser(userId, username, role)));
 
-        // 상영관 저장
-        Auditorium auditorium = auditoriumRepository.findById("1001")
+        // 상영관 ID로 조회
+        Auditorium auditorium = auditoriumRepository.findById("13018")
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_AUDITORIUM.getMessage()));
-        UserAuditorium userAuditorium = UserAuditorium.of(user, auditorium);
-        userAuditoriumRepository.save(userAuditorium);
 
+        // 유저-상영관 매핑이 존재하지 않을 때만 저장
+        boolean alreadyMapped = userAuditoriumRepository.existsByUserAndAuditorium(user, auditorium);
+        if (!alreadyMapped) {
+            UserAuditorium userAuditorium = UserAuditorium.of(user, auditorium);
+            userAuditoriumRepository.save(userAuditorium);
+        }
+
+        // 권한 설정
         Collection<GrantedAuthority> authorities = Collections.singletonList(
                 new SimpleGrantedAuthority(role.getRole())
         );
 
+        // 인증 객체 설정
         Authentication mockAuthentication = new UsernamePasswordAuthenticationToken(
                 user, null, authorities);
-
         SecurityContextHolder.getContext().setAuthentication(mockAuthentication);
 
         return generateToken(mockAuthentication, devTokenExpiration);

@@ -4,6 +4,7 @@ import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
 import com.seeat.server.domain.user.application.dto.response.UserNicknameResponse;
 import com.seeat.server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +19,7 @@ public interface UserControllerSpec {
     /**
      * 회원가입 API
      *
+     * @param response    토큰을 헤더 및 쿠키에 설정하기 위한 HTTP 응답 객체
      * @param request     추가 정보 요청값
      * @param tempUserKey 임시유저정보
      * @return 회원가입 완료 응답
@@ -28,6 +30,7 @@ public interface UserControllerSpec {
             description = "최초 로그인 추가 회원가입입니다."
     )
     ApiResponse<Void> userSignUp(
+            @Parameter(hidden = true) HttpServletResponse response,
             @RequestBody @Valid UserSignUpRequest request,
             @RequestHeader String tempUserKey
     ) throws IOException;

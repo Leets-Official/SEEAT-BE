@@ -1,6 +1,7 @@
 package com.seeat.server.domain.user.domain.repository;
 
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
+import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserAuditorium;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,6 @@ public interface UserAuditoriumRepository extends JpaRepository<UserAuditorium, 
     List<Auditorium> findAuditoriumsByUserId(@Param("userId") Long userId);
 
     void deleteByUserId(Long userId);
+
+    boolean existsByUserAndAuditorium(User user, Auditorium auditorium);
 }

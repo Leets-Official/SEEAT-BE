@@ -23,7 +23,7 @@ public interface UserUseCase {
     Optional<User> getUserBySocialAndSocialId(UserSocial social, String socialId);
 
     // 사용자 생성
-    void createUser(TempUserInfo tempUserInfo, UserSignUpRequest request) throws IOException;
+    User createUser(TempUserInfo tempUserInfo, UserSignUpRequest request) throws IOException;
 
     // redis, cookie - refreshToken 삭제 (로그아웃)
     void logout(HttpServletRequest request, HttpServletResponse response);

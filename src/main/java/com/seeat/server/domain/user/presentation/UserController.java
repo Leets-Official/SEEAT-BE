@@ -4,6 +4,7 @@ package com.seeat.server.domain.user.presentation;
 import com.seeat.server.domain.user.application.dto.response.UserNicknameResponse;
 import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.application.dto.request.UserSignUpRequest;
+import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.domain.user.presentation.swagger.UserControllerSpec;
 import com.seeat.server.global.response.ApiResponse;
@@ -39,6 +40,7 @@ public class UserController implements UserControllerSpec {
      */
     @PostMapping()
     public ApiResponse<Void> userSignUp(
+            HttpServletResponse response,
             @RequestBody @Valid UserSignUpRequest request,
             @RequestHeader("Temp-User-Key") String tempUserKey) throws IOException {
 
@@ -48,7 +50,12 @@ public class UserController implements UserControllerSpec {
 
             throw new CustomException(ErrorCode.NOT_TEMP_USER, null);
         }
-        userService.createUser(tempUserInfo, request);
+        User user = userService.createUser(tempUserInfo, request);
+
+        // 토큰 발급
+        tokenService.generateTokensAndSetHeaders(response, user);
+
+        // 임시유저 정보 삭제
         redisService.deleteValues(tempUserKey);
 
         return ApiResponse.created();
