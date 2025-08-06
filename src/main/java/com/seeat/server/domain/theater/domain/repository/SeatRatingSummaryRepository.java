@@ -15,7 +15,9 @@ import java.util.*;
 public interface SeatRatingSummaryRepository extends JpaRepository<SeatRatingSummary,Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT s FROM SeatRatingSummary s WHERE s.seat = :seat")
+    @Query("SELECT s " +
+            "FROM SeatRatingSummary s " +
+            "WHERE s.seat = :seat")
     Optional<SeatRatingSummary> findBySeatForUpdate(@Param("seat") Seat seat);
 
 

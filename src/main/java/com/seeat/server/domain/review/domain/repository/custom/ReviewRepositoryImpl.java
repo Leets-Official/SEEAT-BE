@@ -37,7 +37,8 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom{
                 "SELECT r FROM Review r " +
                         "JOIN ReviewSeat rs ON rs.review = r " +
                         "JOIN Seat s ON s = rs.seat " +
-                        "LEFT JOIN ReviewLike rl ON rl.review = r "
+                        "LEFT JOIN ReviewLike rl ON rl.review = r " +
+                        "WHERE r.user.isDelete = false "
         );
 
         // 해시태그 필터가 있을 경우 - 해시태그 조인 추가

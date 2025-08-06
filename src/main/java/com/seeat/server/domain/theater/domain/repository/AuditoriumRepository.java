@@ -28,7 +28,7 @@ public interface AuditoriumRepository extends JpaRepository<Auditorium, String> 
     LEFT JOIN Seat s ON s.auditorium = a
     LEFT JOIN ReviewSeat rs ON rs.seat = s
     LEFT JOIN Review r ON rs.review = r
-    WHERE a.id = :auditoriumId
+    WHERE a.id = :auditoriumId and r.user.isDelete = false
     GROUP BY a
     """)
     Optional<AuditoriumWithRating> findAuditoriumWithRating(@Param("auditoriumId") String auditoriumId);
@@ -44,6 +44,7 @@ public interface AuditoriumRepository extends JpaRepository<Auditorium, String> 
     LEFT JOIN Seat s ON s.auditorium = a
     LEFT JOIN ReviewSeat rs ON rs.seat = s
     LEFT JOIN Review r ON rs.review = r
+    where r.user.isDelete = false
     GROUP BY a.id
     ORDER BY (COUNT(DISTINCT r.id) * 0.3 + COALESCE(AVG(r.rating), 0) * 0.7) DESC
 """)

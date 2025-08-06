@@ -49,7 +49,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    WHERE rs.seat.id = :seatId
+    WHERE rs.seat.id = :seatId and r.user.isDelete = false
     GROUP BY r
     ORDER BY r.createdAt DESC
 """)
@@ -67,7 +67,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    WHERE rs.seat.id = :seatId
+    WHERE rs.seat.id = :seatId and r.user.isDelete = false
     GROUP BY r
     ORDER BY COUNT(rl) DESC, r.createdAt DESC
 """)
@@ -85,7 +85,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    WHERE rs.seat.id = :seatId
+    WHERE rs.seat.id = :seatId and r.user.isDelete = false
     GROUP BY r
     ORDER BY r.rating DESC, r.createdAt DESC
 """)
@@ -103,7 +103,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    WHERE rs.seat.id = :seatId
+    WHERE rs.seat.id = :seatId and r.user.isDelete = false
     GROUP BY r
     ORDER BY r.rating ASC, r.createdAt DESC
 """)
@@ -122,7 +122,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    WHERE rs.seat.auditorium.id = :auditoriumId
+    WHERE rs.seat.auditorium.id = :auditoriumId and r.user.isDelete = false
     GROUP BY r
     ORDER BY r.createdAt DESC
 """)
@@ -140,7 +140,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    WHERE rs.seat.auditorium.id = :auditoriumId
+    WHERE rs.seat.auditorium.id = :auditoriumId and r.user.isDelete = false
     GROUP BY r
     ORDER BY COUNT(rl) DESC, r.createdAt DESC
 """)
@@ -158,7 +158,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    WHERE rs.seat.auditorium.id = :auditoriumId
+    WHERE rs.seat.auditorium.id = :auditoriumId and r.user.isDelete = false
     GROUP BY r
     ORDER BY r.rating DESC, r.createdAt DESC
 """)
@@ -176,7 +176,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
     FROM ReviewSeat rs
     JOIN Review r ON rs.review = r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    WHERE rs.seat.auditorium.id = :auditoriumId
+    WHERE rs.seat.auditorium.id = :auditoriumId and r.user.isDelete = false
     GROUP BY r
     ORDER BY r.rating ASC, r.createdAt DESC
 """)
@@ -190,7 +190,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
     @Query("""
    SELECT COUNT(rs.review)
    FROM ReviewSeat rs
-   WHERE rs.seat.auditorium.id = :auditoriumId
+   WHERE rs.seat.auditorium.id = :auditoriumId and rs.review.user.isDelete = false
    """)
     Long countByAuditoriumId(@Param("auditoriumId") String auditoriumId);
 
@@ -204,8 +204,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
     SELECT r AS review,
            COUNT(rl.user.id) AS likeCount
     FROM Review r
-    LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    WHERE r.id = :id
+    LEFT JOIN ReviewLike rl ON rl.review.id = r.id 
+    WHERE r.id = :id and r.user.isDelete = false
     GROUP BY r
 """)
     Optional<ReviewWithLikeCount> findReviewAndCountById(@Param("id") Long id);
@@ -220,7 +220,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
            COUNT(rl.user.id) AS likeCount
     FROM Review r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    WHERE r.id IN :reviewIds
+    WHERE r.id IN :reviewIds and r.user.isDelete = false
     GROUP BY r
     ORDER BY COUNT(rl.user.id) DESC, r.createdAt DESC
     """)
@@ -238,6 +238,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
            COUNT(rl.user.id) AS likeCount
     FROM Review r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
+    WHERE r.user.isDelete = false
     GROUP BY r
     ORDER BY COUNT(rl.user.id) DESC, r.createdAt DESC
     """)
@@ -255,7 +256,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRep
            COUNT(rl.user.id) AS likeCount
     FROM Review r
     LEFT JOIN ReviewLike rl ON rl.review.id = r.id
-    WHERE r.user.id = :userId
+    WHERE r.user.id = :userId and r.user.isDelete = false
     GROUP BY r
     ORDER BY COUNT(rl.user.id) DESC, r.createdAt DESC
 """)
