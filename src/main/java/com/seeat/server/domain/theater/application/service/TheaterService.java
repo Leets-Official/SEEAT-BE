@@ -136,10 +136,12 @@ public class TheaterService implements TheaterUseCase {
     @Override
     public List<Seat> getSeatByName(String theaterName, String auditoriumName, List<String> seats) {
 
-        /// 영화관 예외 처리
-        Theater theater = theaterRepository.findByName(theaterName)
-                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_THEATER.getMessage()));
+        /// 이름 하드 코딩
+        String name = getName(theaterName);
 
+        /// 영화관 예외 처리
+        Theater theater = theaterRepository.findByName(name)
+                .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_THEATER.getMessage()));
 
         /// 상영관 예외 처리
         Auditorium auditorium = auditoriumRepository.findByNameContainingIgnoreCaseAndTheater_Id(auditoriumName, theater.getId())
@@ -162,6 +164,17 @@ public class TheaterService implements TheaterUseCase {
 
         return seatList;
 
+    }
+
+    /// 인식 안되는 오류 상영관들 하드코딩
+    private String getName(String theaterName) {
+
+        /// 하드 코딩
+        if (theaterName.equals("메가박스 남양주현대아울렛스퍼이스원")){
+            theaterName = "메가박스 남양주현대아울렛스페이스원";
+        }
+
+        return theaterName;
     }
 
 

@@ -1,8 +1,8 @@
-package com.seeat.server.domain.review.application.service;
+package com.seeat.server.domain.review_ai.application.service;
 
-import com.seeat.server.domain.review.application.usecase.TicketOcrUseCase;
-import com.seeat.server.domain.review.external.NaverOcrApi;
-import com.seeat.server.domain.review.application.dto.response.OcrResponse;
+import com.seeat.server.domain.review_ai.application.usecase.TicketOcrUseCase;
+import com.seeat.server.domain.review_ai.external.NaverOcrApi;
+import com.seeat.server.domain.review_ai.application.dto.response.OcrResponse;
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.Seat;
@@ -60,11 +60,22 @@ public class TicketOcrService implements TicketOcrUseCase {
             /// OCR API 호출 (텍스트 추출 결과 리스트)
             List<String> result = naverOcrApi.callApi(HttpMethod.POST.name(), tempFile.getAbsolutePath(), ext);
 
-            /// OCR 결과를 분기
-            OcrCGVResponse cgvResponse = cgvImageOCR(result);
+            String type = result.get(3);
+
+            /// 공통 응답
+            OcrTheaterResponse theaterResponse;
+
+            if (type.equals("메가박스 영화 예시")) {
+
+                /// 메가박스 적용
+                theaterResponse = megaboxImageOCR(result);
+            } else {
+                /// CGV 적용
+                theaterResponse = cgvImageOCR(result);
+            }
 
             /// 분기한 것을 DTO로 변환
-            return toResponse(cgvResponse);
+            return toResponse(theaterResponse);
 
         } finally {
             // 임시 파일 삭제 (예외 발생 여부와 관계없이 항상 삭제)
@@ -74,8 +85,8 @@ public class TicketOcrService implements TicketOcrUseCase {
         }
     }
 
-    ///
-    private OcrCGVResponse cgvImageOCR(List<String> strings) {
+    /// CGV 파싱
+    private OcrTheaterResponse cgvImageOCR(List<String> strings) {
 
         /// 예외 처리
         if (strings == null || strings.size() < 3) {
@@ -124,24 +135,86 @@ public class TicketOcrService implements TicketOcrUseCase {
         }
 
 
-        return OcrCGVResponse.from(theater, title, hall, seat);
+        return OcrTheaterResponse.from(theater, title, hall, seat);
+    }
+
+    /// 메가박스 파싱
+    private OcrTheaterResponse megaboxImageOCR(List<String> strings) {
+
+        /// 예외 처리
+        if (strings == null || strings.size() < 3) {
+            return null;
+        }
+
+        String titleInfo = strings.get(0);
+        String hallInfo = strings.get(1);
+        String seatInfo = strings.get(2);
+
+        /// 영화제목 정보 추출
+        String[] titleParts = titleInfo.split("\n");
+        String title = titleParts.length > 0 ? titleParts[0] : null;
+        System.out.println("title: " + title);
+
+        /// 상영관 정보 추출
+        String[] hallLines = hallInfo.split("\n");
+        String rawTheater = hallLines.length > 0 ? hallLines[0].trim() : null;
+        String theater = null;
+
+        /// 메가박스가 없다면 추가
+        if (rawTheater != null) {
+            theater = rawTheater.startsWith("메가박스") ? rawTheater : "메가박스 " + rawTheater;
+            System.out.println("theater: " + theater);
+        }
+
+
+        /// "IMAX관 7층" 같은 줄에서 "IMAX관"만 추출
+        String hallLine = hallLines.length > 1 ? hallLines[1] : null;
+        String hall = null;
+        if (hallLine != null) {
+            hall = hallLine;
+            System.out.println("hall: " + hall);
+
+        }
+
+        /// 좌석 정보 추출
+        String[] seatLines = seatInfo.split("\n");
+        List<String> seat = new ArrayList<>();
+
+        /// 콤마로 되어있는 것 나누기
+        for (String line : seatLines) {
+
+            // "좌석"이라는 단어가 포함된 라인은 건너뜀
+            if (line.contains("좌석")) {
+                continue;
+            }
+
+            String[] parts = line.split(",");
+            for (String part : parts) {
+                String trimmed = part.trim();
+                if (!trimmed.isEmpty()) {
+                    seat.add(trimmed);
+                }
+            }
+        }
+
+        return OcrTheaterResponse.from(theater, title, hall, seat);
     }
 
 
 
     /// DB에서 결과 가져오기
-    private OcrResponse toResponse(OcrCGVResponse cgvResponse) {
+    private OcrResponse toResponse(OcrTheaterResponse theaterResponse) {
 
         /// 예외처리
-        if (cgvResponse == null) {
+        if (theaterResponse == null) {
             return null;
         }
 
         /// DB에서 해당 값들 조회
-        String theater = cgvResponse.theater;
-        String title = cgvResponse.title;
-        String auditorium = cgvResponse.auditorium;
-        List<String> seats = cgvResponse.seats;
+        String theater = theaterResponse.theater;
+        String title = theaterResponse.title;
+        String auditorium = theaterResponse.auditorium;
+        List<String> seats = theaterResponse.seats;
 
         /// 체크
         List<Seat> checkSeats = theaterService.getSeatByName(theater, auditorium, seats);
@@ -159,14 +232,14 @@ public class TicketOcrService implements TicketOcrUseCase {
 
     /// CGV OCR 응답을 내부에서 사용하는 DTO
     @Builder
-    record OcrCGVResponse(
+    record OcrTheaterResponse(
             String theater,
             String title,
             String auditorium,
             List<String> seats){
         /// 정적 팩토리 메서드
-        public static OcrCGVResponse from(String theater, String title, String auditorium, List<String> seats) {
-            return OcrCGVResponse.builder()
+        public static OcrTheaterResponse from(String theater, String title, String auditorium, List<String> seats) {
+            return OcrTheaterResponse.builder()
                     .theater(theater)
                     .title(title)
                     .auditorium(auditorium)

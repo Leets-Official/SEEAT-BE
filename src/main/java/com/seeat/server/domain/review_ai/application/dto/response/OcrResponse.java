@@ -1,4 +1,4 @@
-package com.seeat.server.domain.review.application.dto.response;
+package com.seeat.server.domain.review_ai.application.dto.response;
 
 import com.seeat.server.domain.theater.domain.entity.Seat;
 import io.swagger.v3.oas.annotations.media.Schema;

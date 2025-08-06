@@ -1,4 +1,4 @@
-package com.seeat.server.domain.review.external;
+package com.seeat.server.domain.review_ai.external;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
@@ -65,6 +65,7 @@ public class NaverOcrApi {
             JSONArray images = new JSONArray();
             images.add(image);
             json.put("images", images);
+
 
             String postParams = json.toString();
 
@@ -177,6 +178,14 @@ public class NaverOcrApi {
                     result.add(fieldText.toString());
                 }
             }
+        }
+
+        // matchedTemplate 추출
+        if (imageObj.containsKey("matchedTemplate")) {
+            JSONObject matchedTemplate = (JSONObject) imageObj.get("matchedTemplate");
+
+            result.add(matchedTemplate.get("name").toString());
+
         }
 
         return result;

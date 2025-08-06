@@ -1,4 +1,4 @@
-package com.seeat.server.domain.review.external;
+package com.seeat.server.domain.review_ai.external;
 
 public class LangchainApiException extends RuntimeException {
   public LangchainApiException(String message, Throwable throwable) {

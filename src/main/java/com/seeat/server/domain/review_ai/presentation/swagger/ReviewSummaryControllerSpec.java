@@ -1,6 +1,6 @@
-package com.seeat.server.domain.review.presentation.swagger;
+package com.seeat.server.domain.review_ai.presentation.swagger;
 
-import com.seeat.server.domain.review.application.dto.response.ReviewSummaryResponse;
+import com.seeat.server.domain.review_ai.application.dto.response.ReviewSummaryResponse;
 import com.seeat.server.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

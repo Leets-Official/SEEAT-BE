@@ -1,21 +1,24 @@
-package com.seeat.server.domain.review.application.service;
+package com.seeat.server.domain.review_ai.application.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.seeat.server.domain.review.application.dto.response.ReviewSummaryResponse;
-import com.seeat.server.domain.review.application.usecase.ReviewSummaryUseCase;
+import com.seeat.server.domain.review_ai.application.dto.response.ReviewSummaryResponse;
+import com.seeat.server.domain.review_ai.application.usecase.ReviewSummaryUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
-import com.seeat.server.domain.review.external.LangchainApi;
-import com.seeat.server.domain.review.external.LangchainApiException;
+import com.seeat.server.domain.review_ai.external.LangchainApi;
+import com.seeat.server.domain.review_ai.external.LangchainApiException;
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.global.response.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.TimeUnit;
 
 import static com.seeat.server.global.util.RedisKeyUtil.REVIEW_SUMMARY_KEY;
 
@@ -33,19 +36,24 @@ import static com.seeat.server.global.util.RedisKeyUtil.REVIEW_SUMMARY_KEY;
 public class ReviewSummaryService implements ReviewSummaryUseCase {
 
     private final LangchainApi langchainApi;
+    private final RedisTemplate<String,String> redisTemplate;
 
     /// 외부 의존성
     private final TheaterUseCase theaterService;
     private final ReviewUseCase reviewService;
     private final ObjectMapper objectMapper;
 
+
     /**
      * 상영관 ID를 바탕으로 랭체인 요청 보내는 함수
      * 레디스에서 값 가져오기, 없으면 동기화로 AI에게 요청
-     * @param auditoriumId  상영관 ID
+     *
+     * @param auditoriumId 상영관 ID
      */
     @Override
-    @Cacheable(cacheNames = REVIEW_SUMMARY_KEY, key = "#auditoriumId")
+    @Cacheable(cacheNames = REVIEW_SUMMARY_KEY,
+            key = "#auditoriumId",
+            unless = "#result.summary.contains('요약이 가능') == false")
     public ReviewSummaryResponse loadSummaryByAuditoriumId(String auditoriumId) {
 
         /// 상영관 예외처리
@@ -63,8 +71,15 @@ public class ReviewSummaryService implements ReviewSummaryUseCase {
         }
 
         /// 상영관 아이디 전송으로 AI에게 요약 정보 요청하기
-        String summary;
+        String summary = getSummary(auditorium);
 
+        /// 결과 응답하기
+        return ReviewSummaryResponse.from(auditorium.getId(), auditoriumName, summary);
+    }
+
+    /// 랭체인을 바탕으로 요약하는 함수
+    private String getSummary(Auditorium auditorium) {
+        String summary;
         try {
             String rawSummary = langchainApi.postSummaryByLangchain(auditorium.getId())
                     .block();
@@ -84,7 +99,6 @@ public class ReviewSummaryService implements ReviewSummaryUseCase {
             throw new IllegalStateException(ErrorCode.INTERNAL_LANGCHAIN_ERROR.getMessage());
         }
 
-        /// 결과 응답하기
-        return ReviewSummaryResponse.from(auditorium.getId(), auditoriumName, summary);
+        return summary;
     }
 }
