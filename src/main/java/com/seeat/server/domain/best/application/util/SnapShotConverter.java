@@ -52,7 +52,8 @@ public class SnapShotConverter {
                 response.auditoriumName(),
                 response.avgRating(),
                 response.reviewCount(),
-                response.score()
+                response.score(),
+                response.image()
         );
     }
 

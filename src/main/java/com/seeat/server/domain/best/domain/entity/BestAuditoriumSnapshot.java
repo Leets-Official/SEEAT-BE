@@ -19,16 +19,17 @@ public class BestAuditoriumSnapshot extends BaseEntity {
 
     private String auditoriumId;
     private String auditoriumName;
-
+    private String image;
     private Double avgRating;
     private Long reviewCount;
     private Double score;
 
     /// 정적 팩토리 메서드 생성
-    public static BestAuditoriumSnapshot of(String auditoriumId, String auditoriumName, Double avgRating, Long reviewCount, Double score) {
+    public static BestAuditoriumSnapshot of(String auditoriumId, String auditoriumName, Double avgRating, Long reviewCount, Double score, String image) {
         return BestAuditoriumSnapshot.builder()
                 .auditoriumId(auditoriumId)
                 .auditoriumName(auditoriumName)
+                .image(image)
                 .avgRating(avgRating)
                 .reviewCount(reviewCount)
                 .score(score)

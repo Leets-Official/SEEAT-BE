@@ -36,6 +36,9 @@ public class Auditorium {
     @Column(name = "image_url", length = 512)
     private String imageUrl;
 
+    @Column(name = "thumbnail_url", length = 512)
+    private String thumbnailUrl;
+
     private String screenSize;
 
     private String soundType;
