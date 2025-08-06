@@ -74,6 +74,9 @@ public class RequestMatcherHolder {
             new RequestInfo(DELETE, "/api/v1/search", null),
             new RequestInfo(GET, "/api/v1/search/**", null),
 
+            // 토큰 조회 관련
+            new RequestInfo(GET, "/api/v1/auth", null),
+
             // static resources
             new RequestInfo(GET, "/docs/**", null),
             new RequestInfo(GET, "/*.ico", null),
