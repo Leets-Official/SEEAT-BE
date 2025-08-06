@@ -1,13 +1,13 @@
-package com.seeat.server.domain.review.application.service;
+package com.seeat.server.domain.review_ai.application.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.seeat.server.domain.review.application.dto.response.ReviewSummaryResponse;
-import com.seeat.server.domain.review.application.usecase.ReviewSummaryUseCase;
+import com.seeat.server.domain.review_ai.application.dto.response.ReviewSummaryResponse;
+import com.seeat.server.domain.review_ai.application.usecase.ReviewSummaryUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
-import com.seeat.server.domain.review.external.LangchainApi;
-import com.seeat.server.domain.review.external.LangchainApiException;
+import com.seeat.server.domain.review_ai.external.LangchainApi;
+import com.seeat.server.domain.review_ai.external.LangchainApiException;
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.global.response.ErrorCode;

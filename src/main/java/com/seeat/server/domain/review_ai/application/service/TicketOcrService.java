@@ -1,8 +1,8 @@
-package com.seeat.server.domain.review.application.service;
+package com.seeat.server.domain.review_ai.application.service;
 
-import com.seeat.server.domain.review.application.usecase.TicketOcrUseCase;
-import com.seeat.server.domain.review.external.NaverOcrApi;
-import com.seeat.server.domain.review.application.dto.response.OcrResponse;
+import com.seeat.server.domain.review_ai.application.usecase.TicketOcrUseCase;
+import com.seeat.server.domain.review_ai.external.NaverOcrApi;
+import com.seeat.server.domain.review_ai.application.dto.response.OcrResponse;
 import com.seeat.server.domain.theater.application.usecase.TheaterUseCase;
 import com.seeat.server.domain.theater.domain.entity.Auditorium;
 import com.seeat.server.domain.theater.domain.entity.Seat;

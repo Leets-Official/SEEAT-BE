@@ -1,4 +1,4 @@
-package com.seeat.server.domain.review.external;
+package com.seeat.server.domain.review_ai.external;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

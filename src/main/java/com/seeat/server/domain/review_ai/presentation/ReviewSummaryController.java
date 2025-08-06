@@ -1,8 +1,8 @@
-package com.seeat.server.domain.review.presentation;
+package com.seeat.server.domain.review_ai.presentation;
 
-import com.seeat.server.domain.review.application.dto.response.ReviewSummaryResponse;
-import com.seeat.server.domain.review.application.usecase.ReviewSummaryUseCase;
-import com.seeat.server.domain.review.presentation.swagger.ReviewSummaryControllerSpec;
+import com.seeat.server.domain.review_ai.application.dto.response.ReviewSummaryResponse;
+import com.seeat.server.domain.review_ai.application.usecase.ReviewSummaryUseCase;
+import com.seeat.server.domain.review_ai.presentation.swagger.ReviewSummaryControllerSpec;
 import com.seeat.server.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
