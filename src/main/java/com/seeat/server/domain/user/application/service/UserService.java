@@ -96,7 +96,7 @@ public class UserService implements UserUseCase {
      * @param request 회원가입을 위한 추가 정보
      */
     @Override
-    public void createUser(TempUserInfo tempUserInfo, UserSignUpRequest request) throws IOException {
+    public User createUser(TempUserInfo tempUserInfo, UserSignUpRequest request) throws IOException {
 
         String thumbnailImage = "thumbnail";
 
@@ -123,6 +123,8 @@ public class UserService implements UserUseCase {
                 userAuditoriumRepository.save(userAuditorium);
             }
         }
+
+        return user;
     }
 
     /**

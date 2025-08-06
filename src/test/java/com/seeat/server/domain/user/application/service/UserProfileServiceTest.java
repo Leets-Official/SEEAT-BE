@@ -96,6 +96,7 @@ public class UserProfileServiceTest {
     private User user2;
     private User user3;
     private User user4;
+    private User user5;
     private HashTag hashTag1;
     private HashTag hashTag2;
     private HashTag hashTag3;
@@ -111,6 +112,7 @@ public class UserProfileServiceTest {
         user2 = repository.save(UserFixtures.createUser("user2@test.com"));
         user3 = repository.save(UserFixtures.createUser("user3@test.com"));
         user4 = repository.save(UserFixtures.createUser("user4@test.com"));
+        user5 = repository.save(UserFixtures.createUser("user5@test.com"));
         hashTag1 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.SOUND, "해시태그 1"));
         hashTag2 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.COMPANION, "해시태그 2"));
         hashTag3 = hashTagRepository.save(HashTagFixtures.createHashTag(HashTagType.ENVIRONMENT, "해시태그 3"));
@@ -126,16 +128,20 @@ public class UserProfileServiceTest {
             // given
             userAuditoriumRepository.save(UserAuditorium.of(user1, auditorium));
 
-            Review review1 = reviewService.createReview(getReviewRequest(List.of(seat1, seat2), 5, "test-1"), user1.getId());
-            Review review2 = reviewService.createReview(getReviewRequest(List.of(seat1, seat2), 5, "test-1"), user1.getId());
+            Review review1 = reviewService.createReview(getReviewRequest(List.of(seat1, seat2), 1, "test-1"), user1.getId());
+            Review review2 = reviewService.createReview(getReviewRequest(List.of(seat1, seat2), 2, "test-2"), user2.getId());
+            Review review3 = reviewService.createReview(getReviewRequest(List.of(seat1, seat2), 3, "test-3"), user3.getId());
+            Review review4 = reviewService.createReview(getReviewRequest(List.of(seat1, seat2), 4, "test-4"), user4.getId());
+            Review review5 = reviewService.createReview(getReviewRequest(List.of(seat1, seat2), 5, "test-5"), user5.getId());
+            Review review6 = reviewService.createReview(getReviewRequest(List.of(seat1, seat2), 5, "test-1"), user1.getId());
 
             /// 좋아요
             reviewLikeRepository.saveAll(List.of(
-                    ReviewLikeFixtures.stub(user2, review1),
-                    ReviewLikeFixtures.stub(user3, review1),
-                    ReviewLikeFixtures.stub(user2, review1),
-                    ReviewLikeFixtures.stub(user3, review2),
-                    ReviewLikeFixtures.stub(user4, review2)
+                    ReviewLikeFixtures.stub(user1, review1),
+                    ReviewLikeFixtures.stub(user1, review2),
+                    ReviewLikeFixtures.stub(user1, review3),
+                    ReviewLikeFixtures.stub(user1, review4),
+                    ReviewLikeFixtures.stub(user1, review5)
             ));
 
 
