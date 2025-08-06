@@ -34,6 +34,9 @@ public class RequestMatcherHolder {
             new RequestInfo(POST, "/api/v1/users/logout", USER),
             new RequestInfo(POST, "/api/v1/users/dev/long-token", null),
 
+            // 이미지 관련
+            new RequestInfo(GET, "/api/v1/images/**", null),
+
             // 해시태그 관련
             new RequestInfo(GET, "/api/v1/hashtag", null),
             new RequestInfo(GET, "/api/v1/hashtag/**", null),
