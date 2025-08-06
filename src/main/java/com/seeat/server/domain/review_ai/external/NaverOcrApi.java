@@ -66,6 +66,7 @@ public class NaverOcrApi {
             images.add(image);
             json.put("images", images);
 
+
             String postParams = json.toString();
 
             // 멀티파트 데이터 전송
@@ -177,6 +178,14 @@ public class NaverOcrApi {
                     result.add(fieldText.toString());
                 }
             }
+        }
+
+        // matchedTemplate 추출
+        if (imageObj.containsKey("matchedTemplate")) {
+            JSONObject matchedTemplate = (JSONObject) imageObj.get("matchedTemplate");
+
+            result.add(matchedTemplate.get("name").toString());
+
         }
 
         return result;
