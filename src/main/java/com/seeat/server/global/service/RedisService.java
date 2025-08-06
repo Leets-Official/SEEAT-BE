@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.Set;
+
 /**
  * Redis와의 상호작용을 담당하는 서비스 클래스
  *
@@ -42,6 +44,17 @@ public class RedisService {
             return null;
         }
         return objectMapper.convertValue(value, clazz);
+    }
+
+    public boolean existsRefreshToken(String token) {
+        Set<String> keys = redisTemplate.keys(REFRESH_TOKEN_PREFIX + "*");
+        if (keys == null || keys.isEmpty()) return false;
+
+        ValueOperations<String, Object> values = redisTemplate.opsForValue();
+
+        return keys.stream()
+                .map(values::get)
+                .anyMatch(value -> token.equals(value));
     }
 
     public void deleteValues(String key) {
