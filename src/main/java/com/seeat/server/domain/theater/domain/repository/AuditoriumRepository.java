@@ -20,14 +20,17 @@ public interface AuditoriumRepository extends JpaRepository<Auditorium, String> 
 
     /// 리뷰 개수 및 평점 같이 가져오기
     @Query("""
-    select a as auditorium,
-           SUM(sr.totalReviews) as totalReviews,
-           AVG(sr.averageGrade) as averageRating
-    from Auditorium a
-    left join SeatRatingSummary sr on sr.seat.auditorium.id = a.id
-    where a.id = :auditoriumId
-    group by a
-""")
+    SELECT
+        a AS auditorium,
+        COUNT(DISTINCT r.id) AS totalReviews,
+        AVG(DISTINCT r.rating) AS averageRating
+    FROM Auditorium a
+    LEFT JOIN Seat s ON s.auditorium = a
+    LEFT JOIN ReviewSeat rs ON rs.seat = s
+    LEFT JOIN Review r ON rs.review = r
+    WHERE a.id = :auditoriumId
+    GROUP BY a
+    """)
     Optional<AuditoriumWithRating> findAuditoriumWithRating(@Param("auditoriumId") String auditoriumId);
 
 

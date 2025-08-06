@@ -34,8 +34,7 @@ public interface ReviewHashTagRepository extends JpaRepository<ReviewHashTag, Lo
      * @return List<Review>
      */
     @Query("""
-    SELECT rh.hashTag.id as hashTagId,
-        rh.hashTag.name as hashTagName,
+    SELECT rh.hashTag as hashTag,
         COUNT(DISTINCT r.id) AS count
     FROM Auditorium a
     LEFT JOIN Seat s ON s.auditorium = a

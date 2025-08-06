@@ -9,6 +9,7 @@ import java.util.List;
  * 상영관 리뷰들 중에서 많이 사용된 해시태그를 파악하기 위한 DTO 입니다.
  * @param hashTagId     해시태그 ID
  * @param hashTagName   해시태그 이름
+ * @param hashType      해시태그 타입
  * @param count         개수
  */
 @Builder
@@ -16,14 +17,16 @@ import java.util.List;
 public record AuditoriumHashTagResponse(
         Long hashTagId,
         String hashTagName,
+        String hashType,
         Long count
 ) {
 
     /// 정적 팩토리 메서드
     public static AuditoriumHashTagResponse from(ReviewHashTagWithCount withCount) {
         return AuditoriumHashTagResponse.builder()
-                .hashTagId(withCount.getHashTagId())
-                .hashTagName(withCount.getHashTagName())
+                .hashTagId(withCount.getHashTag().getId())
+                .hashTagName(withCount.getHashTag().getName())
+                .hashType(withCount.getHashTag().getType().getLabel())
                 .count(withCount.getCount())
                 .build();
 
