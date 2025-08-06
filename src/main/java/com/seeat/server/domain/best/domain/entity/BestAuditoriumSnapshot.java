@@ -1,6 +1,7 @@
 package com.seeat.server.domain.best.domain.entity;
 
 import com.seeat.server.domain.BaseEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -19,6 +20,8 @@ public class BestAuditoriumSnapshot extends BaseEntity {
 
     private String auditoriumId;
     private String auditoriumName;
+
+    @Column(length = 512)
     private String image;
     private Double avgRating;
     private Long reviewCount;
