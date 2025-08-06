@@ -28,7 +28,7 @@ public class CorsConfig {
 
         /// CORS 추가
         configuration.addAllowedOriginPattern(front_local);
-        configuration.addAllowedOriginPattern(front_dev);
+        configuration.addAllowedOriginPattern("https://www.seeat.site");
         configuration.addAllowedOriginPattern(back_dev);
 
         configuration.addAllowedHeader("*");
