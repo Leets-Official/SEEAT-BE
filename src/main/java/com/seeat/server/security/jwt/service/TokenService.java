@@ -10,12 +10,14 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * 토큰 발급 서비스
@@ -79,5 +81,24 @@ public class TokenService {
         refreshTokenCookie.setMaxAge((int) (devTokenExpiration / 1000));
 
         response.addCookie(refreshTokenCookie);
+    }
+
+    public Optional<User> getUserFromRefreshToken(String refreshToken) {
+        if (refreshToken == null || !redisService.existsRefreshToken(refreshToken)) {
+            return Optional.empty();
+        }
+
+        if (!jwtProvider.validateToken(refreshToken)) {
+            return Optional.empty();
+        }
+
+        Authentication authentication = jwtProvider.getAuthentication(refreshToken);
+        User user = (User) authentication.getPrincipal();
+
+        return Optional.ofNullable(user);
+    }
+
+    public String generateAccessToken(User user) {
+        return jwtProvider.generateAccessToken(user);
     }
 }
