@@ -45,12 +45,16 @@ public class TokenService {
     private boolean sslEnabled;
 
 
-    public void generateTokensAndSetHeaders(HttpServletResponse response, User user) {
-        String accessToken = jwtProvider.generateAccessToken(user);
-        String refreshToken = jwtProvider.generateRefreshToken(user);
+    public void generateTokensAndSetHeaders(Authentication authentication, HttpServletResponse response, User user) {
 
+        /// 토큰 발급하기
+        String accessToken = jwtProvider.generateAccessToken(authentication);
+        String refreshToken = jwtProvider.generateRefreshToken(authentication);
+
+        /// 리프레쉬 토큰 지정하기
         redisService.setRefreshToken(user.getId(), refreshToken, Duration.ofMillis(refreshTokenExpiration));
 
+        /// 헤더에 저장
         response.setHeader(HttpHeaders.AUTHORIZATION, JwtConstants.TOKEN_TYPE + " " + accessToken);
 
         Cookie refreshTokenCookie = new Cookie(JwtConstants.REFRESH_TOKEN_COOKIE, refreshToken);
@@ -81,24 +85,5 @@ public class TokenService {
         refreshTokenCookie.setMaxAge((int) (devTokenExpiration / 1000));
 
         response.addCookie(refreshTokenCookie);
-    }
-
-    public Optional<User> getUserFromRefreshToken(String refreshToken) {
-        if (refreshToken == null || !redisService.existsRefreshToken(refreshToken)) {
-            return Optional.empty();
-        }
-
-        if (!jwtProvider.validateToken(refreshToken)) {
-            return Optional.empty();
-        }
-
-        Authentication authentication = jwtProvider.getAuthentication(refreshToken);
-        User user = (User) authentication.getPrincipal();
-
-        return Optional.ofNullable(user);
-    }
-
-    public String generateAccessToken(User user) {
-        return jwtProvider.generateAccessToken(user);
     }
 }
