@@ -38,7 +38,7 @@ public interface AuditoriumRepository extends JpaRepository<Auditorium, String> 
     SELECT
         a AS auditorium,
         COUNT(DISTINCT r.id) AS reviewCount,
-        AVG(r.rating) AS avgRating,
+        AVG(DISTINCT r.rating) AS avgRating,
         (COUNT(DISTINCT r.id) * 0.3 + AVG(r.rating) * 0.7) AS score
     FROM Auditorium a
     LEFT JOIN Seat s ON s.auditorium = a
