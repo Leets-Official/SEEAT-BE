@@ -58,6 +58,9 @@ public record ReviewDetailResponse(
 
         List<ReviewImageInfoResponse> imageInfo,
 
+        @Schema(description = "좋아요 여부", example = "3.7")
+        boolean liked,
+
         @Schema(description = "좋아요 개수", example = "152")
         Long heartCount,
 
@@ -67,7 +70,7 @@ public record ReviewDetailResponse(
 
     public static ReviewDetailResponse from(
             Review review,
-            List<ReviewHashTag> hashTags, Long heartCount, List<ReviewImage> images, List<Seat> seats
+            List<ReviewHashTag> hashTags, Long heartCount, List<ReviewImage> images, List<Seat> seats, boolean liked
     ) {
 
         /// 같은 상영관의 좌석이기에,
@@ -85,6 +88,7 @@ public record ReviewDetailResponse(
                 .content(review.getContent())
                 .rating(review.getRating())
                 .heartCount(heartCount)
+                .liked(liked)
                 .user(UserResponse
                         .from(review.getUser()))
                 .imageInfo(ReviewImageInfoResponse.from(images))

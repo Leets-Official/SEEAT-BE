@@ -138,6 +138,11 @@ public class JwtFilter extends OncePerRequestFilter {
             return false; // 필터 타게 함
         }
 
+        // 리뷰 상세조회만 필터 타게 함
+        if (path.matches("^/api/v1/reviews/\\d+$")) {
+            return false;
+        }
+
         /// requestMatcherHolder 통해 필터와 시큐리티를 한번에 해결, true 이면 필터 자체를 타지 않는다.
         /// ex) 개발용 토큰 자체에 필터를 타지 않도록 설정하여, 401,403 에러가 발생하지 않도록 설정
         return requestMatcherHolder.getRequestMatchersByMinRole(null)

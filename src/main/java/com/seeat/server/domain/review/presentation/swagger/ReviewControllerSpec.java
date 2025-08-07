@@ -50,7 +50,9 @@ public interface ReviewControllerSpec {
     @GetMapping("/{reviewId}")
     ApiResponse<ReviewDetailResponse> getReview(
             @Parameter(description = "조회할 리뷰ID",example = "1")
-            @PathVariable Long reviewId
+            @PathVariable Long reviewId,
+
+            @Parameter(hidden = true) @AuthenticationPrincipal User user
     );
 
     /**

@@ -3,7 +3,6 @@ package com.seeat.server.domain.review.application.service;
 import com.seeat.server.domain.best.application.usecase.BestContentUseCase;
 import com.seeat.server.domain.image.application.usecase.ReviewImageUseCase;
 import com.seeat.server.domain.review.application.dto.request.ReviewSortType;
-import com.seeat.server.domain.review.application.dto.response.ReviewSaveResponse;
 import com.seeat.server.domain.review.application.dto.response.ReviewSeatListResponse;
 import com.seeat.server.domain.hashtag.application.usecase.ReviewHashTagUseCase;
 import com.seeat.server.domain.review.application.usecase.ReviewSeatUseCase;
@@ -11,6 +10,7 @@ import com.seeat.server.domain.review.application.usecase.ReviewUseCase;
 import com.seeat.server.domain.review.domain.entity.Review;
 import com.seeat.server.domain.hashtag.domain.entity.ReviewHashTag;
 import com.seeat.server.domain.image.domain.entity.ReviewImage;
+import com.seeat.server.domain.review.domain.repository.ReviewLikeRepository;
 import com.seeat.server.domain.review.domain.repository.ReviewRepository;
 import com.seeat.server.domain.review.application.dto.request.ReviewRequest;
 import com.seeat.server.domain.review.application.dto.request.ReviewUpdateRequest;
@@ -48,6 +48,7 @@ public class ReviewService implements ReviewUseCase {
 
     private final ReviewRepository repository;
     private final ReviewHashTagUseCase hashTagService;
+    private final ReviewLikeRepository likeRepository;
 
     /// 이미지 의존성 처리
     private final ReviewImageUseCase imageService;
@@ -116,7 +117,7 @@ public class ReviewService implements ReviewUseCase {
      * @return 리뷰에 대한 상세 조회 DTO
      */
     @Override
-    public ReviewDetailResponse loadReview(Long reviewId) {
+    public ReviewDetailResponse loadReview(Long reviewId, Long userId) {
 
         /// ReviewId를 바탕으로 조회 (리뷰와 좋아요 동시에 조회)
         ReviewWithLikeCount result = repository.findReviewAndCountById(reviewId)
@@ -134,7 +135,21 @@ public class ReviewService implements ReviewUseCase {
         /// 이미지 주소 조회
         List<ReviewImage> images = imageService.getReviewImagesByReview(review);
 
-        return ReviewDetailResponse.from(review, hashTags, result.getLikeCount(), images, seats);
+        /// 좋아요를 눌렀는지 체크
+        if (userId != null) {
+
+            /// 유저 검증
+            User user = userService.getUser(userId);
+
+            boolean checked = likeRepository.existsByUserAndReview(user, review);
+
+            if (checked) {
+                return ReviewDetailResponse.from(review, hashTags, result.getLikeCount(), images, seats, true);
+
+            }
+        }
+
+        return ReviewDetailResponse.from(review, hashTags, result.getLikeCount(), images, seats, false);
     }
 
     /**

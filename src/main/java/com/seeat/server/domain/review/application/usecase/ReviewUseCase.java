@@ -32,7 +32,7 @@ public interface ReviewUseCase {
     //  조회 함수
     // ========================
     /// 상세 조회
-    ReviewDetailResponse loadReview(Long reviewId);
+    ReviewDetailResponse loadReview(Long reviewId, Long userId);
 
     /// 좌석 바탕 리뷰 목록 조회
     SliceResponse<ReviewSeatListResponse> loadReviewsBySeatId(

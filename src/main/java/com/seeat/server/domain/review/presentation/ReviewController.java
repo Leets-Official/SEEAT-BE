@@ -17,7 +17,6 @@ import com.seeat.server.global.response.pageable.SliceResponse;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,10 +57,14 @@ public class ReviewController implements ReviewControllerSpec {
      */
     @GetMapping("/{reviewId}")
     public ApiResponse<ReviewDetailResponse> getReview(
-            @PathVariable Long reviewId) {
+            @PathVariable Long reviewId,
+            @AuthenticationPrincipal User user) {
+
+        /// 유저가 있다면
+        Long userId = user != null ? user.getId() : null;
 
         // 서비스 호출
-        var response = reviewService.loadReview(reviewId);
+        var response = reviewService.loadReview(reviewId, userId);
 
         // 결과 리턴
         return ApiResponse.ok(response);

@@ -428,7 +428,7 @@ class ReviewServiceIntTest {
             Review review1 = sut.createReview(request, user1.getId());
 
             //when
-            ReviewDetailResponse response = sut.loadReview(review1.getId());
+            ReviewDetailResponse response = sut.loadReview(review1.getId(), null);
 
             //then
             Assertions.assertThat(response).isNotNull();
@@ -456,7 +456,7 @@ class ReviewServiceIntTest {
             Review fakeReview = ReviewFixtures.fakeReview(user1);
 
             // when & then
-            Assertions.assertThatThrownBy(() -> sut.loadReview(fakeReview.getId()))
+            Assertions.assertThatThrownBy(() -> sut.loadReview(fakeReview.getId(), null))
                     .isInstanceOf(NoSuchElementException.class)
                     .hasMessageContaining(ErrorCode.NOT_REVIEW.getMessage());
         }
@@ -551,7 +551,7 @@ class ReviewServiceIntTest {
             likeService.reviewLike(user2.getId(), review.getId());
 
             //when
-            ReviewDetailResponse response = sut.loadReview(review.getId());
+            ReviewDetailResponse response = sut.loadReview(review.getId(), null);
 
             //then
             Assertions.assertThat(response).isNotNull();

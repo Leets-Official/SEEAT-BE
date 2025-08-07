@@ -51,7 +51,6 @@ public record ReviewListResponse(
         @Schema(description = "리뷰 점수", example = "3.7")
         Double rating
 
-
 ) {
 
     public static ReviewListResponse from(Review review, List<ReviewHashTag> hashTags, Long heartCount) {

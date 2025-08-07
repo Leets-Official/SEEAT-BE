@@ -24,6 +24,8 @@ public class UserDeleteBatch {
         LocalDateTime cutoffDate = LocalDateTime.now().minusDays(30);
         List<User> usersToDelete = userRepository.findAllByIsDeleteTrueAndUpdatedAtBefore(cutoffDate);
 
+        /// 해당 유저가 작성한 리뷰, 좋아요, 북마크, 이미지 전부 삭제하기
+
         usersToDelete.forEach(userRepository::delete);
     }
 }
