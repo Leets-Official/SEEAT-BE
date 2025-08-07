@@ -17,6 +17,7 @@ import com.seeat.server.global.service.RedisService;
 import com.seeat.server.global.util.JwtConstants;
 import com.seeat.server.security.jwt.JwtProvider;
 import com.seeat.server.security.oauth2.application.dto.TempUserInfo;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -155,8 +156,9 @@ public class UserService implements UserUseCase {
                     // 유효성 체크 후 삭제
                     if (jwtProvider.validateToken(refreshToken)) {
                         Authentication authentication = jwtProvider.getAuthentication(refreshToken);
-                        User user = (User) authentication.getPrincipal();
-                        Long userId = user.getId();
+                        CustomUserInfo userInfo = (CustomUserInfo) authentication.getPrincipal();
+
+                        Long userId = userInfo.getUser().getId();
 
                         // refreshToken 삭제
                         redisService.deleteRefreshToken(userId);
