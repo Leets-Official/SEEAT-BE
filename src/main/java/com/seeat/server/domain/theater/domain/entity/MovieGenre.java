@@ -1,6 +1,8 @@
 package com.seeat.server.domain.theater.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.seeat.server.global.response.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -29,5 +31,16 @@ public enum MovieGenre {
     @JsonIgnore
     private String getGenre() {
         return displayName;
+    }
+
+    @JsonCreator
+    public static MovieGenre from(String value) {
+        for (MovieGenre genre : MovieGenre.values()) {
+            if (genre.name().equalsIgnoreCase(value) || genre.displayName.equalsIgnoreCase(value)) {
+                return genre;
+            }
+        }
+
+        throw new IllegalArgumentException(ErrorCode.BAD_PARAMETER.getMessage());
     }
 }
