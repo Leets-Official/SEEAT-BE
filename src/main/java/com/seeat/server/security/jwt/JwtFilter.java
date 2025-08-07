@@ -6,6 +6,7 @@ import com.seeat.server.global.service.RedisService;
 import com.seeat.server.global.util.JwtConstants;
 import com.seeat.server.security.config.RequestMatcherHolder;
 import com.seeat.server.security.handler.JwtFailureHandler;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -69,8 +70,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 if (StringUtils.hasText(refreshToken) && jwtProvider.validateToken(refreshToken)) {
                     Authentication refreshAuth = jwtProvider.getAuthentication(refreshToken);
 
-                    User user = (User) refreshAuth.getPrincipal();
-                    Long userId = user.getId();
+                    CustomUserInfo userInfo = (CustomUserInfo) refreshAuth.getPrincipal();
+                    Long userId = userInfo.getUser().getId();
 
                     String redisRefreshToken = redisService.getRefreshToken(userId);
 
