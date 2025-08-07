@@ -7,15 +7,16 @@ import com.seeat.server.domain.user.application.dto.response.UserNicknameRespons
 import com.seeat.server.domain.user.application.usecase.UserUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserAuditorium;
+import com.seeat.server.domain.user.domain.entity.UserRole;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
 import com.seeat.server.domain.user.domain.repository.UserAuditoriumRepository;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
-import com.seeat.server.domain.image.application.usecase.ImageUseCase;
 import com.seeat.server.global.response.CustomException;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.service.RedisService;
 import com.seeat.server.global.util.JwtConstants;
 import com.seeat.server.security.jwt.JwtProvider;
+import com.seeat.server.security.jwt.service.TokenService;
 import com.seeat.server.security.oauth2.application.dto.TempUserInfo;
 import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import jakarta.servlet.http.Cookie;
@@ -49,6 +50,8 @@ public class UserService implements UserUseCase {
     private final RedisService redisService;
     private final UserAuditoriumRepository userAuditoriumRepository;
     private final AuditoriumRepository auditoriumRepository;
+
+    private final TokenService tokenService;
 
     @Value("${server.ssl.enabled}")
     private boolean sslEnabled;
@@ -99,13 +102,22 @@ public class UserService implements UserUseCase {
     /**
      * 최초 가입 회원가입을 위한 로직
      *
-     * @param tempUserInfo 임시유저 정보
+     * @param tempUserKey 임시유저 정보
      * @param request 회원가입을 위한 추가 정보
      */
     @Override
-    public User createUser(TempUserInfo tempUserInfo, UserSignUpRequest request) throws IOException {
+    public User createUser(String tempUserKey, UserSignUpRequest request, HttpServletResponse response) throws IOException {
 
+        /// 썸네일
         String thumbnailImage = "thumbnail";
+
+        /// 임시 유저 정보를 추출
+        TempUserInfo tempUserInfo = redisService.getValues(tempUserKey, TempUserInfo.class);
+
+        if (tempUserInfo == null) {
+
+            throw new CustomException(ErrorCode.NOT_TEMP_USER, null);
+        }
 
         /// 존재한다면 이미지 추가
         if (request.getImage() != null) {
@@ -118,7 +130,7 @@ public class UserService implements UserUseCase {
         /// DB에 유저 저장
         User user = repository.save(requestUser);
 
-        // 선호하는 상영관 유무 체크 후 저장
+        /// 선호하는 상영관 유무 체크 후 저장
         if (request.getAuditoriumId() != null) {
             for (String auditoriumId : request.getAuditoriumId()) {
                 Auditorium auditorium = auditoriumRepository.findById(auditoriumId)
@@ -133,8 +145,17 @@ public class UserService implements UserUseCase {
 
         /// 인증 객체 생성 및 저장
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getRole().getRole()));
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, authorities);
+
+        /// 인증 CustomUserInfo로 감싸서 진행
+        CustomUserInfo userInfo = CustomUserInfo.of(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userInfo, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        /// 토큰 발급
+        tokenService.generateTokensAndSetHeaders(authentication, response, user);
+
+        /// 임시 유저 정보 삭제
+        redisService.deleteValues(tempUserKey);
 
         return user;
     }
@@ -187,6 +208,15 @@ public class UserService implements UserUseCase {
     public User getUser(Long userId) {
         return repository.findByIdAndIsDeleteFalse(userId)
                 .orElseThrow(() -> new NoSuchElementException(ErrorCode.NOT_USER.getMessage()));
+    }
+
+    /**
+     * 개발용 함수
+     */
+    @Override
+    public void generateDev(HttpServletResponse response) {
+
+        tokenService.generateDevTokensAndSetHeaders(1L, "admin", UserRole.ADMIN, response);
     }
 
 }

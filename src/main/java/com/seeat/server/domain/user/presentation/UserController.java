@@ -28,9 +28,7 @@ import java.io.IOException;
 @RequestMapping("/api/v1/users")
 public class UserController implements UserControllerSpec {
 
-    private final RedisService redisService;
     private final UserUseCase userService;
-    private final TokenService tokenService;
 
     /**
      * 최초 로그인시 추가 회원가입을 진행합니다.
@@ -45,29 +43,26 @@ public class UserController implements UserControllerSpec {
             @RequestBody @Valid UserSignUpRequest request,
             @RequestHeader("Temp-User-Key") String tempUserKey) throws IOException {
 
-        TempUserInfo tempUserInfo = redisService.getValues(tempUserKey, TempUserInfo.class);
-
-        if (tempUserInfo == null) {
+        /// 헤더 값 없다면 예외 처리
+        if (tempUserKey == null) {
 
             throw new CustomException(ErrorCode.NOT_TEMP_USER, null);
         }
-        User user = userService.createUser(tempUserInfo, request);
 
-        /// 시큐리티 홀더에서 가져오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        /// 토큰 발급
-        tokenService.generateTokensAndSetHeaders(authentication, response, user);
-
-        // 임시유저 정보 삭제
-        redisService.deleteValues(tempUserKey);
+        /// 서비스 로직 구현
+        userService.createUser(tempUserKey, request, response);
 
         return ApiResponse.created();
     }
 
+    /**
+     * 중복 여부 판단 로직
+     * @param nickname 사용할 닉네임
+     */
     @GetMapping
     public ApiResponse<UserNicknameResponse> userDuplicateNickname(@RequestParam String nickname){
 
+        /// 서비스 호출
         UserNicknameResponse response = userService.isNicknameDuplicated(nickname);
 
         return ApiResponse.ok(response);
@@ -86,7 +81,10 @@ public class UserController implements UserControllerSpec {
             HttpServletRequest request,
             HttpServletResponse response) {
 
+        /// 서비스 호출
         userService.logout(request, response);
+
+        /// 시큐리티 제거
         SecurityContextHolder.clearContext();
 
         return ApiResponse.ok(null);
@@ -102,7 +100,8 @@ public class UserController implements UserControllerSpec {
     public ApiResponse<Void> generateDevToken(
             HttpServletResponse response) {
 
-        tokenService.generateDevTokensAndSetHeaders(1L, "admin", UserRole.ADMIN, response);
+        /// 서비스 호출
+        userService.generateDev(response);
 
         return ApiResponse.created();
     }

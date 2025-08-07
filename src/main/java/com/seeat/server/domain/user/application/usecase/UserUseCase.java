@@ -23,7 +23,7 @@ public interface UserUseCase {
     Optional<User> getUserBySocialAndSocialId(UserSocial social, String socialId);
 
     // 사용자 생성
-    User createUser(TempUserInfo tempUserInfo, UserSignUpRequest request) throws IOException;
+    User createUser(String tempUserKey, UserSignUpRequest request, HttpServletResponse response) throws IOException;
 
     // redis, cookie - refreshToken 삭제 (로그아웃)
     void logout(HttpServletRequest request, HttpServletResponse response);
@@ -32,4 +32,6 @@ public interface UserUseCase {
     User getUser(Long userId);
 
 
+    /// 개발용 유저를 위한 함수
+    void generateDev(HttpServletResponse response);
 }
