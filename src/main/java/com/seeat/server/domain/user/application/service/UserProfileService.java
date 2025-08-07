@@ -93,39 +93,45 @@ public class UserProfileService implements UserProfileUseCase {
         // 사용자 예외 처리
         User user = service.getUser(userId);
 
-        // request 상영관 예외 처리
-        List<Auditorium> auditoriums = request.getAuditoriumIds().stream()
-                .map(theaterService::getAuditorium)
-                .toList();
-
-        /// 기존 이미지 사진이 기본 값
+        // 기존 프로필 이미지 유지
         String thumbnailImage = user.getImageUrl();
 
-        /// 존재한다면 이미지 추가
+        // 이미지가 존재한다면 삭제 후 갱신
         if (request.getImage() != null) {
-
-            /// 기존 사진 사진
             imageService.deleteFile(thumbnailImage);
-
             thumbnailImage = request.getImage();
         }
 
-        // 사용자 정보 수정
+        // 사용자 정보 수정 (닉네임, 이미지, 장르)
         user.updateUser(request.getNickname(), thumbnailImage, request.getGenres());
 
-        // 기존 userAuditorium 삭제
-        userAuditoriumRepository.deleteByUserId(userId);
+        List<Auditorium> auditoriums;
 
-        // 새 상영관으로 저장
-        List<UserAuditorium> userAuditoriums = auditoriums.stream()
-                .map(auditorium -> UserAuditorium.of(user, auditorium))
-                .collect(Collectors.toList());
+        // 요청에 auditoriumIds가 존재하면 선호 상영관 정보 수정
+        if (request.getAuditoriumIds() != null && !request.getAuditoriumIds().isEmpty()) {
+            // 상영관 예외 처리 및 조회
+            auditoriums = request.getAuditoriumIds().stream()
+                    .map(theaterService::getAuditorium)
+                    .toList();
 
-        userAuditoriumRepository.saveAll(userAuditoriums);
+            // 기존 userAuditorium 삭제
+            userAuditoriumRepository.deleteByUserId(userId);
 
-        // 사용자 업데이트 DTO로 변환
+            // 새 상영관으로 저장
+            List<UserAuditorium> userAuditoriums = auditoriums.stream()
+                    .map(auditorium -> UserAuditorium.of(user, auditorium))
+                    .toList();
+
+            userAuditoriumRepository.saveAll(userAuditoriums);
+        } else {
+            // auditorium 수정이 없는 경우 기존 값을 응답에 포함하기 위해 조회
+            auditoriums = userAuditoriumRepository.findAuditoriumsByUserId(userId);
+        }
+
+        // 응답 DTO로 변환
         return UserInfoUpdateResponse.from(user, auditoriums);
     }
+
 
     /**
      * 사용자 등급 목록 조회를 위한 로직
