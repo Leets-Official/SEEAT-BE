@@ -9,6 +9,7 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.SliceResponse;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +31,7 @@ public class SearchController implements SearchControllerSpec {
      */
     @GetMapping
     public ApiResponse<List<SearchResponse>> getSearchList(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             @RequestHeader(value = "X-Guest-Token", required = false) String guestToken){
 
         // 최근 검색어 리스트 조회
@@ -60,7 +61,7 @@ public class SearchController implements SearchControllerSpec {
             @RequestParam(required = false) Long searchId,
             @RequestParam(required = false) String keyword,
             @RequestHeader(value = "X-Guest-Token", required = false) String guestToken,
-            @AuthenticationPrincipal User user){
+            @AuthenticationPrincipal CustomUserInfo user){
 
         if (guestToken != null) {
             // 비회원 - 삭제
@@ -85,7 +86,7 @@ public class SearchController implements SearchControllerSpec {
     @GetMapping("/reviews")
     public ApiResponse<SliceResponse<ReviewSearchResponse>> getReviewList(
             @ModelAttribute ReviewSearchCondition request,
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             @RequestHeader(value = "X-Guest-Token", required = false) String guestToken,
             PageRequest pageRequest){
 

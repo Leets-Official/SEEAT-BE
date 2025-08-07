@@ -2,6 +2,7 @@ package com.seeat.server.domain.bookmark.presentation.swagger;
 
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +24,7 @@ public interface BookmarkControllerSpec {
             summary = "북마크 설정 API 입니다."
     )
     ApiResponse<Void> saveBookmark(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             @Parameter(description = "북마크할 리뷰ID", example = "1")
             @RequestParam Long reviewId);
 
@@ -38,7 +39,7 @@ public interface BookmarkControllerSpec {
             summary = "북마크 삭제 API 입니다."
     )
     ApiResponse<Void> deleteBookmark(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             @Parameter(description = "북마크 취소할 리뷰ID", example = "1")
             @PathVariable Long bookmarkId);
 

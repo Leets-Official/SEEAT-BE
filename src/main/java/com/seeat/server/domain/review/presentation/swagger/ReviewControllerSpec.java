@@ -11,6 +11,7 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.SliceResponse;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,7 +35,7 @@ public interface ReviewControllerSpec {
     @PostMapping()
     ApiResponse<ReviewSaveResponse> createReview(
             @RequestBody @Valid ReviewRequest request,
-            @Parameter(hidden = true) @AuthenticationPrincipal User user
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserInfo user
     ) throws IOException;
 
     /**
@@ -52,7 +53,7 @@ public interface ReviewControllerSpec {
             @Parameter(description = "조회할 리뷰ID",example = "1")
             @PathVariable Long reviewId,
 
-            @Parameter(hidden = true) @AuthenticationPrincipal User user
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserInfo user
     );
 
     /**
@@ -112,7 +113,7 @@ public interface ReviewControllerSpec {
             @Parameter(description = "수정할 리뷰ID", example = "1")
             @PathVariable Long reviewId,
             @RequestBody @Valid ReviewUpdateRequest request,
-            @Parameter(hidden = true) @AuthenticationPrincipal User user) throws IOException;;
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserInfo user) throws IOException;;
 
 
     /**
@@ -129,5 +130,5 @@ public interface ReviewControllerSpec {
 
             @Parameter(description = "삭제할 리뷰ID", example = "1")
             @PathVariable Long reviewId,
-            @Parameter(hidden = true) @AuthenticationPrincipal User user) throws IOException;
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserInfo user) throws IOException;
 }

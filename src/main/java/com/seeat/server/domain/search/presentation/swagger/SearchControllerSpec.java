@@ -8,6 +8,7 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.SliceResponse;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,7 +34,7 @@ public interface SearchControllerSpec {
     @GetMapping
     ApiResponse<List<SearchResponse>> getSearchList(
             @Parameter(hidden = true)
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             @RequestHeader(value = "X-Guest-Token", required = false) String guestToken);
 
     /**
@@ -54,7 +55,7 @@ public interface SearchControllerSpec {
             @RequestParam(required = false) String keyword,
             @RequestHeader(value = "X-Guest-Token", required = false) String guestToken,
             @Parameter(hidden = true)
-            @AuthenticationPrincipal User user);
+            @AuthenticationPrincipal CustomUserInfo user);
 
 
     /**
@@ -74,7 +75,7 @@ public interface SearchControllerSpec {
     ApiResponse<SliceResponse<ReviewSearchResponse>> getReviewList(
             @ModelAttribute ReviewSearchCondition request,
             @Parameter(hidden = true)
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             @RequestHeader(value = "X-Guest-Token", required = false) String guestToken,
             PageRequest pageRequest);
 }

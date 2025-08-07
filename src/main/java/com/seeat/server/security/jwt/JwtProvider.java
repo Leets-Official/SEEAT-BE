@@ -182,7 +182,10 @@ public class JwtProvider {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new JwtAuthenticationException(ErrorCode.INVALID_CREDENTIALS.getMessage()));
 
-        return new UsernamePasswordAuthenticationToken(user, token, authorities);
+        /// 생성을 맞추기
+        CustomUserInfo userInfo = CustomUserInfo.of(user);
+
+        return new UsernamePasswordAuthenticationToken(userInfo, token, authorities);
     }
 
 }

@@ -4,6 +4,7 @@ import com.seeat.server.domain.review.application.usecase.ReviewLikeUseCase;
 import com.seeat.server.domain.review.presentation.swagger.ReviewLikeControllerSpec;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class ReviewLikeController implements ReviewLikeControllerSpec {
      */
     @PostMapping
     public ApiResponse<Void> reviewLike(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             @RequestParam Long reviewId) {
 
         /// 서비스 호출
@@ -41,7 +42,7 @@ public class ReviewLikeController implements ReviewLikeControllerSpec {
      */
     @DeleteMapping
     public ApiResponse<Void> deleteReviewLike(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             @RequestParam Long reviewId){
 
         /// 서비스 호출

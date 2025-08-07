@@ -3,7 +3,6 @@ package com.seeat.server.security.oauth2.application;
 import com.seeat.server.domain.user.application.service.UserService;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.domain.entity.UserSocial;
-import com.seeat.server.global.response.CustomException;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import com.seeat.server.security.oauth2.application.dto.response.KakaoUserInfo;
@@ -44,7 +43,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Optional<User> userOpt = userService.getUserBySocialAndSocialId(social, socialId);
 
         if (userOpt.isPresent()) {
-            return CustomUserInfo.ofExistingUser(userOpt.get(), oAuth2User.getAttributes());
+            return CustomUserInfo.of(userOpt.get(), oAuth2User.getAttributes());
         }
 
         Optional<User> userByEmail = userService.getUserByEmail(email);

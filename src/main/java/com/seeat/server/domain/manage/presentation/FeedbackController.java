@@ -6,6 +6,7 @@ import com.seeat.server.domain.manage.application.dto.response.FeedbackDetailRes
 import com.seeat.server.domain.manage.presentation.swagger.FeedbackControllerSpec;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,7 +28,7 @@ public class FeedbackController implements FeedbackControllerSpec {
     @PostMapping
     public ApiResponse<Void> createFeedback(
             @RequestBody @Valid FeedbackRequest request,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal CustomUserInfo user) {
 
         // 서비스 호출
         feedbackService.createFeedback(request, user.getId());
@@ -43,7 +44,7 @@ public class FeedbackController implements FeedbackControllerSpec {
     @GetMapping("/{feedbackId}")
     public ApiResponse<FeedbackDetailResponse> getReview(
             @PathVariable Long feedbackId,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal CustomUserInfo user) {
 
         // 서비스 호출
         var response = feedbackService.loadFeedback(feedbackId, user.getId());

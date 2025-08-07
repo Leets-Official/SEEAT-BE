@@ -2,6 +2,7 @@ package com.seeat.server.domain.review.presentation.swagger;
 
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +22,7 @@ public interface ReviewLikeControllerSpec {
             description = "JWT를 기반으로 리뷰에 좋아요를 추가합니다."
     )
     ApiResponse<Void> reviewLike(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             @Parameter(description = "좋아요할 리뷰ID", example = "1")
             @RequestParam Long reviewId);
 
@@ -35,7 +36,7 @@ public interface ReviewLikeControllerSpec {
             description = "JWT를 기반으로 좋아요를 삭제합니다."
     )
     ApiResponse<Void> deleteReviewLike(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             @Parameter(description = "좋아요 취소할 리뷰ID", example = "1")
             @RequestParam Long reviewId);
 

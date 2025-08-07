@@ -8,7 +8,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 public class CustomUserInfo implements OAuth2User {
@@ -42,9 +41,14 @@ public class CustomUserInfo implements OAuth2User {
         this.attributes = attributes;
     }
 
-    public static CustomUserInfo ofExistingUser(User user, Map<String, Object> attributes) {
+    public static CustomUserInfo of(User user, Map<String, Object> attributes) {
         return new CustomUserInfo(user, attributes);
     }
+
+    public static CustomUserInfo of(User user) {
+        return new CustomUserInfo(user, null);
+    }
+
 
     public static CustomUserInfo ofNewUser(OAuth2UserInfo userInfo, UserSocial social, Map<String, Object> attributes) {
         return new CustomUserInfo(

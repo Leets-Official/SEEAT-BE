@@ -4,6 +4,7 @@ import com.seeat.server.domain.bookmark.application.usecase.BookmarkUseCase;
 import com.seeat.server.domain.bookmark.presentation.swagger.BookmarkControllerSpec;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class BookmarkController implements BookmarkControllerSpec {
      * @param reviewId   북마크할 리뷰 ID
      */
     @PostMapping()
-    public ApiResponse<Void> saveBookmark(@AuthenticationPrincipal User user,
+    public ApiResponse<Void> saveBookmark(@AuthenticationPrincipal CustomUserInfo user,
                                           @RequestParam Long reviewId) {
         /// 서비스 호출
         bookmarkService.createBookmark(reviewId, user.getId());
@@ -38,7 +39,7 @@ public class BookmarkController implements BookmarkControllerSpec {
      */
     @DeleteMapping("/{bookmarkId}")
     public ApiResponse<Void> deleteBookmark(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             @PathVariable Long bookmarkId
     ) {
         /// 서비스 호출

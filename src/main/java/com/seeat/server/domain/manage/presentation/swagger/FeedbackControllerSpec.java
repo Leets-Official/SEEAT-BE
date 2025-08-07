@@ -4,6 +4,7 @@ import com.seeat.server.domain.manage.application.dto.request.FeedbackRequest;
 import com.seeat.server.domain.manage.application.dto.response.FeedbackDetailResponse;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,7 +28,7 @@ public interface FeedbackControllerSpec {
     @PostMapping
     ApiResponse<Void> createFeedback(
         @RequestBody @Valid FeedbackRequest request,
-        @Parameter(hidden = true) @AuthenticationPrincipal User user);
+        @Parameter(hidden = true) @AuthenticationPrincipal CustomUserInfo user);
 
     /**
      * 피드백 상세 조회 API
@@ -44,6 +45,6 @@ public interface FeedbackControllerSpec {
             @Parameter(example = "1")
             @PathVariable Long feedbackId,
 
-            @Parameter(hidden = true) @AuthenticationPrincipal User user
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserInfo user
     );
 }

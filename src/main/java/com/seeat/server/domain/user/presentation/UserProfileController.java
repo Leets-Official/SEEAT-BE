@@ -11,6 +11,7 @@ import com.seeat.server.domain.user.application.usecase.UserProfileUseCase;
 import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.domain.user.presentation.swagger.UserProfileControllerSpec;
 import com.seeat.server.global.response.ApiResponse;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +46,7 @@ public class UserProfileController implements UserProfileControllerSpec {
      */
     @GetMapping
     public ApiResponse<UserInfoResponse> getUserInfo(
-            @AuthenticationPrincipal User user){
+            @AuthenticationPrincipal CustomUserInfo user){
 
         // 사용자 정보 조회
         UserInfoResponse response = userProfileService.getUserInfo(user.getId());
@@ -62,7 +63,7 @@ public class UserProfileController implements UserProfileControllerSpec {
      */
     @PatchMapping()
     public ApiResponse<UserInfoUpdateResponse> updateUserInfo(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             @RequestBody @Valid UserInfoUpdateRequest request) throws IOException {
 
         // 사용자 정보 수정
@@ -93,7 +94,7 @@ public class UserProfileController implements UserProfileControllerSpec {
      */
     @GetMapping("/reviews")
     public ApiResponse<SliceResponse<ReviewListResponse>> getMyReviews(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             PageRequest pageRequest) {
 
         /// 서비스 호출
@@ -110,7 +111,7 @@ public class UserProfileController implements UserProfileControllerSpec {
      */
     @GetMapping("/bookmark")
     public ApiResponse<SliceResponse<ReviewListResponse>> getBookmarksByUser(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal CustomUserInfo user,
             PageRequest pageRequest) {
 
         /// 서비스 호출
@@ -130,7 +131,7 @@ public class UserProfileController implements UserProfileControllerSpec {
     @DeleteMapping
     public ApiResponse<Void> deactivateUser(
             @Parameter(hidden = true)
-            @AuthenticationPrincipal User user){
+            @AuthenticationPrincipal CustomUserInfo user){
 
         // 삭제 서비스
         userProfileService.deactivateUser(user.getId());

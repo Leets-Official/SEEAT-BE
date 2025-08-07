@@ -14,6 +14,7 @@ import com.seeat.server.domain.user.domain.entity.User;
 import com.seeat.server.global.response.ApiResponse;
 import com.seeat.server.global.response.pageable.PageRequest;
 import com.seeat.server.global.response.pageable.SliceResponse;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class ReviewController implements ReviewControllerSpec {
     @PostMapping()
     public ApiResponse<ReviewSaveResponse> createReview(
             @RequestBody @Valid ReviewRequest request,
-            @AuthenticationPrincipal User user) throws IOException {
+            @AuthenticationPrincipal CustomUserInfo user) throws IOException {
 
         // 서비스 호출
         Review review = reviewService.createReview(request, user.getId());
@@ -58,7 +59,7 @@ public class ReviewController implements ReviewControllerSpec {
     @GetMapping("/{reviewId}")
     public ApiResponse<ReviewDetailResponse> getReview(
             @PathVariable Long reviewId,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal CustomUserInfo user) {
 
         /// 유저가 있다면
         Long userId = user != null ? user.getId() : null;
@@ -117,7 +118,7 @@ public class ReviewController implements ReviewControllerSpec {
     public ApiResponse<Void> updateReview(
             @PathVariable Long reviewId,
             @RequestBody @Valid ReviewUpdateRequest request,
-            @AuthenticationPrincipal User user) throws IOException {
+            @AuthenticationPrincipal CustomUserInfo user) throws IOException {
 
         /// 서비스 호출
         reviewService.updateReview(reviewId, request, user.getId());
@@ -133,7 +134,7 @@ public class ReviewController implements ReviewControllerSpec {
     @DeleteMapping("/{reviewId}")
     public ApiResponse<Void> deleteReview(
             @PathVariable Long reviewId,
-            @Parameter(hidden = true) @AuthenticationPrincipal User user) throws IOException {
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserInfo user) throws IOException {
 
         /// 서비스 호출
         reviewService.deleteReview(reviewId, user.getId());
