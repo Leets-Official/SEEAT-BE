@@ -35,6 +35,9 @@ public record ReviewDetailResponse(
         @Schema(description = "영화 제목", example = "어벤져스: 엔드게임")
         String movieTitle,
 
+        @Schema(description = "상영관 ID", example = "13083")
+        String auditoriumId,
+
         @Schema(description = "상영관 이름", example = "CGV 용산아이파크몰 IMAX관")
         String auditoriumName,
 
@@ -72,6 +75,7 @@ public record ReviewDetailResponse(
 
         return ReviewDetailResponse.builder()
                 .movieTitle(review.getMovieTitle())
+                .auditoriumId(seat.getAuditorium().getId())
                 .auditoriumName(seat.getAuditorium().getTheater().getName() + " " + seat.getAuditorium().getName())
                 .seatInfo(ReviewSeatInfoResponse
                         .from(seats))
