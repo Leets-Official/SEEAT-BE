@@ -11,6 +11,7 @@ import com.seeat.server.domain.user.domain.repository.UserAuditoriumRepository;
 import com.seeat.server.domain.user.domain.repository.UserRepository;
 import com.seeat.server.global.response.ErrorCode;
 import com.seeat.server.global.util.JwtConstants;
+import com.seeat.server.security.oauth2.application.dto.response.CustomUserInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -79,7 +80,9 @@ public class JwtProvider {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + tokenValidTime);
 
-        User user = (User) authentication.getPrincipal();
+        CustomUserInfo userInfo = (CustomUserInfo) authentication.getPrincipal();
+        User user = userInfo.getUser();
+
         Long userId = user.getId();
 
         return Jwts.builder()
