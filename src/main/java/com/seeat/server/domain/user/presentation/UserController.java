@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,8 +53,11 @@ public class UserController implements UserControllerSpec {
         }
         User user = userService.createUser(tempUserInfo, request);
 
-        // 토큰 발급
-        tokenService.generateTokensAndSetHeaders(response, user);
+        /// 시큐리티 홀더에서 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        /// 토큰 발급
+        tokenService.generateTokensAndSetHeaders(authentication, response, user);
 
         // 임시유저 정보 삭제
         redisService.deleteValues(tempUserKey);

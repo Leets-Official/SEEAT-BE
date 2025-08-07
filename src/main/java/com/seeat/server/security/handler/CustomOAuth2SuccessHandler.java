@@ -24,7 +24,6 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
-    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
     private final RedisTemplate<String, Object> redisTemplate;
     @Value("${cors.front.local}")
     private String frontLocalUrl;
@@ -55,7 +54,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         try {
             switch (userInfo.getStatus()) {
                 case EXISTING_USER -> {
-                    tokenService.generateTokensAndSetHeaders(response, userInfo.getUser());
+                    tokenService.generateTokensAndSetHeaders(authentication, response, userInfo.getUser());
                     response.sendRedirect(frontUrl + "/home");  // changed here
                 }
                 case NEW_USER -> {
