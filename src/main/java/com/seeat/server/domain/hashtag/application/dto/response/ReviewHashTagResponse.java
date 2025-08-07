@@ -21,12 +21,16 @@ public record ReviewHashTagResponse(
         Long hashTagId,
 
         @Schema(description = "해시태그 이름", example = "감동")
-        String hashTagName
+        String hashTagName,
+
+        @Schema(description = "해시태그 타입", example = "음향")
+        String hashTagType
 ) {
     public static ReviewHashTagResponse from(ReviewHashTag reviewHashTag) {
         return ReviewHashTagResponse.builder()
                 .hashTagId(reviewHashTag.getHashTag().getId())
                 .hashTagName(reviewHashTag.getHashTag().getName())
+                .hashTagType(reviewHashTag.getHashTag().getType().getLabel())
                 .build();
     }
 
