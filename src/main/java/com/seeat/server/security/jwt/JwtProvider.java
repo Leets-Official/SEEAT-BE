@@ -119,9 +119,11 @@ public class JwtProvider {
                 new SimpleGrantedAuthority(role.getRole())
         );
 
+        CustomUserInfo userInfo = CustomUserInfo.of(user, null);
+
         // 인증 객체 설정
         Authentication mockAuthentication = new UsernamePasswordAuthenticationToken(
-                user, null, authorities);
+                userInfo, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(mockAuthentication);
 
         return generateToken(mockAuthentication, devTokenExpiration);
