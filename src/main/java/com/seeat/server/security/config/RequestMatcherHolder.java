@@ -77,6 +77,9 @@ public class RequestMatcherHolder {
             // 토큰 조회 관련
             new RequestInfo(GET, "/api/v1/auth", null),
 
+            // 이미지 관련
+            new RequestInfo(GET, "/api/v1/images/**", null),
+
             // static resources
             new RequestInfo(GET, "/docs/**", null),
             new RequestInfo(GET, "/*.ico", null),
